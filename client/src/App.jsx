@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import "./App.css";
 
-export const App=()=> {
+export const App = () => {
   const URL = "http://192.168.0.103:4000/";
   const [directoryItems, setDirectoryItems] = useState([]);
   const [progress, setProgress] = useState(0);
@@ -33,9 +32,8 @@ export const App=()=> {
   }
 
   async function handleDelete(filename) {
-    const response = await fetch(URL, {
+    const response = await fetch(`${URL}${filename}`, {
       method: "DELETE",
-      body: filename,
     });
     const data = await response.text();
     console.log(data);
@@ -49,9 +47,12 @@ export const App=()=> {
 
   async function saveFilename(oldFilename) {
     setNewFilename(oldFilename);
-    const response = await fetch(URL, {
+    const response = await fetch(`${URL}${oldFilename}`, {
       method: "PATCH",
-      body: JSON.stringify({ oldFilename, newFilename }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ newFilename }),
     });
     const data = await response.text();
     console.log(data);
