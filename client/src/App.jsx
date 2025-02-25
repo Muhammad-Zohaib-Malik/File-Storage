@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 
 export const App = () => {
-  const URL = "http://192.168.0.103:4000/";
+  const Base_URL = "http://192.168.0.103:4000";
   const [directoryItems, setDirectoryItems] = useState([]);
   const [progress, setProgress] = useState(0);
   const [newFilename, setNewFilename] = useState("");
 
   async function getDirectoryItems() {
-    const response = await fetch(URL);
+    const response = await fetch(`${Base_URL}/directory`);
     const data = await response.json();
     setDirectoryItems(data);
   }
@@ -18,7 +18,7 @@ export const App = () => {
   async function uploadFile(e) {
     const file = e.target.files[0];
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", `${URL}${file.name}`, true);
+    xhr.open("POST", `${Base_URL}/files/${file.name}`, true);
     xhr.setRequestHeader("filename", file.name);
     xhr.addEventListener("load", () => {
       console.log(xhr.response);
@@ -32,7 +32,7 @@ export const App = () => {
   }
 
   async function handleDelete(filename) {
-    const response = await fetch(`${URL}${filename}`, {
+    const response = await fetch(`${Base_URL}/files/${filename}`, {
       method: "DELETE",
     });
     const data = await response.text();
@@ -47,7 +47,7 @@ export const App = () => {
 
   async function saveFilename(oldFilename) {
     setNewFilename(oldFilename);
-    const response = await fetch(`${URL}${oldFilename}`, {
+    const response = await fetch(`${Base_URL}/files/${oldFilename}`, {
       method: "PATCH",
       headers: {
         'Content-Type': 'application/json'
@@ -72,8 +72,8 @@ export const App = () => {
       <p>Progress: {progress}%</p>
       {directoryItems.map((item, i) => (
         <div key={i}>
-          {item} <a href={`${URL}${item}?action=open`}>Open</a>{" "}
-          <a href={`${URL}${item}?action=download`}>Download</a>
+          {item} <a href={`${Base_URL}/files/${item}?action=open`}>Open</a>{" "}
+          <a href={`${Base_URL}/files/${item}?action=download`}>Download</a>
           <button onClick={() => renameFile(item)}>Rename</button>
           <button onClick={() => saveFilename(item)}>Save</button>
           <button

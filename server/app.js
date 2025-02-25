@@ -1,26 +1,13 @@
 import express from 'express'
 import { createWriteStream } from 'fs'
-// import cors from 'cors'
+import cors from 'cors'
 import { readdir, rename, rm } from 'fs/promises'
 
 const app = express()
 app.use(express.json())
-// app.use(cors({
-//     origin: 'http://localhost:5173', // Allow frontend origin
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Allow PATCH
-// }))
+app.use(cors())
 
-// Enable cors manually
-app.use((_, res, next) => {
-  res.set({
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "*",
-    "Access-Control-Allow-Headers":"*"
-  })
-  next()
-})
-
-app.get("/:filename", (req, res) => {
+app.get("/files/:filename", (req, res) => {
   const { filename } = req.params
   if (req.query.action === "download") {
     res.set('Content-Disposition', 'attachment')
@@ -28,7 +15,7 @@ app.get("/:filename", (req, res) => {
   res.sendFile(`${import.meta.dirname}/storage/${filename}`)
 })
 
-app.post('/:filename',(req,res)=>{
+app.post('/files/:filename',(req,res)=>{
   const writeStream=createWriteStream(`./storage/${req.params.filename}`)
   req.pipe(writeStream)
   req.on("end",()=>{
@@ -36,7 +23,7 @@ app.post('/:filename',(req,res)=>{
   })
 })
 
-app.delete("/:filename", async (req, res) => {
+app.delete("/files/:filename", async (req, res) => {
   const { filename } = req.params
   const filePath = `${import.meta.dirname}/storage/${filename}`
   try {
@@ -47,15 +34,15 @@ app.delete("/:filename", async (req, res) => {
   }
 })
 
-app.patch("/:filename", async (req, res) => {
+app.patch("/files/:filename", async (req, res) => {
   const { filename } = req.params
   const { newFileName } = req.body
   await rename(`./storage/${filename}`,`./storage/${newFileName}`)
-      res.sendStatus(201).json({ message: "file rename successfully" })
+        res.json({ message: "Renamed" });
 })
 
 // serving Dir
-app.get('/', async (_, res) => {
+app.get('/directory', async (_, res) => {
     const filesList = await readdir('./storage')  
     res.json(filesList)
   })
