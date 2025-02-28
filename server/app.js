@@ -42,14 +42,16 @@ app.patch("/files/:filename", async (req, res) => {
 })
 
 // serving Dir
-app.get('/directory', async (_, res) => {
-  const filesList = await readdir('./storage')
+app.get('/directory/:dirname?', async (_, res) => {
+  const { dirname } = req.params
+  console.log(dirname)
+  const fullDirPath = `./storage${dirname ? dirname : ''}`
+  const filesList = await readdir(fullDirPath)
   const resData = []
   for (const item of filesList) {
-    const stats = await stat(`./storage/${item}`)
+    const stats = await stat(`${fullDirPath}/${item}`)
     resData.push({ name: item, isDirectory: stats.isDirectory() })
   }
-  console.log(resData)
   res.json(resData)
 })
 
