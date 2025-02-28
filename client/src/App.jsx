@@ -70,15 +70,23 @@ export const App = () => {
         value={newFilename}
       />
       <p>Progress: {progress}%</p>
-      {directoryItems.map((item, i) => (
+      {directoryItems.map(({ name,isDirectory }, i) => (
         <div key={i}>
-          {item} <a href={`${Base_URL}/files/${item}?action=open`}>Open</a>{" "}
-          <a href={`${Base_URL}/files/${item}?action=download`}>Download</a>
-          <button onClick={() => renameFile(item)}>Rename</button>
-          <button onClick={() => saveFilename(item)}>Save</button>
+          {name}  {
+            isDirectory &&   <a href={`./${name}`}>Open</a>
+          }
+            {
+            !isDirectory &&   <a href={`${Base_URL}/files/${name}?action=open`}>Open</a>
+          }
+          {
+            !isDirectory &&   <a href={`${Base_URL}/files/${name}?action=download`}>Download</a>
+          }
+         
+          <button onClick={() => renameFile(name)}>Rename</button>
+          <button onClick={() => saveFilename(name)}>Save</button>
           <button
             onClick={() => {
-              handleDelete(item);
+              handleDelete(name);
             }}
           >
             Delete

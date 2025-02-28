@@ -1,7 +1,7 @@
 import express from 'express'
 import { createWriteStream } from 'fs'
 import cors from 'cors'
-import { readdir, rename, rm } from 'fs/promises'
+import { readdir, rename, rm, stat } from 'fs/promises'
 
 const app = express()
 app.use(express.json())
@@ -15,11 +15,11 @@ app.get("/files/:filename", (req, res) => {
   res.sendFile(`${import.meta.dirname}/storage/${filename}`)
 })
 
-app.post('/files/:filename',(req,res)=>{
-  const writeStream=createWriteStream(`./storage/${req.params.filename}`)
+app.post('/files/:filename', async (req, res) => {
+  const writeStream = await createWriteStream(`./storage/${req.params.filename}`)
   req.pipe(writeStream)
-  req.on("end",()=>{
-    res.json({message:"File uploaded"})
+  req.on("end", () => {
+    res.json({ message: "File uploaded" })
   })
 })
 
@@ -37,15 +37,21 @@ app.delete("/files/:filename", async (req, res) => {
 app.patch("/files/:filename", async (req, res) => {
   const { filename } = req.params
   const { newFileName } = req.body
-  await rename(`./storage/${filename}`,`./storage/${newFileName}`)
-        res.json({ message: "Renamed" });
+  await rename(`./storage/${filename}`, `./storage/${newFileName}`)
+  res.json({ message: "Renamed" });
 })
 
 // serving Dir
 app.get('/directory', async (_, res) => {
-    const filesList = await readdir('./storage')  
-    res.json(filesList)
-  })
+  const filesList = await readdir('./storage')
+  const resData = []
+  for (const item of filesList) {
+    const stats = await stat(`./storage/${item}`)
+    resData.push({ name: item, isDirectory: stats.isDirectory() })
+  }
+  console.log(resData)
+  res.json(resData)
+})
 
 app.listen(4000, () => {
   console.log('Server is running on http://localhost:4000')
