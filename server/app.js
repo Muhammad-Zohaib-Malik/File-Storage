@@ -42,7 +42,7 @@ app.patch("/files/:filename", async (req, res) => {
 })
 
 // serving Dir
-app.get('/directory/:dirname?', async (_, res) => {
+app.get('/directory{/:dirname}', async (req, res) => {
   const { dirname } = req.params
   console.log(dirname)
   const fullDirPath = `./storage${dirname ? dirname : ''}`
