@@ -1,11 +1,14 @@
+
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 export const DirectoryView = () => {
-  const Base_URL = "http://192.168.0.103:4000";
+  const Base_URL = "http://localhost:4000";
   const [directoryItems, setDirectoryItems] = useState([]);
   const [progress, setProgress] = useState(0);
   const [newFilename, setNewFilename] = useState("");
+  const [newDirname, setNewDirname] = useState("");
+
   const { '*': dirPath } = useParams()
   console.log(dirPath)
 
@@ -14,6 +17,9 @@ export const DirectoryView = () => {
     const data = await response.json();
     setDirectoryItems(data);
   }
+
+
+
   useEffect(() => {
     getDirectoryItems();
   }, [dirPath]);
@@ -59,9 +65,22 @@ export const DirectoryView = () => {
     });
     const data = await response.text();
     console.log(data);
-    setNewFilename("");
+    ("");
     getDirectoryItems();
   }
+
+  async function handleCreateDirectory(e) {
+    e.preventDefault()
+    const url = `${Base_URL}/directory${dirPath ? "/" + dirPath : ''}/${newDirname}`
+    const response = await fetch(url, {
+      method: "POST"
+    });
+    const data = await response.json();
+    console.log(data)
+    setNewDirname("")
+    getDirectoryItems()
+  }
+
 
   return (
     <>
@@ -73,6 +92,12 @@ export const DirectoryView = () => {
         value={newFilename}
       />
       <p>Progress: {progress}%</p>
+
+      <form onSubmit={handleCreateDirectory}>
+        <input type="text" onChange={(e) => setNewDirname(e.target.value)} value={newDirname} />
+        <button>Create Folder</button>
+      </form>
+
       {directoryItems.map(({ name, isDirectory }, i) => (
         <div key={i}>
           {name}  {
