@@ -6,8 +6,7 @@ export const DirectoryView = () => {
   const [directoryItems, setDirectoryItems] = useState([]);
   const [progress, setProgress] = useState(0);
   const [newFilename, setNewFilename] = useState("");
-   const {'*':dirPath}= useParams()
-  console.log(dirPath)
+  const { '*': dirPath } = useParams()
 
   async function getDirectoryItems() {
     const response = await fetch(`${Base_URL}/directory/${dirPath}`);
@@ -73,18 +72,18 @@ export const DirectoryView = () => {
         value={newFilename}
       />
       <p>Progress: {progress}%</p>
-      {directoryItems.map(({ name,isDirectory }, i) => (
+      {directoryItems.map(({ name, isDirectory }, i) => (
         <div key={i}>
           {name}  {
-            isDirectory &&   <a href={`./${name}`}>Open</a>
-          }
-            {
-            !isDirectory &&   <a href={`${Base_URL}/files/${name}?action=open`}>Open</a>
+            isDirectory && <a href={`./${name}`}>Open</a>
           }
           {
-            !isDirectory &&   <a href={`${Base_URL}/files/${name}?action=download`}>Download</a>
+            !isDirectory && <a href={`${Base_URL}/files/${dirPath}/${name}?action=open`}>Open</a>
           }
-         
+          {
+            !isDirectory && <a href={`${Base_URL}/files/${dirPath}/${name}?action=download`}>Download</a>
+          }
+
           <button onClick={() => renameFile(name)}>Rename</button>
           <button onClick={() => saveFilename(name)}>Save</button>
           <button

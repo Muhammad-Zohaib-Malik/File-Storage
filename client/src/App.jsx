@@ -1,15 +1,15 @@
-import { createBrowserRouter ,RouterProvider} from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { DirectoryView } from './DirectoryView';
 
-const router=createBrowserRouter([
+const router = createBrowserRouter([
   {
-    path:"/*",
-    element:<DirectoryView/>
+    path: "/*",
+    element: <DirectoryView />
   }
 ])
 
 export const App = () => {
-  return <RouterProvider router={router}/>
+  return <RouterProvider router={router} />
 }
 
 
