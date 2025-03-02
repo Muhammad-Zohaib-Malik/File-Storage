@@ -7,14 +7,23 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 
-app.get("/files/:filename", (req, res) => {
-  const { filename } = req.params
-  if (req.query.action === "download") {
-    res.set('Content-Disposition', 'attachment')
-  }
-  res.sendFile(`${import.meta.dirname}/storage/${filename}`)
-})
+// app.get("/files/:filename", (req, res) => {
+//   const { filename } = req.params
+//   if (req.query.action === "download") {
+//     res.set('Content-Disposition', 'attachment')
+//   }
+//   res.sendFile(`${import.meta.dirname}/storage/${filename}`)
+// })
 
+
+  app.get("/files/*", (req, res) => {
+      const {0:filePath}=req.params
+    if (req.query.action === "download") {
+      res.set('Content-Disposition', 'attachment')
+    }
+    res.sendFile(`${import.meta.dirname}/storage/${filePath}`)
+  })
+  
 app.post('/files/:filename', async (req, res) => {
   const writeStream = await createWriteStream(`./storage/${req.params.filename}`)
   req.pipe(writeStream)
@@ -42,10 +51,10 @@ app.patch("/files/:filename", async (req, res) => {
 })
 
 // serving Dir
-app.get('/directory{/:dirname}', async (req, res) => {
+app.get('/directory/:dirname', async (req, res) => {
   const { dirname } = req.params
-  console.log(dirname)
-  const fullDirPath = `./storage${dirname ? dirname : ''}`
+  // console.log(dirname)
+  const fullDirPath = `./storage/${dirname ? dirname : ''}`
   const filesList = await readdir(fullDirPath)
   const resData = []
   for (const item of filesList) {
