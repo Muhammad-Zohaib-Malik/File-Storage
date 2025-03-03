@@ -2,7 +2,7 @@ import express from 'express'
 import { createWriteStream } from 'fs'
 import cors from 'cors'
 import { readdir, rename, rm, stat,mkdir } from 'fs/promises'
-
+import path from 'path'
 const app = express()
 app.use(express.json())
 
@@ -19,15 +19,21 @@ app.use(cors())
 
 
   app.get("/files/*", (req, res) => {
-      const {0:filePath}=req.params
+     const filePath=path.join("/",req.params[0])
     if (req.query.action === "download") {
       res.set('Content-Disposition', 'attachment')
     }
-    res.sendFile(`${import.meta.dirname}/storage/${filePath}`)
+    res.sendFile(`${import.meta.dirname}/storage/${filePath}`,(err)=>{
+      if(err)
+      {
+        res.json({err:"File not found!"})
+      }
+    })
   })
   
 app.post('/files/*', async (req, res) => {
-  const writeStream = await createWriteStream(`./storage/${req.params[0]}`)
+ const filePath=path.join("/",req.params[0])
+  const writeStream = await createWriteStream(`./storage/${filePath}`)
   req.pipe(writeStream)
   req.on("end", () => {
     res.json({ message: "File uploaded" })
@@ -35,7 +41,7 @@ app.post('/files/*', async (req, res) => {
 })
 
 app.delete("/files/*", async (req, res) => {
-  const { 0:filePath } = req.params
+  const filePath=path.join("/",req.params[0])
   const fileDelete = `${import.meta.dirname}/storage/${filePath}`
   try {
     await rm(fileDelete,{recursive:true})
@@ -46,28 +52,34 @@ app.delete("/files/*", async (req, res) => {
 })
 
 app.patch("/files/*", async (req, res) => {
-  const { 0:filePath } = req.params
+  const filePath=path.join("/",req.params[0])
   await rename(`./storage/${filePath}`, `./storage/${req.body.newFilename}`)
   res.json({ message: "Renamed" });
 })
 
 // serving Dir
 app.get('/directory/?*', async (req, res) => {
-  const {0:dirname}=req.params
-  // console.log(dirname)
+ const dirname=path.join("/",req.params[0])
+
   const fullDirPath = `./storage/${dirname ? dirname : ''}`
-  const filesList = await readdir(fullDirPath)
+ try {
+   const filesList = await readdir(fullDirPath)
   const resData = []
   for (const item of filesList) {
     const stats = await stat(`${fullDirPath}/${item}`)
     resData.push({ name: item, isDirectory: stats.isDirectory() })
   }
   res.json(resData)
+  
+ } catch (err) {
+  res.json({error:err.message})
+  
+ }
 })
 
 app.post('/directory/*',async(req,res)=>{
   try {
-    const {0:dirname}=req.params
+     const dirname=path.join("/",req.params[0])
  await mkdir(`./storage/${dirname}`)
  res.json({message:"Directory created"})
     
