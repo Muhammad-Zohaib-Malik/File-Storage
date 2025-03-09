@@ -23,9 +23,6 @@ directoryRoutes.get('/:id?', async (req, res) => {
     res.json(directoryData)
   }
 
-
-
-
 })
 
 directoryRoutes.post('/*', async (req, res) => {
