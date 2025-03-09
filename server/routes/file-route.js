@@ -3,6 +3,8 @@ import { rm, writeFile } from "fs/promises";
 import path from "path";
 import { Router } from "express";
 import filesData from "../filesDb.json" with { type: "json" };
+import directoriesData from '../directoryDb.json' with {type: "json"}
+
 
 const filesRoutes = Router();
 
@@ -24,6 +26,8 @@ filesRoutes.get("/:id", (req, res) => {
 
 filesRoutes.post("/:filename", async (req, res) => {
   const { filename } = req.params;
+  const parentDirId=req.headers.parentdirid || directoriesData[0].id
+  
   if (!filename) {
     return res.status(400).json({ message: "Invalid filename" });
   }
@@ -41,8 +45,12 @@ filesRoutes.post("/:filename", async (req, res) => {
         id,
         extension,
         name: filename,
+        parentDirId
       });
+      const parentDirData=directoriesData.find((directoryData)=>directoryData.id===parentDirId)
+      parentDirData.files.push(id)
       await writeFile("./filesDb.json", JSON.stringify(filesData));
+      await writeFile("./directoryDb.json", JSON.stringify(directoriesData));
       res.json({ message: "File uploaded" });
     } catch (error) {
       console.error("Error saving file metadata:", error);
@@ -62,7 +70,13 @@ filesRoutes.delete("/:id", async (req, res) => {
   try {
     await rm(`./storage/${id}${fileData.extension}`)
     filesData.splice(fileIndex, 1)
+    const parentDirData=directoriesData.find((directoryData)=>directoryData.id===fileData.parentDirId)
+    parentDirData.files=parentDirData.files.filter((fileId)=>fileId!==id)
+    console.log(parentDirData.files)
+
     await writeFile("./filesDb.json", JSON.stringify(filesData));
+    await writeFile("./directoryDb.json", JSON.stringify(directoriesData));
+
     res.json({ message: "file deleted successfully" });
   } catch (err) {
     console.error("File deletion error:", err);
