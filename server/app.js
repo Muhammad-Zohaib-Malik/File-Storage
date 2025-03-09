@@ -7,7 +7,7 @@ import filesRoutes from './routes/file-route.js'
 
 app.use(cors())
 app.use('/directory',directoryRoutes)
-app.use('/files',filesRoutes)
+app.use('/file',filesRoutes)
 
 
 
