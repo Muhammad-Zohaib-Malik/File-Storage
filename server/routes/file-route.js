@@ -15,10 +15,11 @@ filesRoutes.get("/:id", (req, res) => {
     return res.status(404).json({ message: "File not found!" });
   }
   if (req.query.action === "download") {
-    res.set("Content-Disposition", "attachment");
+    res.set("Content-Disposition", `attachment;filename=${fileData.name}`);
   }
   res.sendFile(`${process.cwd()}/storage/${id}${fileData.extension}`, (err) => {
-    if (err) {
+    console.log(err)
+    if (!res.headersSent) {
       res.json({ err: "File not found!" });
     }
   });
