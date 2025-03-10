@@ -5,11 +5,10 @@ app.use(express.json())
 import directoryRoutes from './routes/directory-route.js'
 import filesRoutes from './routes/file-route.js'
 
-app.use(cors({
-  origin:'http://localhost:5173'
-})) 
+app.use(cors())
+
 app.use('/directory',directoryRoutes)
-app.use('/file',filesRoutes)
+app.use('/file',filesRoutes)  
 
 
 

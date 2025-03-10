@@ -25,9 +25,9 @@ filesRoutes.get("/:id", (req, res) => {
   });
 });
 
-filesRoutes.post("/:filename", async (req, res) => {
-  const { filename } = req.params;
-  const parentDirId=req.headers.parentdirid || directoriesData[0].id
+filesRoutes.post("/:parentDirId?", async (req, res) => {
+  const parentDirId  = req.params.parentDirId || directoriesData[0].id;
+  const filename=req.headers.filename 
   
   if (!filename) {
     return res.status(400).json({ message: "Invalid filename" });
