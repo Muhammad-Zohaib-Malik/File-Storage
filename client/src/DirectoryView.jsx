@@ -10,26 +10,26 @@ export const DirectoryView = () => {
   const [newFilename, setNewFilename] = useState("");
   const [newDirname, setNewDirname] = useState("");
 
-  const { '*': dirPath } = useParams()
-  console.log(dirPath)
+  const { dirId } = useParams()
+  console.log(dirId)
 
   async function getDirectoryItems() {
-    const response = await fetch(`${Base_URL}/directory/${dirPath}`);
+    const response = await fetch(`${Base_URL}/directory/${dirId || ''}`);
     const data = await response.json();
+    setdirectoriesList(data.directories)
     setFilesList(data.files)
   }
 
 
-
   useEffect(() => {
     getDirectoryItems();
-  }, [dirPath]);
+  }, [dirId]);
 
   async function uploadFile(e) {
     const file = e.target.files[0];
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", `${Base_URL}/file/${file.name}`, true);
-    // xhr.setRequestHeader("parentdirid", file.name);
+    xhr.open("POST", `${Base_URL}/file/${dirId || ''}`, true);
+    xhr.setRequestHeader("filename", file.name);
     xhr.addEventListener("load", () => {
       console.log(xhr.response);
       getDirectoryItems();
@@ -46,6 +46,8 @@ export const DirectoryView = () => {
       method: "DELETE",
     });
     const data = await response.text();
+    console.log(data)
+    getDirectoryItems()
 
   }
 
@@ -54,26 +56,29 @@ export const DirectoryView = () => {
     setNewFilename(oldFilename);
   }
 
-  async function saveFilename(oldFilename) {
-    setNewFilename(oldFilename);
-    const response = await fetch(`${Base_URL}/files/${dirPath}/${oldFilename}`, {
+  async function saveFilename(fileId) {
+
+    const response = await fetch(`${Base_URL}/file/${fileId}`, {
       method: "PATCH",
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ newFilename: `${dirPath}/${newFilename}` }),
+      body: JSON.stringify({ newFilename }),
     });
     const data = await response.text();
     console.log(data);
-    ("");
+    setNewFilename("")
     getDirectoryItems();
   }
 
   async function handleCreateDirectory(e) {
     e.preventDefault()
-    const url = `${Base_URL}/directory${dirPath ? "/" + dirPath : ''}/${newDirname}`
+    const url = `${Base_URL}/directory${dirId || ''}`
     const response = await fetch(url, {
-      method: "POST"
+      method: "POST",
+      headers: {
+        dirname: newDirname
+      }
     });
     const data = await response.json();
     console.log(data)
@@ -97,8 +102,25 @@ export const DirectoryView = () => {
         <input type="text" onChange={(e) => setNewDirname(e.target.value)} value={newDirname} />
         <button>Create Folder</button>
       </form>
-
-      {filesList.map(({ name, id }) => (
+      {directoriesList?.map(({ name, id }) => (
+        <div key={id}>
+          {name}
+          {
+            <Link to={`/directory/${id}`}>Open</Link>
+          }
+          <button onClick={() => renameFile(name)}>Rename</button>
+          <button onClick={() => saveFilename(id)}>Save</button>
+          <button
+            onClick={() => {
+              handleDelete(id);
+            }}
+          >
+            Delete
+          </button>
+          <br />
+        </div>
+      ))}
+      {filesList?.map(({ name, id }) => (
         <div key={id}>
           {name}
           {
@@ -109,7 +131,7 @@ export const DirectoryView = () => {
           }
 
           <button onClick={() => renameFile(name)}>Rename</button>
-          <button onClick={() => saveFilename(name)}>Save</button>
+          <button onClick={() => saveFilename(id)}>Save</button>
           <button
             onClick={() => {
               handleDelete(id);
