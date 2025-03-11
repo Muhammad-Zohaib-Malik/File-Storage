@@ -87,15 +87,16 @@ filesRoutes.delete("/:id", async (req, res) => {
 
 filesRoutes.patch("/:id", async (req, res) => {
   const { id } = req.params;
-  const { newFileName } = req.body;
-  if (!newFileName) {
+  const { newFilename } = req.body;
+  console.log(req.body)
+  if (!newFilename) {
     return res.status(400).json({ message: "New file name is required" });
   }
   const fileData = filesData.find((file) => file.id === id);
   if (!fileData) {
     return res.status(404).json({ message: "File not found" });
   }
-  fileData.name = newFileName;
+  fileData.name = newFilename;
 
   try {
     await writeFile("./filesDb.json", JSON.stringify(filesData));
