@@ -1,4 +1,4 @@
-import { writeFile } from 'fs/promises'
+import {rm, writeFile } from 'fs/promises'
 import { Router } from 'express'
 const directoryRoutes = Router()
 import directoriesData from '../directoryDb.json' with {type: "json"}
@@ -62,8 +62,8 @@ directoryRoutes.delete('/:id',async(req,res)=>{
 
   const parentDirData = directoriesData.find((dirData) => dirData.id === directoryData.parentDirId)
   parentDirData.directories = parentDirData.directories.filter((dirId) => dirId !== id)
-  await writeFile('./filesDB.json', JSON.stringify(filesData))
-  await writeFile('./directoriesDB.json', JSON.stringify(directoriesData))
+  await writeFile('./filesDb.json', JSON.stringify(filesData))
+  await writeFile('./directoryDb.json', JSON.stringify(directoriesData))
   res.json({ message: "Directory Deleted!" });
 })
 

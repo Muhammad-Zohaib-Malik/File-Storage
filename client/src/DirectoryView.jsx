@@ -51,6 +51,17 @@ export const DirectoryView = () => {
 
   }
 
+  async function handleDeleteDir(dirId) {
+    const response = await fetch(`${Base_URL}/directory/${dirId}`, {
+      method: "DELETE",
+    });
+    const data = await response.json();
+    console.log(data)
+    getDirectoryItems()
+
+  }
+
+
   async function renameFile(oldFilename) {
     console.log({ oldFilename, newFilename });
     setNewFilename(oldFilename);
@@ -80,7 +91,7 @@ export const DirectoryView = () => {
       },
       body: JSON.stringify({ newDirname }),
     });
-    const data = await response.text();
+    const data = await response.json();
     console.log(data);
     setNewFilename("")
     getDirectoryItems();
@@ -126,7 +137,7 @@ export const DirectoryView = () => {
           <button onClick={() => saveDir(id)}>Save</button>
           <button
             onClick={() => {
-              handleDelete(id);
+              handleDeleteDir(id);
             }}
           >
             Delete
