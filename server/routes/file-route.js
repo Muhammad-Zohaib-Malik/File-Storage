@@ -62,7 +62,7 @@ filesRoutes.post("/:parentDirId?", async (req, res) => {
   });
 });
 
-filesRoutes.delete("/:id", async (req, res) => {
+filesRoutes.delete("/:id", async (req, res,next) => {
   const { id } = req.params
   const fileIndex = filesData.findIndex((file) => file.id === id);
   if (fileIndex === -1) {
@@ -81,6 +81,7 @@ filesRoutes.delete("/:id", async (req, res) => {
   } catch (err) {
     console.error("File deletion error:", err);
     res.status(500).json({ message: "Error deleting file" });
+    next()
   }
 });
 
@@ -104,6 +105,6 @@ filesRoutes.patch("/:id", async (req, res,next) => {
     res.status(500).json({ message: "Error updating file", error });
     next()
   }
-});
+}); 
 
 export default filesRoutes;
