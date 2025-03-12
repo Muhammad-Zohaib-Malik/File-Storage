@@ -71,6 +71,20 @@ export const DirectoryView = () => {
     getDirectoryItems();
   }
 
+  async function saveDir(dirId) {
+
+    const response = await fetch(`${Base_URL}/directory/${dirId}`, {
+      method: "PATCH",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ newDirname }),
+    });
+    const data = await response.text();
+    console.log(data);
+    setNewFilename("")
+    getDirectoryItems();
+  }
   async function handleCreateDirectory(e) {
     e.preventDefault()
     const url = `${Base_URL}/directory${dirId || ''}`
@@ -109,7 +123,7 @@ export const DirectoryView = () => {
             <Link to={`/directory/${id}`}>Open</Link>
           }
           <button onClick={() => renameFile(name)}>Rename</button>
-          <button onClick={() => saveFilename(id)}>Save</button>
+          <button onClick={() => saveDir(id)}>Save</button>
           <button
             onClick={() => {
               handleDelete(id);

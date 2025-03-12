@@ -41,4 +41,23 @@ directoryRoutes.post('/:parentDirId?', async (req, res) => {
   }
 })
 
+directoryRoutes.patch('/:id',async(req,res)=>{
+  try {
+    const id = req.params.id;
+    const { newDirName } = req.body;
+
+    const dirData = directoriesData.find((dir) => dir.id == id);
+    
+    if (!dirData) {
+      return res.status(404).json({ message: "Directory not found" });
+    }
+
+    dirData.name = newDirName;
+
+    res.status(200).json({ message: "Directory updated successfully", dirData });
+  } catch (error) {
+    res.status(500).json({ message: "An error occurred", error: error.message });
+  }
+})
+
 export default directoryRoutes
