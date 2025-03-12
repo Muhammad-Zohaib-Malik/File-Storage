@@ -14,9 +14,7 @@ directoryRoutes.get('/:id?', async (req, res) => {
   )
   const directories = directoryData.directories.map((dirId) => directoriesData.find((dir) => dir.id === dirId)).map(({ id, name }) => ({ id, name }))
   res.json({ ...directoryData, files, directories })
-}
-
-)
+})
 
 directoryRoutes.post('/:parentDirId?', async (req, res) => {
   const parentDirId = req.params.parentDirId || directoriesData[0].id
@@ -39,6 +37,34 @@ directoryRoutes.post('/:parentDirId?', async (req, res) => {
 
     res.status(400).json({ error })
   }
+})
+
+directoryRoutes.delete('/:id',async(req,res)=>{
+  const { id } = req.params
+  const dirIndex = directoriesData.findIndex((directory) => directory.id === id)
+  if (dirIndex === -1) {
+    return res.status(404).json({ message: "Directory Not Found" })
+  }
+  const directoryData = directoriesData[dirIndex]
+  console.log(directoryData)
+  directoriesData.splice(dirIndex, 1)
+  for await (const fileId of directoryData.files) {
+    const fileIndex = filesData.findIndex((file) => file.id === fileId)
+    const fileData = filesData[fileIndex]
+    await rm(`./storage/${fileData.id}${fileData.extension}`)
+    filesData.splice(fileIndex, 1)
+  }
+
+  for await (const dirId of directoryData.directories) {
+    const dirIndex = directoriesData.findIndex((Id) => Id.id === dirId)
+    directoriesData.splice(dirIndex, 1)
+  }
+
+  const parentDirData = directoriesData.find((dirData) => dirData.id === directoryData.parentDirId)
+  parentDirData.directories = parentDirData.directories.filter((dirId) => dirId !== id)
+  await writeFile('./filesDB.json', JSON.stringify(filesData))
+  await writeFile('./directoriesDB.json', JSON.stringify(directoriesData))
+  res.json({ message: "Directory Deleted!" });
 })
 
 directoryRoutes.patch('/:id',async(req,res)=>{
