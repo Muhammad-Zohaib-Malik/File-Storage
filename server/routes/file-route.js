@@ -26,13 +26,22 @@ filesRoutes.get("/:id", (req, res) => {
 });
 
 
-filesRoutes.post("/:parentDirId?", async (req, res) => {
+filesRoutes.post("/:parentDirId?", async (req, res, next) => {
   const parentDirId = req.params.parentDirId || directoriesData?.[0]?.id;
   const filename = req.headers.filename || "untitled"
 
   if (!filename) {
     return res.status(400).json({ message: "Invalid filename" });
   }
+
+  if (!parentDirId) {
+    return res.status(400).json({ message: "No valid parent directory found" });
+  }
+
+  if (!filename.trim()) {
+    return res.status(400).json({ message: "Invalid filename" });
+  }
+
   const extension = path.extname(filename);
   if (!extension) {
     return res.status(400).json({ message: "File extension is required" });
@@ -57,12 +66,13 @@ filesRoutes.post("/:parentDirId?", async (req, res) => {
     } catch (error) {
       console.error("Error saving file metadata:", error);
       res.status(500).json({ message: "Error updating file database", error: error.message });
+      next(error)
     }
 
   });
 });
 
-filesRoutes.delete("/:id", async (req, res,next) => {
+filesRoutes.delete("/:id", async (req, res, next) => {
   const { id } = req.params
   const fileIndex = filesData.findIndex((file) => file.id === id);
   if (fileIndex === -1) {
@@ -81,11 +91,11 @@ filesRoutes.delete("/:id", async (req, res,next) => {
   } catch (err) {
     console.error("File deletion error:", err);
     res.status(500).json({ message: "Error deleting file" });
-    next()
+    next(error)
   }
 });
 
-filesRoutes.patch("/:id", async (req, res,next) => {
+filesRoutes.patch("/:id", async (req, res, next) => {
   const { id } = req.params;
   const { newFilename } = req.body;
   console.log(req.body)
@@ -100,11 +110,11 @@ filesRoutes.patch("/:id", async (req, res,next) => {
 
   try {
     await writeFile("./filesDb.json", JSON.stringify(filesData));
-   return  res.status(201).json({ message: "Renamed" });
+    return res.status(201).json({ message: "Renamed" });
   } catch (error) {
     res.status(500).json({ message: "Error updating file", error });
-    next()
+    next(error)
   }
-}); 
+});
 
 export default filesRoutes;
