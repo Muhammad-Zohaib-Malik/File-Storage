@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { DirectoryView } from './DirectoryView';
+import { Register } from './components/Register';
 
 const router = createBrowserRouter([
   {
@@ -10,6 +11,10 @@ const router = createBrowserRouter([
   {
     path: "/directory/:dirId",
     element: <DirectoryView />
+  },
+  {
+    path: "/register",
+    element: <Register />
   },
 ])
 
