@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "01_intro-to-express",
   "version": "1.0.0",
   "main": "app.js",
   "type": "module",
@@ -13,6 +13,6 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.2",
-    "prettier": "^3.5.2"
+    "mime-types": "^2.1.35"
   }
 }

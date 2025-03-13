@@ -1,16 +1,16 @@
 [
-  {
-    "id": "e9f6d556-a4d4-42c7-95e5-b2b3981efc51",
-    "username": "zohaibaay",
-    "email": "zohaibaay@gmail.com",
-    "password": "zohaibaay",
-    "rootDirId": "80579d45-b979-45b9-94e8-b1d50bd85027"
-  },
-  {
-    "id": "d5e628c6-77f1-4596-8d65-d97b26e2d86c",
-    "username": "bheem",
-    "email": "bheem@gmail.com",
-    "password": "bheem",
-    "rootDirId": "aa5ff205-941e-44b4-9ce4-e6c4f4cb8f9b"
-  }
+    {
+        "id": "ee30db27-2c38-4d4a-975d-58967eba84de",
+        "name": "Anurag Singh",
+        "email": "anurag@gmail.com",
+        "password": "abcd",
+        "rootDirId": "d1e2f148-82aa-48f3-a824-c7de6580085b"
+    },
+    {
+        "id": "d069a454-adf3-447b-94f9-0fdc4c09b165",
+        "name": "Anurag Singh",
+        "email": "anurags@gmail.com",
+        "password": "abcd",
+        "rootDirId": "6e65941c-9965-4795-a121-d72b8d437a1d"
+    }
 ]
