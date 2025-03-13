@@ -1,25 +1,30 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { DirectoryView } from './DirectoryView';
-import { Register } from './components/Register';
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import DirectoryView from "./DirectoryView";
+import Register from "./Register";
+import "./App.css";
+import Login from "./Login";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <DirectoryView />
-  },
-
-  {
-    path: "/directory/:dirId",
-    element: <DirectoryView />
+    element: <DirectoryView />,
   },
   {
     path: "/register",
-    element: <Register />
+    element: <Register />,
   },
-])
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/directory/:dirId",
+    element: <DirectoryView />,
+  },
+]);
 
-export const App = () => {
-  return <RouterProvider router={router} />
+function App() {
+  return <RouterProvider router={router} />;
 }
 
-
+export default App;
