@@ -29,8 +29,12 @@ export const createDirectory = async (req, res, next) => {
 export const getDirectory = async (req, res) => {
   const user = req.user
   const id = req.params.id || user.rootDirId
-  const directoryData = directoriesData.find((directory) => directory.id === id)
-  if (!directoryData) return res.status(404).json({ message: "Directory not found!" })
+  // Find the directory and verify ownership
+  const directoryData = directoriesData.find((directory) => directory.id === id && directory.userId === user.id);
+  if (!directoryData) {
+    return res.status(404).json({ error: "Directory not found or you do not have access to it!" });
+  }
+
   const files = directoryData.files.map((fileId) =>
     filesData.find((file) => file.id === fileId)
   )
@@ -41,10 +45,16 @@ export const getDirectory = async (req, res) => {
 }
 
 export const updateDirectory = async (req, res, next) => {
+  const user = req.user
   const { id } = req.params
   const { newDirName } = req.body
   const dirData = directoriesData.find((dir) => dir.id === id)
   if (!dirData) res.status(404).json({ message: "Directory not found!" })
+
+  // Check if the directory belongs to the user
+  if (dirData.userId !== user.id) {
+    return res.status(403).json({ message: "You are not authorized to rename this directory!" });
+  }
   dirData.name = newDirName
   try {
     await writeFile('./directoriesDB.json', JSON.stringify(directoriesData))
@@ -55,10 +65,15 @@ export const updateDirectory = async (req, res, next) => {
 }
 
 export const deleteDirectory = async (req, res, next) => {
+  const user = req.user;
   const { id } = req.params
   try {
     const dirIndex = directoriesData.findIndex((directory) => directory.id === id)
     const directoryData = directoriesData[dirIndex]
+    // Check if the directory belongs to the user
+    if (directoryData.userId !== user.id) {
+      return res.status(403).json({ message: "You are not authorized to delete this directory!" });
+    }
     directoriesData.splice(dirIndex, 1)
     for await (const fileId of directoryData.files) {
       const fileIndex = filesData.findIndex((file) => file.id === fileId)
