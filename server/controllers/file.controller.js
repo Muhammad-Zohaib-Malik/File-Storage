@@ -5,7 +5,7 @@ import directoriesData from '../directoriesDB.json' with {type: "json"}
 import filesData from '../filesDB.json' with {type: "json"}
 
 export const createFile=async(req, res, next) => {
-  const parentDirId = req.params.parentDirId || directoriesData[0].id;
+  const parentDirId = req.params.parentDirId || req.user.rootDirId
   const filename = req.headers.filename || 'untitled';
   const id = crypto.randomUUID();
   const extension = path.extname(filename);
@@ -36,6 +36,11 @@ export const createFile=async(req, res, next) => {
 export const getFile=async(req, res) => {
   const { id } = req.params;
   const fileData = filesData.find((file) => file.id === id);
+  const parentDir=directoriesData.find((dir)=>dir.id===fileData.parentDirId)
+  if(parentDir.userId!==req.user.id)
+  { 
+    return res.status(401).json({error:"you don't have access to this file"})
+  }
 
   if (!fileData) {
     return res.status(404).json({ message: "File Not Found!" });
@@ -54,6 +59,11 @@ export const getFile=async(req, res) => {
 export const updateFile=async (req, res, next) => {
   const { id } = req.params;
   const fileData = filesData.find((file) => file.id === id);
+  // const parentDir=directoriesData.find((dir)=>dir.id===fileData.parentDirId)
+  // if(parentDir.userId!==req.user.id)
+  // { 
+  //   return res.status(401).json({error:"you don't have delete to this file"})
+  // }
   fileData.name = req.body.newFilename;
   try {
     await writeFile("./filesDB.json", JSON.stringify(filesData));
@@ -67,6 +77,11 @@ export const updateFile=async (req, res, next) => {
 export const deleteFile=async (req, res, next) => {
   const { id } = req.params;
   const fileIndex = filesData.findIndex((file) => file.id === id);
+  //   const parentDir=directoriesData.find((dir)=>dir.id===fileData.parentDirId)
+  // if(parentDir.userId!==req.user.id)
+  // { 
+  //   return res.status(401).json({error:"you don't have delete to this file"})
+  // }
   if(fileIndex === -1) {
     return res.status(404).json({message: "File Not Found!"})
   }

@@ -6,5 +6,6 @@ export const checkAuth = (req, res, next) => {
   if (!uid || !user) {
     return res.status(401).json({ error: "Not Logges In" });
   }
+  req.user=user
   next()
 }
