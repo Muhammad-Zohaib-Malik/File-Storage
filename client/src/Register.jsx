@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Auth.css";
 
@@ -6,9 +6,9 @@ const Register = () => {
   const BASE_URL = "http://localhost:4000";
 
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
+    name: "Anurag Singh",
+    email: "anurag@gmail.com",
+    password: "abcd",
   });
 
   // serverError will hold the error message from the server
