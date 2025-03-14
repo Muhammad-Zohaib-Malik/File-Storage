@@ -76,11 +76,11 @@ export const getFile = async (req, res) => {
     return res.download(filePath, fileData.name);
   }
 
-  // return res.sendFile(filePath, (err) => {
-  //   if (!res.headersSent && err) {
-  //     return res.status(404).json({ error: "File not found!" });
-  //   }
-  // });
+  return res.sendFile(filePath, (err) => {
+    if (!res.headersSent && err) {
+      return res.status(404).json({ error: "File not found!" });
+    }
+  });
 };
 
 export const updateFile = async (req, res, next) => {

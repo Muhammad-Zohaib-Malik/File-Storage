@@ -5,8 +5,14 @@ import {
   getFile,
   updateFile,
 } from "../controllers/file.controller.js";
+import validateIdMiddleware from "../middleware/validateId.middleware.js";
 
 const router = express.Router();
+
+router.param("parentDirId",validateIdMiddleware );
+router.param("id",validateIdMiddleware );
+
+
 
 // Create
 router.post("/:parentDirId?", createFile);
