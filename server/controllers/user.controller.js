@@ -44,17 +44,31 @@ export const register = async (req, res, next) => {
 
 }
 
-export const login=async(req,res,next)=>{
-    const {email,password}=req.body
+export const login = async (req, res) => {
+  const { email, password } = req.body
 
-    const user=usersData.find((user)=>user.email===email)
-    if(!user || user.password!==password)
-    {
-      return res.status(404).json({error:"Invalid credentials"})
-    }
-    res.cookie('uid',user.id,{
-      httpOnly:true,
-      maxAge:60*1000*60*24*7
-    })
-    res.json({message:"Loged in"})
+  const user = usersData.find((user) => user.email === email)
+  if (!user || user.password !== password) {
+    return res.status(404).json({ error: "Invalid credentials" })
+  }
+  res.cookie('uid', user.id, {
+    httpOnly: true,
+    maxAge: 60 * 1000 * 60 * 24 * 7
+  })
+  res.json({ message: "Loged in" })
 }
+
+export const logout=async(req,res)=>{
+    res.cookie('uid','',{
+      maxAge:0
+    })
+    res.status(200).json({message:"Logged Out"})
+}
+
+export const getUser = async (req, res) => {
+  res.status(200).json({
+    name: req.user.name,
+    email: req.user.email
+  })
+}
+
