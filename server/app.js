@@ -5,6 +5,7 @@ import fileRoutes from "./routes/fileRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import cookieParser from "cookie-parser";
 import { checkAuth } from "./middleware/auth.middleware.js";
+import { connectToDatabase } from "./config/db.js";
 
 const app = express();
 
@@ -16,6 +17,14 @@ app.use(
     credentials: true,
   })
 );
+
+
+const db=await connectToDatabase();
+app.use((req,res,next)=>{
+  req.db=db,
+  next()
+})
+
   
 app.use("/directory", checkAuth, directoryRoutes);
 app.use("/file", checkAuth, fileRoutes);

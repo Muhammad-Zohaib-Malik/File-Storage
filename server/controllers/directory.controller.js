@@ -30,6 +30,10 @@ export const createDirectory = async (req, res, next) => {
 };
 
 export const getDirectory = async (req, res) => {
+
+  const db=req.db
+  
+
   const user = req.user;
   const id = req.params.id || user.rootDirId;
   // Find the directory and verify ownership
