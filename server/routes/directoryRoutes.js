@@ -1,6 +1,11 @@
 import express from "express";
 
-import { createDirectory, deleteDirectory, getDirectory, updateDirectory } from "../controllers/directory.controller.js";
+import {
+  createDirectory,
+  deleteDirectory,
+  getDirectory,
+  updateDirectory,
+} from "../controllers/directory.controller.js";
 
 const router = express.Router();
 
@@ -9,7 +14,7 @@ router.get("/:id?", getDirectory);
 
 router.post("/:parentDirId?", createDirectory);
 
-router.patch('/:id', updateDirectory)
+router.patch("/:id", updateDirectory);
 
 router.delete("/:id", deleteDirectory);
 

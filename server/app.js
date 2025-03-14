@@ -9,14 +9,16 @@ import { checkAuth } from "./middleware/auth.middleware.js";
 const app = express();
 
 app.use(express.json());
-app.use(cookieParser())
-app.use(cors({
-  origin:"http://localhost:5173",
-  credentials:true
-}));
-
-app.use("/directory", checkAuth,directoryRoutes);
-app.use("/file", checkAuth,fileRoutes);
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+  
+app.use("/directory", checkAuth, directoryRoutes);
+app.use("/file", checkAuth, fileRoutes);
 app.use("/user", userRoutes);
 
 app.use((err, req, res, next) => {

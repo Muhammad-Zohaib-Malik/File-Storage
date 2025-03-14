@@ -1,5 +1,10 @@
 import express from "express";
-import { createFile, deleteFile, getFile, updateFile } from "../controllers/file.controller.js";
+import {
+  createFile,
+  deleteFile,
+  getFile,
+  updateFile,
+} from "../controllers/file.controller.js";
 
 const router = express.Router();
 
