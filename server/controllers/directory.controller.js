@@ -71,14 +71,5 @@ export const updateDirectory = async (req, res, next) => {
 };
 
 export const deleteDirectory = async (req, res, next) => {
-  const user = req.user;
-  const { id } = req.params;
-  const db = req.db;
-  const dirCollection = db.collection("directories");
-
-  try {
-    return res.status(200).json({ message: "Directory Deleted!" });
-  } catch (err) {
-    next(err);
-  }
+//  resurcive deletion
 };
