@@ -1,3 +1,5 @@
+import { ObjectId } from "mongodb";
+
 export const register = async (req, res, next) => {
   const db = req.db;
   const { name, email, password } = req.body;
@@ -10,22 +12,27 @@ export const register = async (req, res, next) => {
         "A user with this email address already exists. Please try logging in or use a different email.",
     });
   }
-  const dirCollection = db.collection("directories");
   try {
-    const userRootDir = await dirCollection.insertOne({
+    const rootDirId=new ObjectId()
+    const userId=new ObjectId( )
+    const dirCollection = db.collection("directories");
+     await dirCollection.insertOne({
+      _id:rootDirId,
       name: `root-${email}`,
       parentDirId: null,
+      userId
     });
 
-    const rootDirId = userRootDir.insertedId;
-    const createdUser = await db.collection("users").insertOne({
+     await db.collection("users").insertOne({
+      _id:userId,
       name,
       email,
       password,
       rootDirId,
+      
     });
 
-    const userId = createdUser.insertedId;
+    
     await dirCollection.updateOne({ _id: rootDirId }, { $set: { userId } });
     res.status(201).json({ message: "User Registered" });
   } catch (err) {
