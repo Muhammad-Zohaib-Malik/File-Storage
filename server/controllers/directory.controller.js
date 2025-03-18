@@ -1,10 +1,13 @@
+import { rm } from "fs/promises";
 import { ObjectId } from "mongodb";
 
 export const createDirectory = async (req, res, next) => {
   const user = req.user;
   const db = req.db;
   const dirCollection = db.collection("directories");
-  const parentDirId = req.params.parentDirId ? new ObjectId(req.params.parentDirId) : user.rootDirId;
+  const parentDirId = req.params.parentDirId
+    ? new ObjectId(req.params.parentDirId)
+    : user.rootDirId;
   const dirname = req.headers.dirname || "New Folder";
   const parentDir = await dirCollection.findOne({
     _id: parentDirId,
@@ -71,5 +74,43 @@ export const updateDirectory = async (req, res, next) => {
 };
 
 export const deleteDirectory = async (req, res, next) => {
-//  resurcive deletion
+  const user = req.user;
+  const db = req.db;
+  const { id } = req.params;
+  const filesCollection = db.collection("files");
+  const dirCollection = db.collection("directories");
+  const dirObjId = new ObjectId(id);
+
+  async function getDirectoryContents(id) {
+    let files = await filesCollection
+      .find({ parentDirId: id }, { projection: { extension: 1 } })
+      .toArray();
+    let directories = await dirCollection
+      .find({ parentDirId: id }, { projection: { _id: 1 } })
+      .toArray();
+
+    for (const { _id } of directories) {
+      const { files: childFiles, directories: childDirectories } =
+        await getDirectoryContents(_id);
+      files = [...files, ...childFiles];
+      directories = [...directories, ...childDirectories];
+    }
+
+    return { files, directories };
+  }
+
+  const { files, directories } = await getDirectoryContents(dirObjId);
+  console.log(files, directories);
+  for (const { _id, extension } of files) {
+    await rm(`./storage/${_id.toString()}${extension}`);
+  }
+
+  await filesCollection.deleteMany({
+    _id: { $in: files.map(({ _id }) => _id) },
+  });
+  await dirCollection.deleteMany({
+    _id: { $in: [...directories.map(({ _id }) => _id), dirObjId] },
+  });
+
+  return res.status(201).json({});
 };
