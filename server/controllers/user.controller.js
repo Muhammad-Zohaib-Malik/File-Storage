@@ -13,27 +13,23 @@ export const register = async (req, res, next) => {
     });
   }
   try {
-    const rootDirId=new ObjectId()
-    const userId=new ObjectId( )
+    const rootDirId = new ObjectId();
+    const userId = new ObjectId();
     const dirCollection = db.collection("directories");
-     await dirCollection.insertOne({
-      _id:rootDirId,
+    await dirCollection.insertOne({
+      _id: rootDirId,
       name: `root-${email}`,
       parentDirId: null,
-      userId
+      userId,
     });
 
-     await db.collection("users").insertOne({
-      _id:userId,
+    await db.collection("users").insertOne({
+      _id: userId,
       name,
       email,
       password,
       rootDirId,
-      
     });
-
-    
-    await dirCollection.updateOne({ _id: rootDirId }, { $set: { userId } });
     res.status(201).json({ message: "User Registered" });
   } catch (err) {
     next(err);
