@@ -4,10 +4,10 @@ export const createDirectory = async (req, res, next) => {
   const user = req.user;
   const db = req.db;
   const dirCollection = db.collection("directories");
-  const parentDirId = req.params.parentDirId || user.rootDirId;
+  const parentDirId = req.params.parentDirId ? new ObjectId(req.params.parentDirId) : user.rootDirId;
   const dirname = req.headers.dirname || "New Folder";
   const parentDir = await dirCollection.findOne({
-    _id: new ObjectId(parentDirId),
+    _id: parentDirId,
   });
   if (!parentDir)
     return res
