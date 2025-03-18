@@ -81,6 +81,13 @@ export const deleteDirectory = async (req, res, next) => {
   const dirCollection = db.collection("directories");
   const dirObjId = new ObjectId(id);
 
+  const directoryData =await  dirCollection.findOne({
+    _id: dirObjId,
+    userId: user._id,
+  },{projection:{_id:1}});
+
+  if(!directoryData) return res.status(404).json({error:"Directory Not Found"})
+
   async function getDirectoryContents(id) {
     let files = await filesCollection
       .find({ parentDirId: id }, { projection: { extension: 1 } })
