@@ -11,21 +11,22 @@ try {
     validationAction: "error",
     validator: {
       $jsonSchema: {
-        required: ["name", "email", "password", "rootDirId"],
+        required: ["name", "password", "rootDirId"],
         properties: {
           name: {
             bsonType: "string",
-            minLength: 3,
+            minLength: 4,
             description: "User's full name, must be a string with at least 3 characters.",
           },
           email: {
             bsonType: "string",
-            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+            pattern:
+            "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", 
             description: "User's email address, must follow a valid email format.",
           },
           password: {
             bsonType: "string",
-            minLength: 4,
+            minLength: 8,
             description: "User's password, must be a string with at least 4 characters.",
           },
           rootDirId: {
