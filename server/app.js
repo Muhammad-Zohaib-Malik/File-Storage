@@ -30,8 +30,8 @@ app.use("/directory", checkAuth, directoryRoutes);
 app.use("/file", checkAuth, fileRoutes);
 app.use("/user", userRoutes);
 
-app.use((err, _, res, _) => {
-  res.status(err.status || 500).json({ message: "Something went wrong!" });
+app.use((err, req, res,next) => {
+  res.status(err.status || 500).json({ error: "Something went wrong!" });
 });
 
 app.listen(4000, () => {
