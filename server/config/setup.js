@@ -3,85 +3,98 @@ import { connectToDatabase, disconnectFromDatabase } from "./db.js";
 const db = await connectToDatabase();
 
 const command = "collMod";
-// Creating 'users' collection
-await db.command({
-  [command]: "users",
-  validationLevel: "strict",
-  validationAction: "error",
-  validator: {
-    $jsonSchema: {
-      required: ["name", "email", "password", "rootDirId"],
-      properties: {
-        name: {
-          bsonType: "string",
-          minLength: 3,
-        },
-        email: {
-          bsonType: "string",
-          pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
-        },
-        password: {
-          bsonType: "string",
-          minLength: 4,
-        },
-        rootDirId: {
-          bsonType: "objectId",
-        },
-      },
-      additionalProperties: false,
-    },
-  },
-});
 
-// Creating 'directories' collection
-await db.command({
-  [command]: "directories",
-  validationLevel: "strict",
-  validationAction: "error",
-  validator: {
-    $jsonSchema: {
-      required: ["name", "userId", "parentDirId"],
-      properties: {
-        name: {
-          bsonType: "string",
+try {
+  await db.command({
+    [command]: "users",
+    validationLevel: "strict",
+    validationAction: "error",
+    validator: {
+      $jsonSchema: {
+        required: ["name", "email", "password", "rootDirId"],
+        properties: {
+          name: {
+            bsonType: "string",
+            minLength: 3,
+            description: "User's full name, must be a string with at least 3 characters.",
+          },
+          email: {
+            bsonType: "string",
+            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+            description: "User's email address, must follow a valid email format.",
+          },
+          password: {
+            bsonType: "string",
+            minLength: 4,
+            description: "User's password, must be a string with at least 4 characters.",
+          },
+          rootDirId: {
+            bsonType: "objectId",
+            description: "Reference to the root directory of the user, must be an ObjectId.",
+          },
         },
-        userId: {
-          bsonType: "objectId",
-        },
-        parentDirId: {
-          bsonType: ["objectId", "null"],
-        },
+        additionalProperties: false,
       },
-      additionalProperties: false,
     },
-  },
-});
+  });
 
-// Creating 'files' collection
-await db.command({
-  [command]: "files",
-  validationLevel: "strict",
-  validationAction: "error",
-  validator: {
-    $jsonSchema: {
-      required: ["extension", "name", "userId", "parentDirId"],
-      properties: {
-        extension: {
-          bsonType: "string",
+  await db.command({
+    [command]: "directories",
+    validationLevel: "strict",
+    validationAction: "error",
+    validator: {
+      $jsonSchema: {
+        required: ["name", "userId", "parentDirId"],
+        properties: {
+          name: {
+            bsonType: "string",
+            description: "Name of the directory, must be a string.",
+          },
+          userId: {
+            bsonType: "objectId",
+            description: "Reference to the user who owns the directory, must be an ObjectId.",
+          },
+          parentDirId: {
+            bsonType: ["objectId", "null"],
+            description: "Reference to the parent directory, can be an ObjectId or null if it's a root directory.",
+          },
         },
-        name: {
-          bsonType: "string",
-        },
-        userId: {
-          bsonType: "objectId",
-        },
-        parentDirId: {
-          bsonType: ["objectId", "null"],
-        },
+        additionalProperties: false,
       },
-      additionalProperties: false,
     },
-  },
-});
+  });
 
-await disconnectFromDatabase();
+  await db.command({
+    [command]: "files",
+    validationLevel: "strict",
+    validationAction: "error",
+    validator: {
+      $jsonSchema: {
+        required: ["extension", "name", "userId", "parentDirId"],
+        properties: {
+          extension: {
+            bsonType: "string",
+            description: "File extension (e.g., .txt, .jpg), must be a string.",
+          },
+          name: {
+            bsonType: "string",
+            description: "Name of the file, must be a string.",
+          },
+          userId: {
+            bsonType: "objectId",
+            description: "Reference to the user who owns the file, must be an ObjectId.",
+          },
+          parentDirId: {
+            bsonType: ["objectId", "null"],
+            description: "Reference to the directory containing the file, can be an ObjectId or null if it's a root-level file.",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+  });
+} catch (error) {
+  console.log("Error setting up the database", error);
+} finally {
+  await disconnectFromDatabase();
+}
