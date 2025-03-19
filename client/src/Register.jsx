@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Auth.css";
 
@@ -11,20 +11,24 @@ const Register = () => {
     password: "",
   });
 
-  // serverError will hold the error message from the server
   const [serverError, setServerError] = useState("");
-
+  const [clientError, setClientError] = useState(""); // Local validation error
   const [isSuccess, setIsSuccess] = useState(false);
-
   const navigate = useNavigate();
+
+  // ✅ Email validation regex
+  const isValidEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
 
   // Handler for input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Clear the server error as soon as the user starts typing in Email
-    if (name === "email" && serverError) {
-      setServerError("");
+    if (name === "email") {
+      setClientError(""); // Clear client-side error when typing
+      setServerError(""); // Clear server error too
     }
 
     setFormData((prevFormData) => ({
@@ -36,31 +40,29 @@ const Register = () => {
   // Handler for form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSuccess(false); // reset success if any
+    setIsSuccess(false);
+
+    // ✅ Client-side email validation before sending request
+    if (!isValidEmail(formData.email)) {
+      setClientError("Invalid email format");
+      return;
+    }
 
     try {
       const response = await fetch(`${BASE_URL}/user/register`, {
         method: "POST",
         body: JSON.stringify(formData),
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
 
       const data = await response.json();
-
-      if (data.error) {
-        // Show error below the email field (e.g., "Email already exists")
-        setServerError(data.error);
+      if (!response.ok) {
+        setServerError(data.error || "Registration failed.");
       } else {
-        // Registration success
         setIsSuccess(true);
-        setTimeout(() => {
-          navigate("/");
-        }, 2000);
+        setTimeout(() => navigate("/"), 2000);
       }
     } catch (error) {
-      // In case fetch fails
       console.error("Error:", error);
       setServerError("Something went wrong. Please try again.");
     }
@@ -70,11 +72,8 @@ const Register = () => {
     <div className="container">
       <h2 className="heading">Register</h2>
       <form className="form" onSubmit={handleSubmit}>
-        {/* Name */}
         <div className="form-group">
-          <label htmlFor="name" className="label">
-            Name
-          </label>
+          <label htmlFor="name" className="label">Name</label>
           <input
             className="input"
             type="text"
@@ -84,17 +83,14 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Enter your name"
             required
+            minLength={4}
           />
         </div>
 
-        {/* Email */}
         <div className="form-group">
-          <label htmlFor="email" className="label">
-            Email
-          </label>
+          <label htmlFor="email" className="label">Email</label>
           <input
-            // If there's a serverError, add an extra class to highlight border
-            className={`input ${serverError ? "input-error" : ""}`}
+            className={`input ${clientError || serverError ? "input-error" : ""}`}
             type="email"
             id="email"
             name="email"
@@ -103,15 +99,12 @@ const Register = () => {
             placeholder="Enter your email"
             required
           />
-          {/* Absolutely-positioned error message below email field */}
-          {serverError && <span className="error-msg">{serverError}</span>}
+          {clientError && <span className="error-msg">{clientError}</span>}
+          {serverError && !clientError && <span className="error-msg">{serverError}</span>}
         </div>
 
-        {/* Password */}
         <div className="form-group">
-          <label htmlFor="password" className="label">
-            Password
-          </label>
+          <label htmlFor="password" className="label">Password</label>
           <input
             className="input"
             type="password"
@@ -121,18 +114,15 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Enter your password"
             required
+            minLength={8}
           />
         </div>
 
-        <button
-          type="submit"
-          className={`submit-button ${isSuccess ? "success" : ""}`}
-        >
+        <button type="submit" className={`submit-button ${isSuccess ? "success" : ""}`}>
           {isSuccess ? "Registration Successful" : "Register"}
         </button>
       </form>
 
-      {/* Link to the login page */}
       <p className="link-text">
         Already have an account? <Link to="/login">Login</Link>
       </p>
