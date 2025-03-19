@@ -12,6 +12,8 @@ export const register = async (req, res, next) => {
         "A user with this email address already exists. Please try logging in or use a different email.",
     });
   }
+
+
   try {
     const rootDirId = new ObjectId();
     const userId = new ObjectId();
@@ -23,6 +25,8 @@ export const register = async (req, res, next) => {
       userId,
     });
 
+      
+
     await db.collection("users").insertOne({
       _id: userId,
       name,
@@ -32,7 +36,13 @@ export const register = async (req, res, next) => {
     });
     res.status(201).json({ message: "User Registered" });
   } catch (err) {
-    next(err);
+    if(err.code===121)
+    {
+      res.status(400).json({error:"Invalid fields please enter valid details"})
+    }else {
+      next(err);
+
+    }
   }
 };
 
