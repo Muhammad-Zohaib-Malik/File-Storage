@@ -20,7 +20,7 @@ app.use(
 
 
 const db=await connectToDatabase();
-app.use((req,res,next)=>{
+app.use((req,_,next)=>{
   req.db=db,
   next()
 })
@@ -30,7 +30,7 @@ app.use("/directory", checkAuth, directoryRoutes);
 app.use("/file", checkAuth, fileRoutes);
 app.use("/user", userRoutes);
 
-app.use((err, req, res, next) => {
+app.use((err, _, res, _) => {
   res.status(err.status || 500).json({ message: "Something went wrong!" });
 });
 
