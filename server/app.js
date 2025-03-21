@@ -19,18 +19,18 @@ app.use(
 );
 
 
-const db=await connectToDatabase();
-app.use((req,_,next)=>{
-  req.db=db,
-  next()
+const db = await connectToDatabase();
+app.use((req, _, next) => {
+  req.db = db,
+    next()
 })
 
-  
+
 app.use("/directory", checkAuth, directoryRoutes);
 app.use("/file", checkAuth, fileRoutes);
 app.use("/user", userRoutes);
 
-app.use((err, req, res,next) => {
+app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: "Something went wrong!" });
 });
 
