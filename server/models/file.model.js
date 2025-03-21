@@ -1,11 +1,12 @@
-import { model, Schema } from "mongoose";
+import mongoose from "mongoose";
+import {  Schema } from "mongoose";
 
 const FileSchema = new Schema(
   {
-    extension:{
-      type:String,
-      trim:true,
-      required:[true,'extension is required']
+    extension: {
+      type: String,
+      trim: true,
+      required: [true, "extension is required"],
     },
     name: {
       type: String,
@@ -20,10 +21,9 @@ const FileSchema = new Schema(
     parentDirId: {
       type: Schema.Types.ObjectId,
       ref: "Directory",
-      default: null,
     },
   },
   { timestamps: true, strict: "throw" }
 );
 
-export const File = model("File", FileSchema);
+export const File = mongoose.model("File", FileSchema);

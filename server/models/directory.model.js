@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 
 const directorySchema = new Schema(
   {
@@ -21,4 +21,4 @@ const directorySchema = new Schema(
   { timestamps: true, strict: "throw" }
 );
 
-export const Directory = model("Directory", directorySchema);
+export const Directory = mongoose.model("Directory", directorySchema);
