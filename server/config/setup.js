@@ -1,101 +1,105 @@
 import { connectToDatabase, disconnectFromDatabase } from "./db.js";
 
 const db = await connectToDatabase();
-
 const command = "collMod";
 
 try {
   await db.command({
     [command]: "users",
-    validationLevel: "strict",
-    validationAction: "error",
     validator: {
       $jsonSchema: {
-        required: ["name", "password", "rootDirId"],
+        bsonType: "object",
+        required: ["_id", "name", "email", "password", "rootDirId"],
         properties: {
+          _id: {
+            bsonType: "objectId",
+          },
           name: {
             bsonType: "string",
-            minLength: 4,
-            description: "User's full name, must be a string with at least 3 characters.",
+            minLength: 3,
+            description:
+              "name field should a string with at least three characters",
           },
           email: {
             bsonType: "string",
-            pattern:
-            "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", 
-            description: "User's email address, must follow a valid email format.",
+            description: "please enter a valid email",
+            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
           },
           password: {
             bsonType: "string",
-            minLength: 8,
-            description: "User's password, must be a string with at least 4 characters.",
+            minLength: 4,
           },
           rootDirId: {
             bsonType: "objectId",
-            description: "Reference to the root directory of the user, must be an ObjectId.",
           },
         },
         additionalProperties: false,
       },
     },
+    validationAction: "error",
+    validationLevel: "strict",
   });
 
   await db.command({
     [command]: "directories",
-    validationLevel: "strict",
-    validationAction: "error",
     validator: {
       $jsonSchema: {
-        required: ["name", "userId", "parentDirId"],
+        bsonType: "object",
+        required: ["_id", "name", "userId", "parentDirId"],
         properties: {
+          _id: {
+            bsonType: "objectId",
+          },
           name: {
             bsonType: "string",
-            description: "Name of the directory, must be a string.",
           },
           userId: {
             bsonType: "objectId",
-            description: "Reference to the user who owns the directory, must be an ObjectId.",
           },
           parentDirId: {
             bsonType: ["objectId", "null"],
-            description: "Reference to the parent directory, can be an ObjectId or null if it's a root directory.",
           },
         },
         additionalProperties: false,
       },
     },
+    validationAction: "error",
+    validationLevel: "strict",
   });
 
   await db.command({
     [command]: "files",
-    validationLevel: "strict",
-    validationAction: "error",
     validator: {
       $jsonSchema: {
-        required: ["extension", "name", "userId", "parentDirId"],
+        bsonType: "object",
+        required: ["_id", "name", "extension", "userId", "parentDirId"],
         properties: {
-          extension: {
-            bsonType: "string",
-            description: "File extension (e.g., .txt, .jpg), must be a string.",
+          _id: {
+            bsonType: "objectId",
           },
           name: {
             bsonType: "string",
-            description: "Name of the file, must be a string.",
+          },
+          extension: {
+            bsonType: "string",
           },
           userId: {
             bsonType: "objectId",
-            description: "Reference to the user who owns the file, must be an ObjectId.",
           },
           parentDirId: {
             bsonType: ["objectId", "null"],
-            description: "Reference to the directory containing the file, can be an ObjectId or null if it's a root-level file.",
           },
         },
         additionalProperties: false,
       },
     },
+    validationAction: "error",
+    validationLevel: "strict",
   });
+
+  console.log("Database schema validation applied successfully.");
 } catch (error) {
-  console.log("Error setting up the database", error);
+  console.error("Error setting up the database", error);
 } finally {
   await disconnectFromDatabase();
 }
