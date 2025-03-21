@@ -1,47 +1,52 @@
 import { ObjectId } from "mongodb";
+import { client } from "../config/db.js";
 
 export const register = async (req, res, next) => {
-  const db = req.db;
+  const db=req.db
   const { name, email, password } = req.body;
   const user = await db.collection("users").findOne({ email });
 
   if (user) {
-    return res.status(409).json({
-      error: "User already exists",
-      message:
-        "A user with this email address already exists. Please try logging in or use a different email.",
-    });
+    return res.status(409).json({ error: "Email already exists" });
   }
-
-
+  
+  const session = client.startSession();
   try {
     const rootDirId = new ObjectId();
     const userId = new ObjectId();
     const dirCollection = db.collection("directories");
-    await dirCollection.insertOne({
-      _id: rootDirId,
-      name: `root-${email}`,
-      parentDirId: null,
-      userId,
-    });
+    session.startTransaction();
+    await dirCollection.insertOne(
+      {
+        _id: rootDirId,
+        name: `root-${email}`,
+        parentDirId: null,
+        userId,
+      },
+      { session }
+    );
 
-      
+    await db.collection("users").insertOne(
+      {
+        _id: userId,
+        name,
+        email,
+        password,
+        rootDirId,
+      },
+      { session }
+    );
 
-    await db.collection("users").insertOne({
-      _id: userId,
-      name,
-      email,
-      password,
-      rootDirId,
-    });
+    session.commitTransaction();
     res.status(201).json({ message: "User Registered" });
   } catch (err) {
-    if(err.code===121)
-    {
-      res.status(400).json({error:"Invalid fields please enter valid details"})
-    }else {
+    session.abortTransaction()
+    if (err.code === 121) {
+      res
+        .status(400)
+        .json({ error: "Invalid fields please enter valid details" });
+    } else {
       next(err);
-
     }
   }
 };
