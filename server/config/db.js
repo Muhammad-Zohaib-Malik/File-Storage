@@ -1,12 +1,11 @@
 import { MongoClient } from "mongodb";
 
-const uri = "mongodb://127.0.0.1:27017/storageApp";
-let client;
+const uri = "mongodb://zohaibaay:zohaibaay1234@localhost:27017/storageApp";
+export const client = new MongoClient(uri); 
 
 export const connectToDatabase = async () => {
   try {
-    if (!client) {
-      client = new MongoClient(uri);
+    if (!client.topology || !client.topology.isConnected()) {
       await client.connect();
       console.log(`Connected to database ${uri}`);
     }
