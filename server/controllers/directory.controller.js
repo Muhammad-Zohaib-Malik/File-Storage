@@ -1,8 +1,6 @@
 import { rm } from "fs/promises";
-
 import { Directory } from "../models/directory.model.js";
 import { File } from "../models/file.model.js";
-import { isModuleNamespaceObject } from "util/types";
 
 export const createDirectory = async (req, res, next) => {
   const user = req.user;
@@ -56,11 +54,15 @@ export const updateDirectory = async (req, res, next) => {
   const { id } = req.params;
   const { newDirName } = req.body;
   try {
-    await Directory.updateOne(
-      { _id, userId: user._id },
-      { $set: { name: newDirName } }
+    const updatedDirectory = await Directory.findOneAndUpdate(
+      { _id: id, userId: user._id },
+      { $set: { name: newDirName } },
+      { new: true }
     );
-    dirData.name = newDirName;
+
+    if (!updatedDirectory) {
+      return res.status(404).json({ error: "Directory not found" });
+    }
     return res.status(200).json({ message: "Directory Renamed!" });
   } catch (err) {
     next(err);
@@ -122,8 +124,9 @@ export const deleteDirectory = async (req, res, next) => {
     });
 
     return res.status(200).json({ message: "Directory deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting directory:", error);
+  } catch (err) {
+    next(err);
+    console.error("Error deleting directory:", err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
