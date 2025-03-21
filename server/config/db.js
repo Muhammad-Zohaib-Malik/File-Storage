@@ -1,15 +1,11 @@
-import { MongoClient } from "mongodb";
+import mongoose from "mongoose";
 
 const uri = "mongodb://zohaibaay:zohaibaay1234@localhost:27017/storageApp";
-export const client = new MongoClient(uri); 
 
 export const connectToDatabase = async () => {
   try {
-    if (!client.topology || !client.topology.isConnected()) {
-      await client.connect();
-      console.log(`Connected to database ${uri}`);
-    }
-    return client.db();
+    await mongoose.connect(uri)
+    console.log("Connected to database");
   } catch (error) {
     console.error("Error connecting to database:", error);
     throw error;
@@ -17,9 +13,11 @@ export const connectToDatabase = async () => {
 };
 
 export const disconnectFromDatabase = async () => {
-  if (client) {
-    await client.close();
+  try {
+    await mongoose.connection.close();
     console.log("Database connection closed.");
+  } catch (error) {
+    console.error("Error closing database connection:", error);
   }
 };
 
