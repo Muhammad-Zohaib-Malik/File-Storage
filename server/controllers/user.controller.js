@@ -1,61 +1,54 @@
-import { ObjectId } from "mongodb";
-import { client } from "../config/db.js";
+import { User } from "../models/user.model.js";
+import { Directory } from "../models/directory.model.js";
+import mongoose, { Types } from "mongoose";
 
 export const register = async (req, res, next) => {
-  const db=req.db
   const { name, email, password } = req.body;
-  const user = await db.collection("users").findOne({ email });
+  const existingUser = await User.findOne({ email }).lean();
 
-  if (user) {
+  if (existingUser) {
     return res.status(409).json({ error: "Email already exists" });
   }
-  
-  const session = client.startSession();
+
+  const session = await mongoose.startSession();
+  const rootDirId = new Types.ObjectId();
+  const userId = new Types.ObjectId();
+
+  session.startTransaction();
   try {
-    const rootDirId = new ObjectId();
-    const userId = new ObjectId();
-    const dirCollection = db.collection("directories");
-    session.startTransaction();
-    await dirCollection.insertOne(
-      {
-        _id: rootDirId,
-        name: `root-${email}`,
-        parentDirId: null,
-        userId,
-      },
-      { session }
-    );
+    // Create root directory
+    const rootDir = new Directory({
+      _id: rootDirId,
+      name: `root-${email}`,
+      parentDirId: null,
+      userId,
+    });
 
-    await db.collection("users").insertOne(
-      {
-        _id: userId,
-        name,
-        email,
-        password,
-        rootDirId,
-      },
-      { session }
-    );
+    await rootDir.save({ session });
 
-    session.commitTransaction();
-    res.status(201).json({ message: "User Registered" });
+    // Create user
+    const newUser = new User({
+      _id: userId,
+      name,
+      email,
+      password,
+      rootDirId,
+    });
+
+    await newUser.save({ session });
+    await session.commitTransaction();
+    res.status(201).json({ message: "User Registered", newUser });
   } catch (err) {
-    session.abortTransaction()
-    if (err.code === 121) {
-      res
-        .status(400)
-        .json({ error: "Invalid fields please enter valid details" });
-    } else {
-      next(err);
-    }
+    console.log(err);
+    await session.abortTransaction();
+    next(err)
   }
 };
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
-  const db = req.db;
 
-  const user = await db.collection("users").findOne({ email, password });
+  const user = await User.findOne({ email, password });
   if (!user) {
     return res.status(404).json({ error: "Invalid credentials" });
   }
