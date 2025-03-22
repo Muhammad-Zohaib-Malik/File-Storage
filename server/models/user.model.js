@@ -12,6 +12,7 @@ const UserSchema = new Schema(
     },
     email: {
       type: String,
+      unique:true,
       match: [
         /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$/,
         "please enter a valid email",
