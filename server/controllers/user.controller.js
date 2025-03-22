@@ -4,12 +4,6 @@ import mongoose, { Types } from "mongoose";
 
 export const register = async (req, res, next) => {
   const { name, email, password } = req.body;
-  const existingUser = await User.findOne({ email }).lean();
-
-  if (existingUser) {
-    return res.status(409).json({ error: "Email already exists" });
-  }
-
   const session = await mongoose.startSession();
   const rootDirId = new Types.ObjectId();
   const userId = new Types.ObjectId();
@@ -39,9 +33,13 @@ export const register = async (req, res, next) => {
     await session.commitTransaction();
     res.status(201).json({ message: "User Registered", newUser });
   } catch (err) {
-    console.log(err);
+    if (err.code === 11000) {
+      if (err.keyValue.email) {
+        return res.status(409).json({ error: "Email already exists" });
+      }
+    }
     await session.abortTransaction();
-    next(err)
+    next(err);
   }
 };
 
