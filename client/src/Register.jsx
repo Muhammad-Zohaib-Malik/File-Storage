@@ -8,7 +8,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: "abcd",
+    password: "",
   });
 
   // serverError will hold the error message from the server
