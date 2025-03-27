@@ -1,28 +1,21 @@
 import mongoose from "mongoose";
 
-const uri = "mongodb://zohaibaay:zohaibaay1234@localhost:27017/storageApp";
-
-export const connectToDatabase = async () => {
+export async function connectDB() {
   try {
-    await mongoose.connect(uri)
-    console.log("Connected to database");
-  } catch (error) {
-    console.error("Error connecting to database:", error);
-    throw error;
+    await mongoose.connect(
+      "mongodb://localhost:27017/storageApp"
+    );
+    console.log("Database connected");
+        return mongoose.connection; 
+  } catch (err) {
+    console.log(err);
+    console.log("Could Not Connect to the Database");
+    process.exit(1);
   }
-};
+}
 
-export const disconnectFromDatabase = async () => {
-  try {
-    await mongoose.connection.close();
-    console.log("Database connection closed.");
-  } catch (error) {
-    console.error("Error closing database connection:", error);
-  }
-};
-
-// Handle process termination gracefully
 process.on("SIGINT", async () => {
-  await disconnectFromDatabase();
+  await mongoose.disconnect();
+  console.log("Database Disconnected!");
   process.exit(0);
 });

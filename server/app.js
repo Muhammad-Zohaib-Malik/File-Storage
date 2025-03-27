@@ -1,16 +1,17 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import directoryRoutes from "./routes/directoryRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
-import cookieParser from "cookie-parser";
-import { checkAuth } from "./middleware/auth.middleware.js";
-import { connectToDatabase } from "./config/db.js";
+import checkAuth from "./middlewares/authMiddleware.js";
+import { connectDB } from "./config/db.js";
+
+await connectDB();
 
 const app = express();
-
-app.use(express.json());
 app.use(cookieParser());
+app.use(express.json());
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -18,19 +19,12 @@ app.use(
   })
 );
 
-
-const db = await connectToDatabase();
-app.use((req, _, next) => {
-  req.db = db,
-    next()
-})
-
-
 app.use("/directory", checkAuth, directoryRoutes);
 app.use("/file", checkAuth, fileRoutes);
 app.use("/user", userRoutes);
 
 app.use((err, req, res, next) => {
+  console.log(err);
   res.status(err.status || 500).json({ error: "Something went wrong!" });
 });
 
