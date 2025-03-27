@@ -4,58 +4,67 @@ import mongoose, { Types } from "mongoose";
 
 export const register = async (req, res, next) => {
   const { name, email, password } = req.body;
+
   const session = await mongoose.startSession();
 
   try {
+  
     const rootDirId = new Types.ObjectId();
     const userId = new Types.ObjectId();
 
     session.startTransaction();
 
-    await Directory.insertOne(
-      {
-        _id: rootDirId,
-        name: `root-${email}`,
-        parentDirId: null,
-        userId,
-      },
+  
+    await Directory.create(
+      [
+        {
+          _id: rootDirId,
+          name: `root-${email}`,
+          parentDirId: null,
+          userId,
+        },
+      ],
       { session }
     );
 
-    await User.insertOne(
-      {
-        _id: userId,
-        name,
-        email,
-        password,
-        rootDirId,
-      },
+   
+    await User.create(
+      [
+        {
+          _id: userId,
+          name,
+          email,
+          password,
+          rootDirId,
+        },
+      ],
       { session }
     );
 
-    session.commitTransaction();
+    
+    await session.commitTransaction();
+    session.endSession();
 
-    res.status(201).json({ message: "User Registered" });
+    res.status(201).json({ message: "User Registered Successfully" });
   } catch (err) {
-    session.abortTransaction();
-    if (err.code === 121) {
-      res
-        .status(400)
-        .json({ error: "Invalid input, please enter valid details" });
-    } else if (err.code === 11000) {
-      if (err.keyValue.email) {
-        return res.status(409).json({
-          error: "This email already exists",
-          message:
-            "A user with this email address already exists. Please try logging in or use a different email.",
-        });
-      }
-    } else {
-      next(err);
+  
+    await session.abortTransaction();
+    session.endSession();
+
+    console.error("Registration Error:", err); 
+
+
+    if (err.code === 11000 && err.keyValue.email) {
+      return res.status(409).json({
+        error: "This email already exists",
+        message:
+          "A user with this email address already exists. Please try logging in or use a different email.",
+      });
     }
+
+   next(err)
   }
 };
-
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email, password });
