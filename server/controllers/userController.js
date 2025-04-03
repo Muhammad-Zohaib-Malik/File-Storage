@@ -1,11 +1,14 @@
 import Directory from "../models/directoryModel.js";
 import User from "../models/userModel.js";
 import mongoose, { Types } from "mongoose";
+import crypto from 'crypto'
 
 export const register = async (req, res, next) => {
   const { name, email, password } = req.body;
 
   const session = await mongoose.startSession();
+
+  const hashedPassword=crypto.createHash('sha256').update(password).digest('base64url')
 
   try {
   
@@ -34,7 +37,7 @@ export const register = async (req, res, next) => {
           _id: userId,
           name,
           email,
-          password,
+          password:hashedPassword,
           rootDirId,
         },
       ],
@@ -67,8 +70,15 @@ export const register = async (req, res, next) => {
 };
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
-  const user = await User.findOne({ email, password });
+  const user = await User.findOne({ email });
+
   if (!user) {
+    return res.status(404).json({ error: "Invalid Credentials" });
+  }
+  const enteredPasswordHash=crypto.createHash('sha256').update(password).digest('base64url')
+
+
+  if (user.password!==enteredPasswordHash) {
     return res.status(404).json({ error: "Invalid Credentials" });
   }
   const cookiePayload={
