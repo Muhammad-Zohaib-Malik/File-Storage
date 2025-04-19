@@ -1,21 +1,21 @@
+import Session from "../models/sessionMode.js";
 import User from "../models/userModel.js";
 
 export default async function checkAuth(req, res, next) {
-  const { uid } = req.cookies;
-  if (!uid) {
-    return res.status(401).json({ error: "Not logged!" });
+  const { sid } = req.signedCookies;
+  if (!sid) {
+    res.clearCookie("sid");
+    return res.status(401).json({ error: "Not logged In !" });
   }
 
-  const {id,expiry:expiryTimeInSeconds}=JSON.parse(Buffer.from(uid,'base64url').toString())
-  const currentTimeInSeconds=Math.round(Date.now()/1000)
+  const session = await Session.findById(sid);
 
-  if(currentTimeInSeconds>expiryTimeInSeconds)
-  {
-    res.clearCookie("uid")
-    return res.status(401).json({ error: "Not logged!" });
+  if (!session) {
+    res.clearCookie("sid");
+    return res.status(401).json({ error: "Not logged In !" });
   }
 
-  const user = await User.findOne({ _id: id }).lean();
+  const user = await User.findOne({ _id: session.userId }).lean();
   if (!user) {
     return res.status(401).json({ error: "Not logged!" });
   }

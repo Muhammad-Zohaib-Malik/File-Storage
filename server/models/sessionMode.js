@@ -9,13 +9,15 @@ const sessionSchema = new Schema(
     createdAt: {
       type: Date,
       default: Date.now,
-      expiresAt: 30,
+      expires: 30,
     },
   },
   {
     strict: "throw",
   }
 );
+
+
 
 const Session = model("Session", sessionSchema);
 

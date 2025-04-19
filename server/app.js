@@ -7,10 +7,11 @@ import userRoutes from "./routes/userRoutes.js";
 import checkAuth from "./middlewares/authMiddleware.js";
 import { connectDB } from "./config/db.js";
 
+const mySecretKey="Zohaibaay-1234"
 await connectDB();
 
 const app = express();
-app.use(cookieParser());
+app.use(cookieParser(mySecretKey));
 app.use(express.json());
 app.use(
   cors({

@@ -1,23 +1,20 @@
 import Directory from "../models/directoryModel.js";
+import Session from "../models/sessionMode.js";
 import User from "../models/userModel.js";
 import mongoose, { Types } from "mongoose";
-import crypto from 'crypto'
 
 export const register = async (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { name, email,password } = req.body;
 
   const session = await mongoose.startSession();
 
-  const hashedPassword=crypto.createHash('sha256').update(password).digest('base64url')
 
   try {
-  
     const rootDirId = new Types.ObjectId();
     const userId = new Types.ObjectId();
 
     session.startTransaction();
 
-  
     await Directory.create(
       [
         {
@@ -30,32 +27,28 @@ export const register = async (req, res, next) => {
       { session }
     );
 
-   
     await User.create(
       [
         {
           _id: userId,
           name,
           email,
-          password:hashedPassword,
+          password,
           rootDirId,
         },
       ],
       { session }
     );
 
-    
     await session.commitTransaction();
     session.endSession();
 
     res.status(201).json({ message: "User Registered Successfully" });
   } catch (err) {
-  
     await session.abortTransaction();
     session.endSession();
 
-    console.error("Registration Error:", err); 
-
+    console.error("Registration Error:", err);
 
     if (err.code === 11000 && err.keyValue.email) {
       return res.status(409).json({
@@ -65,7 +58,7 @@ export const register = async (req, res, next) => {
       });
     }
 
-   next(err)
+    next(err);
   }
 };
 export const login = async (req, res, next) => {
@@ -75,24 +68,23 @@ export const login = async (req, res, next) => {
   if (!user) {
     return res.status(404).json({ error: "Invalid Credentials" });
   }
-  const enteredPasswordHash=crypto.createHash('sha256').update(password).digest('base64url')
 
-
-  if (user.password!==enteredPasswordHash) {
+  const passwordMatch = user.isPasswordCorrect(password);
+  if (!passwordMatch) {
     return res.status(404).json({ error: "Invalid Credentials" });
   }
-  const cookiePayload={
-    id:user._id.toString(),
-    expiryTime: Math.round(Date.now()/1000+10),
-  }
 
 
-  res.cookie("uid",'') ,{
+  const session=await Session.create({userId:user._id})
+
+
+
+  res.cookie("sid", session.id, {
     httpOnly: true,
-    // maxAge: 10 * 1000,
-    maxAge: 60 * 1000 * 60 * 24 * 7,
-  };
-  res.json({ message: "logged in" });
+    signed: true,
+    maxAge: 60 * 1000 * 60 * 24 * 7
+  });
+  res.json({ message: "Logged In" });
 };
 
 export const getCurrentUser = (req, res) => {
