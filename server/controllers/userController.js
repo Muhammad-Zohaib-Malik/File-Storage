@@ -4,10 +4,9 @@ import User from "../models/userModel.js";
 import mongoose, { Types } from "mongoose";
 
 export const register = async (req, res, next) => {
-  const { name, email,password } = req.body;
+  const { name, email, password } = req.body;
 
   const session = await mongoose.startSession();
-
 
   try {
     const rootDirId = new Types.ObjectId();
@@ -74,15 +73,20 @@ export const login = async (req, res, next) => {
     return res.status(404).json({ error: "Invalid Credentials" });
   }
 
+  const allSessions=await Session.find({userId:user._id})
+  
+  if(allSessions.length>=2){
+   await  allSessions[0].deleteOne()
+  }
 
-  const session=await Session.create({userId:user._id})
+  const session = await Session.create({ userId: user._id });
 
 
 
   res.cookie("sid", session.id, {
     httpOnly: true,
     signed: true,
-    maxAge: 60 * 1000 * 60 * 24 * 7
+    maxAge: 60 * 1000 * 60 * 24 * 7,
   });
   res.json({ message: "Logged In" });
 };
@@ -94,7 +98,20 @@ export const getCurrentUser = (req, res) => {
   });
 };
 
-export const logout = (req, res) => {
-  res.clearCookie("uid");
+export const logout = async (req, res) => {
+  
+  const { sid } = req.signedCookies;
+  await Session.findByIdAndDelete(sid);
+  res.clearCookie("sid");
+  res.status(204).end();
+};
+
+
+export const logoutFromAllDevices = async (req, res) => {
+  
+  const { sid } = req.signedCookies;
+  const session = await Session.findById(sid);
+  await Session.deleteMany({ userId: session.userId });
+  res.clearCookie("sid");
   res.status(204).end();
 };
