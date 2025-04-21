@@ -1,10 +1,21 @@
 import Directory from "../models/directoryModel.js";
+import Otp from "../models/otp.model.js";
 import Session from "../models/sessionMode.js";
 import User from "../models/userModel.js";
+import {sendOtp} from "../utils/sendOTP.js"
 import mongoose, { Types } from "mongoose";
 
 export const register = async (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { name, email, password,otp } = req.body;
+
+  const otpRecord = await Otp.findOne({ email, otp });
+
+
+  if (!otpRecord) {
+    return res.status(400).json({ error: "Invalid or expired OTP" });
+  }
+
+  await otpRecord.deleteOne()
 
   const session = await mongoose.startSession();
 
@@ -114,4 +125,27 @@ export const logoutFromAllDevices = async (req, res) => {
   await Session.deleteMany({ userId: session.userId });
   res.clearCookie("sid");
   res.status(204).end();
+};
+
+
+export const sendOTP=async(req,res)=>{
+  const {email}=req.body
+  const resData=await sendOtp(email)
+  res.json(resData)
+}
+
+export const verifyOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const otpRecord = await Otp.findOne({ email, otp });
+
+    if (!otpRecord) {
+      return res.status(400).json({ error: "Invalid or expired OTP" });
+    }
+
+    res.json({ message: "OTP Verified successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
 };
