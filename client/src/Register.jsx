@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Auth.css";
 
@@ -8,7 +8,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: "Anurag Singh",
     email: "anurag@gmail.com",
-    password: "abcd",
+    password: "abcd"
   });
 
   const [serverError, setServerError] = useState("");
@@ -55,7 +55,7 @@ const Register = () => {
 
     try {
       setIsSending(true);
-      const res = await fetch(`${BASE_URL}/send-otp`, {
+      const res = await fetch(`${BASE_URL}/user/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -87,7 +87,7 @@ const Register = () => {
 
     try {
       setIsVerifying(true);
-      const res = await fetch(`${BASE_URL}/verify-otp`, {
+      const res = await fetch(`${BASE_URL}/user/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp }),
@@ -122,7 +122,7 @@ const Register = () => {
     try {
       const response = await fetch(`${BASE_URL}/user/register`, {
         method: "POST",
-        body: JSON.stringify(formData),
+        body: JSON.stringify({...formData,otp}),
         headers: { "Content-Type": "application/json" },
       });
       const data = await response.json();
@@ -190,7 +190,6 @@ const Register = () => {
             </button>
           </div>
           {serverError && <span className="error-msg">{serverError}</span>}
-          {otpError && <span className="error-msg">{otpError}</span>}
         </div>
 
         {/* OTP Input + Verify */}
@@ -224,7 +223,10 @@ const Register = () => {
                     : "Verify OTP"}
               </button>
             </div>
+          {otpError && <span className="error-msg">{otpError}</span>}
+
           </div>
+          
         )}
 
         {/* Password */}
