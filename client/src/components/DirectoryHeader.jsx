@@ -114,8 +114,6 @@ function DirectoryHeader({
     }
   };
 
-
-
   // -------------------------------------------
   // 4. Close menu on outside click
   // -------------------------------------------
@@ -197,7 +195,7 @@ function DirectoryHeader({
                     onClick={handleLogoutAll}
                   >
                     <FaSignOutAlt className="menu-item-icon" />
-                    <span>LogoutAll</span>
+                    <span>Logout All</span>
                   </div>
                 </>
               ) : (
