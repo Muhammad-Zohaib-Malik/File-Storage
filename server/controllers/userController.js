@@ -2,20 +2,20 @@ import Directory from "../models/directoryModel.js";
 import Otp from "../models/otp.model.js";
 import Session from "../models/sessionMode.js";
 import User from "../models/userModel.js";
-import {sendOtp} from "../utils/sendOTP.js"
+import { verifyGoogleToken } from "../utils/googleAuth.js";
+import { sendOtp } from "../utils/sendOTP.js";
 import mongoose, { Types } from "mongoose";
 
 export const register = async (req, res, next) => {
-  const { name, email, password,otp } = req.body;
+  const { name, email, password, otp } = req.body;
 
   const otpRecord = await Otp.findOne({ email, otp });
-
 
   if (!otpRecord) {
     return res.status(400).json({ error: "Invalid or expired OTP" });
   }
 
-  await otpRecord.deleteOne()
+  await otpRecord.deleteOne();
 
   const session = await mongoose.startSession();
 
@@ -84,15 +84,13 @@ export const login = async (req, res, next) => {
     return res.status(404).json({ error: "Invalid Credentials" });
   }
 
-  const allSessions=await Session.find({userId:user._id})
-  
-  if(allSessions.length>=2){
-   await  allSessions[0].deleteOne()
+  const allSessions = await Session.find({ userId: user._id });
+
+  if (allSessions.length >= 2) {
+    await allSessions[0].deleteOne();
   }
 
   const session = await Session.create({ userId: user._id });
-
-
 
   res.cookie("sid", session.id, {
     httpOnly: true,
@@ -110,16 +108,13 @@ export const getCurrentUser = (req, res) => {
 };
 
 export const logout = async (req, res) => {
-  
   const { sid } = req.signedCookies;
   await Session.findByIdAndDelete(sid);
   res.clearCookie("sid");
   res.status(204).end();
 };
 
-
 export const logoutFromAllDevices = async (req, res) => {
-  
   const { sid } = req.signedCookies;
   const session = await Session.findById(sid);
   await Session.deleteMany({ userId: session.userId });
@@ -127,12 +122,11 @@ export const logoutFromAllDevices = async (req, res) => {
   res.status(204).end();
 };
 
-
-export const sendOTP=async(req,res)=>{
-  const {email}=req.body
-  const resData=await sendOtp(email)
-  res.json(resData)
-}
+export const sendOTP = async (req, res) => {
+  const { email } = req.body;
+  const resData = await sendOtp(email);
+  res.json(resData);
+};
 
 export const verifyOTP = async (req, res) => {
   try {
@@ -147,5 +141,83 @@ export const verifyOTP = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
+  }
+};
+
+export const loginWithGoogle = async (req, res, next) => {
+  const { idToken } = req.body;
+  const userData = await verifyGoogleToken(idToken);
+  const { email, name, picture } = userData;
+
+  const existingUser = await User.findOne({ email }).select("-__v");
+  
+
+  if (existingUser) {
+    const allSessions = await Session.find({ userId: existingUser._id });
+
+    if (allSessions.length >= 2) {
+      await allSessions[0].deleteOne();
+    }
+
+    if(!existingUser.picture.includes("googleusercontent")) {
+      existingUser.picture = picture;
+      await existingUser.save();
+    }
+
+    const session = await Session.create({ userId: existingUser._id });
+
+    res.cookie("sid", session.id, {
+      httpOnly: true,
+      signed: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    });
+
+    return res.status(200).json({ message: "Logged In", userData });
+  }
+
+  const mongooseSession = await mongoose.startSession();
+
+  try {
+    mongooseSession.startTransaction();
+
+    const rootDirId = new Types.ObjectId();
+    const userId = new Types.ObjectId();
+
+    const directory = new Directory({
+      _id: rootDirId,
+      name: `root-${email}`,
+      parentDirId: null,
+      userId,
+    });
+
+    const user = new User({
+      _id: userId,
+      name,
+      email,
+      picture,
+      rootDirId,
+    });
+
+    await directory.save({ session: mongooseSession });
+    await user.save({ session: mongooseSession });
+
+    const session = await Session.create({ userId: user._id });
+
+    res.cookie("sid", session.id, {
+      httpOnly: true,
+      signed: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    });
+
+    await mongooseSession.commitTransaction();
+   
+    return res.status(201).json({ message: "Account created and logged In", user });
+
+  } catch (err) {
+    await mongooseSession.abortTransaction();
+    console.error("Registration Error:", err);
+    return next(err);
+  } finally {
+    mongooseSession.endSession();
   }
 };

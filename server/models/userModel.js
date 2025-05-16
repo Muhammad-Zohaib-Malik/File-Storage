@@ -22,8 +22,11 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: true,
       minLength: 4,
+    },
+    picture:{
+      type:String,
+      default:'https://imgs.search.brave.com/3evpfgurwSBCOyfmtSzvH9y1C1ARWyuAe2RbJGcxL-c/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzRiL2Yz/LzJhLzRiZjMyYWU1/ZjA2NzM1YjFkODMx/NzRlOWM5MGEzODVi/LmpwZw'
     },
     rootDirId: {
       type: Schema.Types.ObjectId,
