@@ -1,14 +1,16 @@
 import  { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Auth.css";
+import { GoogleLogin } from "@react-oauth/google";
+import { loginWithGoogle } from "./apis/loginWithGoogle";
 
 const Register = () => {
   const BASE_URL = "http://localhost:4000";
 
   const [formData, setFormData] = useState({
-    name: "Anurag Singh",
-    email: "anurag@gmail.com",
-    password: "abcd"
+    name: "",
+    email: "",
+    password: ""
   });
 
   const [serverError, setServerError] = useState("");
@@ -258,6 +260,26 @@ const Register = () => {
       <p className="link-text">
         Already have an account? <Link to="/login">Login</Link>
       </p>
+
+       <div className="google-login">
+        <GoogleLogin
+        onSuccess={async(credentialResponse) => {
+           const data = await loginWithGoogle(credentialResponse.credential);
+         if (data.error) {
+          console.log(data);
+          return
+         }
+         navigate("/");
+        }}
+        shape="circle"
+        theme="filled_blue"
+        text="continue_with"
+        onError={() => {
+          console.log("Login Failed");
+        }}
+        useOneTap
+      />
+      </div>
     </div>
   );
 };

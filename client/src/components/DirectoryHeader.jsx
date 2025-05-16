@@ -23,6 +23,8 @@ function DirectoryHeader({
   const [loggedIn, setLoggedIn] = useState(false);
   const [userName, setUserName] = useState("Guest User");
   const [userEmail, setUserEmail] = useState("guest@example.com");
+  const [userPicture, setUserPicture] = useState("");
+  console.log("userPicture", userPicture);
 
   const userMenuRef = useRef(null);
   const navigate = useNavigate();
@@ -38,9 +40,11 @@ function DirectoryHeader({
         });
         if (response.ok) {
           const data = await response.json();
+          console.log("User data:", data);
           // Set user info if logged in
           setUserName(data.name);
           setUserEmail(data.email);
+          setUserPicture(data.picture);
           setLoggedIn(true);
         } else if (response.status === 401) {
           // User not logged in
@@ -80,6 +84,7 @@ function DirectoryHeader({
         setLoggedIn(false);
         setUserName("Guest User");
         setUserEmail("guest@example.com");
+
         navigate("/login");
       } else {
         console.error("Logout failed");
@@ -170,7 +175,7 @@ function DirectoryHeader({
             title="User Menu"
             onClick={handleUserIconClick}
           >
-            <FaUser />
+            {userPicture ? <img src={userPicture} alt={userPicture} /> :( <FaUser />)}
           </button>
 
           {showUserMenu && (
