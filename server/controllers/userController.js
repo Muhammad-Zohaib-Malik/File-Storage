@@ -221,3 +221,27 @@ export const loginWithGoogle = async (req, res, next) => {
     mongooseSession.endSession();
   }
 };
+
+
+
+export const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find({}).select("_id name email").lean();
+    const usersWithLoginStatus = await Promise.all(
+      users.map(async (user) => {
+        const sessionCount = await Session.countDocuments({ userId: user._id });
+        return {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          isLoggedIn: sessionCount > 0, 
+        };
+      })
+    );
+
+    res.status(200).json({ users: usersWithLoginStatus });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

@@ -1,6 +1,7 @@
 import express from "express";
 import checkAuth from "../middlewares/authMiddleware.js";
 import {
+  getAllUsers,
   getCurrentUser,
   login,
   loginWithGoogle,
@@ -20,10 +21,12 @@ router.post("/login", login);
 router.get("/", checkAuth, getCurrentUser);
 
 router.post("/logout", logout);
-router.post("/logout-all", logoutFromAllDevices);
+router.post("/logout-all",checkAuth, logoutFromAllDevices);
 router.post("/send-otp", sendOTP);
 router.post("/verify-otp", verifyOTP);
 router.post("/google", loginWithGoogle);
+router.get("/all",checkAuth, getAllUsers);
+
 
 
 
