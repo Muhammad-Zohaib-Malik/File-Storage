@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import directoryRoutes from "./routes/directoryRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
-import checkAuth from "./middlewares/authMiddleware.js";
+import {checkAuth} from "./middlewares/authMiddleware.js";
 import { connectDB } from "./config/db.js";
 
 const mySecretKey="Zohaibaay-1234"

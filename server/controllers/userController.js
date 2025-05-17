@@ -1,4 +1,5 @@
 import Directory from "../models/directoryModel.js";
+import File from "../models/fileModel.js";
 import Otp from "../models/otp.model.js";
 import Session from "../models/sessionMode.js";
 import User from "../models/userModel.js";
@@ -104,6 +105,8 @@ export const getCurrentUser = (req, res) => {
   res.status(200).json({
     name: req.user.name,
     email: req.user.email,
+    picture: req.user.picture,
+    role: req.user.role,
   });
 };
 
@@ -150,7 +153,6 @@ export const loginWithGoogle = async (req, res, next) => {
   const { email, name, picture } = userData;
 
   const existingUser = await User.findOne({ email }).select("-__v");
-  
 
   if (existingUser) {
     const allSessions = await Session.find({ userId: existingUser._id });
@@ -159,7 +161,7 @@ export const loginWithGoogle = async (req, res, next) => {
       await allSessions[0].deleteOne();
     }
 
-    if(!existingUser.picture.includes("googleusercontent")) {
+    if (!existingUser.picture.includes("googleusercontent")) {
       existingUser.picture = picture;
       await existingUser.save();
     }
@@ -210,9 +212,10 @@ export const loginWithGoogle = async (req, res, next) => {
     });
 
     await mongooseSession.commitTransaction();
-   
-    return res.status(201).json({ message: "Account created and logged In", user });
 
+    return res
+      .status(201)
+      .json({ message: "Account created and logged In", user });
   } catch (err) {
     await mongooseSession.abortTransaction();
     console.error("Registration Error:", err);
@@ -222,9 +225,7 @@ export const loginWithGoogle = async (req, res, next) => {
   }
 };
 
-
-
-export const getAllUsers = async (req, res, next) => {
+export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({}).select("_id name email").lean();
     const usersWithLoginStatus = await Promise.all(
@@ -234,7 +235,7 @@ export const getAllUsers = async (req, res, next) => {
           _id: user._id,
           name: user.name,
           email: user.email,
-          isLoggedIn: sessionCount > 0, 
+          isLoggedIn: sessionCount > 0,
         };
       })
     );
@@ -243,5 +244,66 @@ export const getAllUsers = async (req, res, next) => {
   } catch (error) {
     console.error("Error fetching users:", error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const logoutUsingRole = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+    if (!userId) {
+      return res
+        .status(400)
+        .json({ message: "Invalid or missing userId in URL." });
+    }
+    await Session.deleteMany({ userId });
+    res
+      .status(200)
+      .json({ message: "Logged out from all sessions successfully." });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteUsingRole = async (req, res, next) => {
+  const { userId } = req.params;
+
+  // Prevent self-deletion
+  if (req.user._id.toString() === userId.toString()) {
+    return res.status(403).json({ message: "You can't delete yourself." });
+  }
+
+  // Validate userId
+  if (!userId || userId === "undefined") {
+    return res.status(400).json({ message: "Invalid or missing userId." });
+  }
+
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    const user = await User.findById(userId).session(session);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    await Promise.all([
+      User.deleteOne({ _id: userId }).session(session),
+      Session.deleteMany({ userId }).session(session),
+      File.deleteMany({ userId }).session(session),
+      Directory.deleteMany({ userId }).session(session),
+    ]);
+
+    await session.commitTransaction();
+    return res
+      .status(200)
+      .json({ message: "User and all related data deleted successfully." });
+  } catch (error) {
+    await session.abortTransaction();
+    return res
+      .status(500)
+      .json({ message: error.message || "Deletion failed." });
+  } finally {
+    session.endSession();
   }
 };

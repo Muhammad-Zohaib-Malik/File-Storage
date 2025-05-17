@@ -1,7 +1,7 @@
 import Session from "../models/sessionMode.js";
 import User from "../models/userModel.js";
 
-export default async function checkAuth(req, res, next) {
+export async function checkAuth(req, res, next) {
   const { sid } = req.signedCookies;
   if (!sid) {
     res.clearCookie("sid");
@@ -21,4 +21,14 @@ export default async function checkAuth(req, res, next) {
   }
   req.user = user;
   next();
+}
+
+export async function checkForRole(req, res, next) {
+  if (req.user.role !== "User") return next();
+  res.status(403).json({ error: "You cannot access users" });
+}
+
+export async function checkForAdminOnly(req, res, next) {
+  if (req.user.role === "Admin") return next();
+  res.status(403).json({ error: "You cannot access users" });
 }

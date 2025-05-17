@@ -24,9 +24,15 @@ const userSchema = new Schema(
       type: String,
       minLength: 4,
     },
-    picture:{
-      type:String,
-      default:'https://imgs.search.brave.com/3evpfgurwSBCOyfmtSzvH9y1C1ARWyuAe2RbJGcxL-c/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzRiL2Yz/LzJhLzRiZjMyYWU1/ZjA2NzM1YjFkODMx/NzRlOWM5MGEzODVi/LmpwZw'
+    picture: {
+      type: String,
+      default:
+        "https://imgs.search.brave.com/3evpfgurwSBCOyfmtSzvH9y1C1ARWyuAe2RbJGcxL-c/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzRiL2Yz/LzJhLzRiZjMyYWU1/ZjA2NzM1YjFkODMx/NzRlOWM5MGEzODVi/LmpwZw",
+    },
+    role: {
+      type: String,
+      enum: ["Admin", "Manager", "User"],
+      default: "User",
     },
     rootDirId: {
       type: Schema.Types.ObjectId,
@@ -38,17 +44,15 @@ const userSchema = new Schema(
   }
 );
 
-userSchema.pre("save",async function (next) {
-  if(!this.isModified('password')) return next();
-  this.password=await bcrypt.hash(this.password, 10)
-  next()
-})
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
 
 userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
-
-
 
 const User = model("User", userSchema);
 

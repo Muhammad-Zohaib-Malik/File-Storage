@@ -24,7 +24,7 @@ function DirectoryHeader({
   const [userName, setUserName] = useState("Guest User");
   const [userEmail, setUserEmail] = useState("guest@example.com");
   const [userPicture, setUserPicture] = useState("");
-  console.log("userPicture", userPicture);
+
 
   const userMenuRef = useRef(null);
   const navigate = useNavigate();
