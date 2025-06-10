@@ -86,11 +86,21 @@ export const login = async (req, res, next) => {
     return res.status(404).json({ error: "Invalid Credentials" });
   }
 
-  // const allSessions = await Session.find({ userId: user._id });
+  const allSessions = await redisClient.ft.search(
+    "userIdIdx",
+    `@userId:{${user.id}}`,
+    {
+      RETURN: [],
+    }
+  );
 
-  // if (allSessions.length >= 2) {
-  //   await allSessions[0].deleteOne();
-  // }
+  const info = await redisClient.ft.info("userIdIdx");
+  console.log("Docs:", info.num_docs);
+  console.log("All Sessions:", allSessions.documents);
+
+  if (allSessions.documents.length >= 2) {
+    await redisClient.del(allSessions.documents[0].id);
+  }
 
   const sessionId = crypto.randomUUID();
   const redisKey = `session:${sessionId}`;
