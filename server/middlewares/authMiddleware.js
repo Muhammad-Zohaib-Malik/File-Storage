@@ -8,8 +8,6 @@ export async function checkAuth(req, res, next) {
   }
 
   const session = await redisClient.json.get(`session:${sid}`);
-  console.log("Session:", session);
-
   if (!session) {
     res.clearCookie("sid");
     return res.status(401).json({ error: "Not logged In !" });
