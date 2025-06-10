@@ -40,7 +40,6 @@ function DirectoryHeader({
         });
         if (response.ok) {
           const data = await response.json();
-          console.log("User data:", data);
           // Set user info if logged in
           setUserName(data.name);
           setUserEmail(data.email);
