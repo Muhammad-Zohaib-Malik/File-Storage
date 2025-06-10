@@ -173,10 +173,20 @@ export const loginWithGoogle = async (req, res, next) => {
   const existingUser = await User.findOne({ email }).select("-__v");
 
   if (existingUser) {
-    const allSessions = await Session.find({ userId: existingUser._id });
+    const allSessions = await redisClient.ft.search(
+      "userIdIdx",
+      `@userId:{${existingUser._id}}`,
+      {
+        RETURN: [],
+      }
+    );
 
-    if (allSessions.length >= 2) {
-      await allSessions[0].deleteOne();
+    const info = await redisClient.ft.info("userIdIdx");
+    console.log("Docs:", info.num_docs);
+    console.log("All Sessions:", allSessions.documents);
+
+    if (allSessions.documents.length >= 2) {
+      await redisClient.del(allSessions.documents[0].id);
     }
 
     if (!existingUser.picture.includes("googleusercontent")) {
@@ -184,9 +194,15 @@ export const loginWithGoogle = async (req, res, next) => {
       await existingUser.save();
     }
 
-    const session = await Session.create({ userId: existingUser._id });
+    const sessionId = crypto.randomUUID();
+    const redisKey = `session:${sessionId}`;
+    await redisClient.json.set(redisKey, "$", {
+      userId: existingUser._id,
+      rootDirId: existingUser.rootDirId,
+    });
+    redisClient.expire(redisKey, 60 * 60 * 24 * 7);
 
-    res.cookie("sid", session.id, {
+    res.cookie("sid", sessionId, {
       httpOnly: true,
       signed: true,
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
@@ -221,9 +237,15 @@ export const loginWithGoogle = async (req, res, next) => {
     await directory.save({ session: mongooseSession });
     await user.save({ session: mongooseSession });
 
-    const session = await Session.create({ userId: user._id });
+    const sessionId = crypto.randomUUID();
+    const redisKey = `session:${sessionId}`;
+    await redisClient.json.set(redisKey, "$", {
+      userId: user._id,
+      rootDirId: user.rootDirId,
+    });
+    redisClient.expire(redisKey, 60 * 60 * 24 * 7);
 
-    res.cookie("sid", session.id, {
+    res.cookie("sid", sessionId, {
       httpOnly: true,
       signed: true,
       maxAge: 1000 * 60 * 60 * 24 * 7,
