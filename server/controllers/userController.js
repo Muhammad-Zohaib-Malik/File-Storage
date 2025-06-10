@@ -93,12 +93,12 @@ export const login = async (req, res, next) => {
   // }
 
   const sessionId = crypto.randomUUID();
-  const redisKey = `session:${crypto.randomUUID()}`;
+  const redisKey = `session:${sessionId}`;
   await redisClient.json.set(redisKey, "$", {
     userId: user._id,
     rootDirId: user.rootDirId,
   });
-  redisClient.expire(redisKey, 1000 * 60 * 60 * 24 * 7);
+  redisClient.expire(redisKey, 60 * 60 * 24 * 7);
 
   res.cookie("sid", sessionId, {
     httpOnly: true,
