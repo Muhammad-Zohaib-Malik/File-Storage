@@ -171,11 +171,11 @@ function DirectoryHeader({
         {/* User Icon & Dropdown Menu */}
         <div className="user-menu-container" ref={userMenuRef}>
           <button
-            className="icon-button"
+            className="icon-button "
             title="User Menu"
             onClick={handleUserIconClick}
           >
-            {userPicture ? <img src={userPicture} alt={userPicture} /> :( <FaUser />)}
+            {userPicture ? <img className="user-img" src={userPicture} alt={userPicture} /> :( <FaUser />)}
           </button>
 
           {showUserMenu && (
