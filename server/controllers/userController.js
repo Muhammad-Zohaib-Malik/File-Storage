@@ -136,10 +136,18 @@ export const logout = async (req, res) => {
 };
 
 export const logoutFromAllDevices = async (req, res) => {
-  const { sid } = req.signedCookies;
-  const session = await Session.findById(sid);
-  await Session.deleteMany({ userId: session.userId });
-  res.clearCookie("sid");
+  const allSession = await redisClient.ft.search(
+    "userIdIdx",
+    `@userId:{${req.user._id}}`,
+    {
+      RETURN: [],
+    }
+  );
+  for (const session of allSession.documents) {
+    await redisClient.del(session.id);
+    res.clearCookie("sid");
+  }
+
   res.status(204).end();
 };
 
