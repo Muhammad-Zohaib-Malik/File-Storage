@@ -94,9 +94,6 @@ export const login = async (req, res, next) => {
     }
   );
 
-  const info = await redisClient.ft.info("userIdIdx");
-  console.log("Docs:", info.num_docs);
-  console.log("All Sessions:", allSessions.documents);
 
   if (allSessions.documents.length >= 2) {
     await redisClient.del(allSessions.documents[0].id);
@@ -145,8 +142,8 @@ export const logoutFromAllDevices = async (req, res) => {
   );
   for (const session of allSession.documents) {
     await redisClient.del(session.id);
-    res.clearCookie("sid");
   }
+  res.clearCookie("sid");
 
   res.status(204).end();
 };
