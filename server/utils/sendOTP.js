@@ -61,7 +61,3 @@ export async function sendOtp(email) {
     messageId: info.messageId,
   };
 }
-
-export async function verifyOtp(){
-
-}
