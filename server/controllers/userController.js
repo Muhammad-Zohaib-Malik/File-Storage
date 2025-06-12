@@ -36,7 +36,7 @@ export const register = async (req, res, next) => {
           userId,
         },
       ],
-      { session }
+      { session },
     );
 
     await User.create(
@@ -49,7 +49,7 @@ export const register = async (req, res, next) => {
           rootDirId,
         },
       ],
-      { session }
+      { session },
     );
 
     await session.commitTransaction();
@@ -91,9 +91,8 @@ export const login = async (req, res, next) => {
     `@userId:{${user.id}}`,
     {
       RETURN: [],
-    }
+    },
   );
-
 
   if (allSessions.documents.length >= 2) {
     await redisClient.del(allSessions.documents[0].id);
@@ -138,7 +137,7 @@ export const logoutFromAllDevices = async (req, res) => {
     `@userId:{${req.user._id}}`,
     {
       RETURN: [],
-    }
+    },
   );
   for (const session of allSession.documents) {
     await redisClient.del(session.id);
@@ -183,7 +182,7 @@ export const loginWithGoogle = async (req, res, next) => {
       `@userId:{${existingUser._id}}`,
       {
         RETURN: [],
-      }
+      },
     );
 
     const info = await redisClient.ft.info("userIdIdx");
@@ -282,7 +281,7 @@ export const getAllUsers = async (req, res) => {
           email: user.email,
           isLoggedIn: sessionCount > 0,
         };
-      })
+      }),
     );
 
     res.status(200).json({ users: usersWithLoginStatus });

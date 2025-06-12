@@ -2,11 +2,9 @@ import mongoose from "mongoose";
 
 export async function connectDB() {
   try {
-    await mongoose.connect(
-      "mongodb://localhost:27017/storageApp"
-    );
+    await mongoose.connect("mongodb://localhost:27017/storageApp");
     console.log("Database connected");
-        return mongoose.connection; 
+    return mongoose.connection;
   } catch (err) {
     console.log(err);
     console.log("Could Not Connect to the Database");

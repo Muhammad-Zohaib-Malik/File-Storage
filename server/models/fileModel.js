@@ -21,7 +21,7 @@ const fileSchema = new Schema(
   },
   {
     strict: "throw",
-  }
+  },
 );
 
 const File = model("File", fileSchema);

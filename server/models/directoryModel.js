@@ -18,7 +18,7 @@ const directorySchema = new Schema(
   },
   {
     strict: "throw",
-  }
+  },
 );
 
 const Directory = model("Directory", directorySchema);

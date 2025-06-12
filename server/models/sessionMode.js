@@ -14,10 +14,8 @@ const sessionSchema = new Schema(
   },
   {
     strict: "throw",
-  }
+  },
 );
-
-
 
 const Session = model("Session", sessionSchema);
 

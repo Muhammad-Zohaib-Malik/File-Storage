@@ -1,8 +1,5 @@
 import nodemailer from "nodemailer";
-import Otp from "../models/otp.model.js"; 
-import dotenv from 'dotenv'
-
-dotenv.config()
+import Otp from "../models/otp.model.js";
 
 // 🔐 Utility to generate a 4-digit OTP
 function generateOtp() {
@@ -16,7 +13,7 @@ export async function sendOtp(email) {
   await Otp.findOneAndUpdate(
     { email },
     { otp, createdAt: new Date() },
-    { upsert: true, new: true }
+    { upsert: true, new: true },
   );
 
   // Beautiful HTML Email content
@@ -37,13 +34,12 @@ export async function sendOtp(email) {
     </div>
   `;
 
- 
   const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST, 
-    port: process.env.SMTP_PORT, 
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
     auth: {
-      user: process.env.SMTP_USER, 
-      pass: process.env.SMTP_PASS,  
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
     },
   });
 

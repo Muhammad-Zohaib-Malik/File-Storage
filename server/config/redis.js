@@ -1,13 +1,8 @@
 import { createClient } from "redis";
-import dotenv from "dotenv";
-
-dotenv.config()
 
 const redisClient = await createClient({
   password: process.env.REDIS_PASSWORD,
-
 });
-
 
 redisClient.on("error", (err) => {
   console.error("Redis Client Error", err);
