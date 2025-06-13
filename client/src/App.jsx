@@ -19,12 +19,12 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    path:"/users",
-    element:<UsersPage/>
+    path: "/users",
+    element: <UsersPage />,
   },
   {
     path: "/directory/:dirId",
-    element: <DirectoryView />
+    element: <DirectoryView />,
   },
 ]);
 
