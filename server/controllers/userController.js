@@ -271,7 +271,6 @@ export const loginWithGoogle = async (req, res, next) => {
   }
 };
 
-// controllers/userController.js
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({}).select("_id name email").lean();
@@ -317,7 +316,18 @@ export const logoutUsingRole = async (req, res, next) => {
         .status(400)
         .json({ message: "Invalid or missing userId in URL." });
     }
-    await Session.deleteMany({ userId });
+    const allSessions = await redisClient.ft.search(
+      "userIdIdx",
+      `@userId:{${userId}}`,
+      {
+        RETURN: [],
+      },
+    );
+
+    for (const session of allSessions.documents) {
+      await redisClient.del(session.id);
+    }
+
     res
       .status(200)
       .json({ message: "Logged out from all sessions successfully." });
