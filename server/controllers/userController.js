@@ -271,22 +271,38 @@ export const loginWithGoogle = async (req, res, next) => {
   }
 };
 
+// controllers/userController.js
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({}).select("_id name email").lean();
-    const usersWithLoginStatus = await Promise.all(
-      users.map(async (user) => {
-        const sessionCount = await Session.countDocuments({ userId: user._id });
-        return {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          isLoggedIn: sessionCount > 0,
-        };
-      }),
-    );
 
-    res.status(200).json({ users: usersWithLoginStatus });
+    let cursor = "0";
+    let loggedInUserIds = new Set();
+
+    do {
+      const result = await redisClient.scan(cursor, {
+        MATCH: "session:*",
+        COUNT: 100,
+      });
+
+      cursor = result.cursor;
+
+      for (const key of result.keys) {
+        const session = await redisClient.json.get(key);
+        if (session?.userId) {
+          loggedInUserIds.add(session.userId.toString());
+        }
+      }
+    } while (cursor !== "0");
+
+    const usersWithStatus = users.map((user) => ({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      isLoggedIn: loggedInUserIds.has(user._id.toString()),
+    }));
+
+    res.status(200).json({ users: usersWithStatus });
   } catch (error) {
     console.error("Error fetching users:", error);
     res.status(500).json({ message: "Server error" });
