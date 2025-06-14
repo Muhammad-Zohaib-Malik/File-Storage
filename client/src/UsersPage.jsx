@@ -44,7 +44,7 @@ export default function UsersPage() {
   async function fetchUsers() {
     try {
       const data = await fetchAllUsers();
-      setUsers(data);
+      setUsers(data); // already an array of users
     } catch (err) {
       if (err.response?.status === 403) navigate("/");
       else if (err.response?.status === 401) navigate("/login");
@@ -79,7 +79,7 @@ export default function UsersPage() {
             <th className="border p-3 bg-gray-200 text-left">Status</th>
             <th className="border p-3 bg-gray-200 text-left"></th>
             {userRole === "Admin" && (
-              <th className="border p-3 bg-gray-200 text-left"></th>
+              <th className="border p-3 bg-gray-200 text-left">Delete</th>
             )}
           </tr>
         </thead>
