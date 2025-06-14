@@ -36,6 +36,6 @@ export const registerUser = async (formData) => {
 };
 
 export const deleteUserById = async (id) => {
-  const { data } = await axiosWithCreds.delete(`/users/${id}`);
+  const { data } = await axiosWithCreds.delete(`/user/${id}`);
   return data;
 };
