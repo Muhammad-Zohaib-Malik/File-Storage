@@ -21,7 +21,7 @@ export const logoutAllSessions = async () => {
 };
 
 export const logoutUserById = async (id) => {
-  const { data } = await axiosWithCreds.post(`/users/${id}/logout`);
+  const { data } = await axiosWithCreds.post(`/user/${id}/logout`);
   return data;
 };
 
