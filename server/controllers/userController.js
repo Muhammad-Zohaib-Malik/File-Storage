@@ -132,9 +132,11 @@ export const logout = async (req, res) => {
 };
 
 export const logoutFromAllDevices = async (req, res) => {
+  const { sid } = req.signedCookies;
+  const session = await redisClient.json.get(`session:${sid}`);
   const allSession = await redisClient.ft.search(
     "userIdIdx",
-    `@userId:{${req.user._id}}`,
+    `@userId:{${session.userId}}`,
     {
       RETURN: [],
     },
