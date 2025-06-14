@@ -6,8 +6,8 @@ export const fetchUser = async () => {
 };
 
 export const fetchAllUsers = async () => {
-  const { data } = await axiosWithCreds.get("/users");
-  return data;
+  const { data } = await axiosWithCreds.get("/user/all");
+  return data.users;
 };
 
 export const logoutUser = async () => {
