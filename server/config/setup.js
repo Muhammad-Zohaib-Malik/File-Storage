@@ -42,6 +42,9 @@ try {
           picture: {
             bsonType: "string",
           },
+          IsDeleted:{
+            bsonType:"bool"
+          },
           __v: {
             bsonType: "int",
           },
