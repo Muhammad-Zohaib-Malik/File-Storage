@@ -184,7 +184,12 @@ export default function UsersPage() {
                     <td className="p-2">
                       <button
                         onClick={() => handleRecover(user)}
-                        className="px-3 py-1 text-sm text-white bg-green-600 hover:bg-green-700 rounded"
+                        disabled={user.email === userEmail}
+                        className={`px-3 py-1 text-sm text-white rounded ${
+                          user.email === userEmail
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-green-700 hover:bg-green-800"
+                        }`}
                       >
                         Recover User
                       </button>
