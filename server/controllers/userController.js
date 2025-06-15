@@ -1,7 +1,6 @@
 import Directory from "../models/directoryModel.js";
 import File from "../models/fileModel.js";
 import Otp from "../models/otp.model.js";
-import Session from "../models/sessionMode.js";
 import User from "../models/userModel.js";
 import { verifyGoogleToken } from "../utils/googleAuth.js";
 import { sendOtp } from "../utils/sendOTP.js";
@@ -36,7 +35,7 @@ export const register = async (req, res, next) => {
           userId,
         },
       ],
-      { session },
+      { session }
     );
 
     await User.create(
@@ -49,7 +48,7 @@ export const register = async (req, res, next) => {
           rootDirId,
         },
       ],
-      { session },
+      { session }
     );
 
     await session.commitTransaction();
@@ -59,8 +58,6 @@ export const register = async (req, res, next) => {
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-
-    console.error("Registration Error:", err);
 
     if (err.code === 11000 && err.keyValue.email) {
       return res.status(409).json({
@@ -91,7 +88,7 @@ export const login = async (req, res, next) => {
     `@userId:{${user.id}}`,
     {
       RETURN: [],
-    },
+    }
   );
 
   if (allSessions.documents.length >= 2) {
@@ -103,7 +100,9 @@ export const login = async (req, res, next) => {
   await redisClient.json.set(redisKey, "$", {
     userId: user._id,
     rootDirId: user.rootDirId,
+    role: user.role,
   });
+
   redisClient.expire(redisKey, 60 * 60 * 24 * 7);
 
   res.cookie("sid", sessionId, {
@@ -139,7 +138,7 @@ export const logoutFromAllDevices = async (req, res) => {
     `@userId:{${session.userId}}`,
     {
       RETURN: [],
-    },
+    }
   );
   for (const session of allSession.documents) {
     await redisClient.del(session.id);
@@ -179,17 +178,19 @@ export const loginWithGoogle = async (req, res, next) => {
   const existingUser = await User.findOne({ email }).select("-__v");
 
   if (existingUser) {
+    if (existingUser.IsDeleted) {
+      return res.status(403).json({
+        error: "Your account has been deleted. Contact App Owner to recover",
+      });
+    }
+
     const allSessions = await redisClient.ft.search(
       "userIdIdx",
       `@userId:{${existingUser._id}}`,
       {
         RETURN: [],
-      },
+      }
     );
-
-    const info = await redisClient.ft.info("userIdIdx");
-    console.log("Docs:", info.num_docs);
-    console.log("All Sessions:", allSessions.documents);
 
     if (allSessions.documents.length >= 2) {
       await redisClient.del(allSessions.documents[0].id);
@@ -205,6 +206,7 @@ export const loginWithGoogle = async (req, res, next) => {
     await redisClient.json.set(redisKey, "$", {
       userId: existingUser._id,
       rootDirId: existingUser.rootDirId,
+      role: existingUser.role,
     });
     redisClient.expire(redisKey, 60 * 60 * 24 * 7);
 
@@ -248,6 +250,7 @@ export const loginWithGoogle = async (req, res, next) => {
     await redisClient.json.set(redisKey, "$", {
       userId: user._id,
       rootDirId: user.rootDirId,
+      role: user.role,
     });
     redisClient.expire(redisKey, 60 * 60 * 24 * 7);
 
@@ -273,7 +276,9 @@ export const loginWithGoogle = async (req, res, next) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({}).select("_id name email").lean();
+    const users = await User.find({ IsDeleted: false })
+      .select("_id name email")
+      .lean();
 
     let cursor = "0";
     let loggedInUserIds = new Set();
@@ -321,7 +326,7 @@ export const logoutUsingRole = async (req, res, next) => {
       `@userId:{${userId}}`,
       {
         RETURN: [],
-      },
+      }
     );
 
     for (const session of allSessions.documents) {
@@ -338,43 +343,28 @@ export const logoutUsingRole = async (req, res, next) => {
 
 export const deleteUsingRole = async (req, res, next) => {
   const { userId } = req.params;
+  console.log(userId);
 
   if (req.user._id.toString() === userId.toString()) {
     return res.status(403).json({ message: "You can't delete yourself." });
   }
 
-  if (!userId || userId === "undefined") {
-    return res.status(400).json({ message: "Invalid or missing userId." });
-  }
-
-  const session = await mongoose.startSession();
-
   try {
-    session.startTransaction();
-
-    const user = await User.findById(userId).session(session);
+    const user = await User.findById(userId);
     if (!user) {
       throw new Error("User not found");
     }
 
-    const userFiles = await File.find({ userId }).session(session);
-    await Promise.all([
-      User.deleteOne({ _id: userId }).session(session),
-      Session.deleteMany({ userId }).session(session),
-      File.deleteMany({ userId }).session(session),
-      Directory.deleteMany({ userId }).session(session),
-    ]);
+    await User.findByIdAndUpdate(userId, {
+      IsDeleted: true,
+    });
 
-    await session.commitTransaction();
     return res
       .status(200)
       .json({ message: "User and all related data deleted successfully." });
   } catch (error) {
-    await session.abortTransaction();
     return res
       .status(500)
       .json({ message: error.message || "Deletion failed." });
-  } finally {
-    session.endSession();
   }
 };
