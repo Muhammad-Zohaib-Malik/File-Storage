@@ -37,7 +37,7 @@ export const register = async (req, res, next) => {
           userId,
         },
       ],
-      { session },
+      { session }
     );
 
     await User.create(
@@ -50,7 +50,7 @@ export const register = async (req, res, next) => {
           rootDirId,
         },
       ],
-      { session },
+      { session }
     );
 
     await session.commitTransaction();
@@ -90,7 +90,7 @@ export const login = async (req, res, next) => {
     `@userId:{${user.id}}`,
     {
       RETURN: [],
-    },
+    }
   );
 
   if (allSessions.documents.length >= 2) {
@@ -140,7 +140,7 @@ export const logoutFromAllDevices = async (req, res) => {
     `@userId:{${session.userId}}`,
     {
       RETURN: [],
-    },
+    }
   );
   for (const session of allSession.documents) {
     await redisClient.del(session.id);
@@ -191,7 +191,7 @@ export const loginWithGoogle = async (req, res, next) => {
       `@userId:{${existingUser._id}}`,
       {
         RETURN: [],
-      },
+      }
     );
 
     if (allSessions.documents.length >= 2) {
@@ -278,8 +278,11 @@ export const loginWithGoogle = async (req, res, next) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({ IsDeleted: false })
-      .select("_id name email")
+    const isOwner = req.user.role === "Owner";
+    const query = isOwner ? {} : { IsDeleted: false };
+
+    const users = await User.find(query)
+      .select("_id name email IsDeleted")
       .lean();
 
     let cursor = "0";
@@ -306,6 +309,7 @@ export const getAllUsers = async (req, res) => {
       name: user.name,
       email: user.email,
       isLoggedIn: loggedInUserIds.has(user._id.toString()),
+      isDeleted: user.IsDeleted,
     }));
 
     res.status(200).json({ users: usersWithStatus });
@@ -328,7 +332,7 @@ export const logoutUsingRole = async (req, res, next) => {
       `@userId:{${userId}}`,
       {
         RETURN: [],
-      },
+      }
     );
 
     for (const session of allSessions.documents) {
@@ -396,7 +400,7 @@ export const deleteUsingRoleByHardDelete = async (req, res, next) => {
     const allSessions = await redisClient.ft.search(
       "userIdIdx",
       `@userId:{${userId}}`,
-      { RETURN: [] },
+      { RETURN: [] }
     );
 
     for (const redisSession of allSessions.documents) {
