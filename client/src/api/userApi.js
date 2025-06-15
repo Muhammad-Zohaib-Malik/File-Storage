@@ -40,12 +40,12 @@ export const deleteUserById = async (id) => {
   return data;
 };
 
-export const permanentDeleteUserById=async(id)=>{
-   const { data } = await axiosWithCreds.delete(`/user/${id}/hard`);
+export const permanentDeleteUserById = async (id) => {
+  const { data } = await axiosWithCreds.delete(`/user/${id}/hard`);
   return data;
-}
+};
 
-export const recoverUserById=async(id)=>{
-   const { data } = await axiosWithCreds.patch(`/user/${id}/hard`);
+export const recoverUserById = async (id) => {
+  const { data } = await axiosWithCreds.patch(`/user/${id}/recover`);
   return data;
-}
+};
