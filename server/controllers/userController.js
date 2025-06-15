@@ -416,3 +416,27 @@ export const deleteUsingRoleByHardDelete = async (req, res, next) => {
     session.endSession();
   }
 };
+
+export const recoverUserById = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    if (req.user.role !== "Owner") {
+      return res
+        .status(403)
+        .json({ message: "Only owners can recover users." });
+    }
+
+    if (req.user._id.toString() === userId.toString()) {
+      return res.status(403).json({ message: "You can't recover yourself." });
+    }
+
+    await User.findByIdAndUpdate(userId, {
+      IsDeleted: false,
+    });
+    return res
+      .status(200)
+      .json({ message: "User and all related data recover successfully." });
+  } catch (error) {
+    next(error);
+  }
+};
