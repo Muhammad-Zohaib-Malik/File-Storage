@@ -26,7 +26,7 @@ export async function checkForRole(req, res, next) {
   res.status(403).json({ error: "You cannot access users" });
 }
 
-export async function checkForAdminOnly(req, res, next) {
-  if (req.user.role === "Admin") return next();
+export async function checkForAdminOwner(req, res, next) {
+  if (req.user.role === "Admin" || req.user.role === "Owner") return next();
   res.status(403).json({ error: "You cannot access users" });
 }
