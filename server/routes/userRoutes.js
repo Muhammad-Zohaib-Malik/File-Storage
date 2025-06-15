@@ -15,6 +15,7 @@ import {
   logout,
   logoutFromAllDevices,
   logoutUsingRole,
+  recoverUserById,
   register,
   sendOTP,
   verifyOTP,
@@ -47,6 +48,13 @@ router.delete(
   checkAuth,
   checkForAdminOwner,
   deleteUsingRoleByHardDelete
+);
+
+router.patch(
+  "/:userId/recover",
+  checkAuth,
+  checkForAdminOwner,
+  recoverUserById
 );
 
 export default router;
