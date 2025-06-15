@@ -37,7 +37,7 @@ try {
             bsonType: "objectId",
           },
           role: {
-            enum: ["Admin", "Manager", "User"],
+            enum: ["Owner", "Admin", "Manager", "User"],
           },
           picture: {
             bsonType: "string",
