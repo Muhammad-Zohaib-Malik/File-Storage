@@ -6,7 +6,7 @@ import {
   deleteUserById,
   logoutUserById,
   permanentDeleteUserById,
-} from "./api/userApi"; 
+} from "./api/userApi";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModel";
 
 export default function UsersPage() {
@@ -103,7 +103,7 @@ export default function UsersPage() {
             <th className="border p-3 bg-gray-200 text-left">Email</th>
             <th className="border p-3 bg-gray-200 text-left">Status</th>
             <th className="border p-3 bg-gray-200 text-left">Logout</th>
-            {userRole === "Admin" && (
+            {(userRole === "Admin" || userRole === "Owner") && (
               <>
                 <th className="border p-3 bg-gray-200 text-left">Delete</th>
                 <th className="border p-3 bg-gray-200 text-left">
@@ -134,7 +134,7 @@ export default function UsersPage() {
                   Logout
                 </button>
               </td>
-              {userRole === "Admin" && (
+              {(userRole === "Admin" || userRole === "Owner") && (
                 <>
                   <td className="border p-3">
                     <button
@@ -176,7 +176,6 @@ export default function UsersPage() {
           onConfirm={confirmDelete}
           onCancel={cancelDelete}
           isPermanent={permanentMode}
-          
         />
       )}
     </div>
