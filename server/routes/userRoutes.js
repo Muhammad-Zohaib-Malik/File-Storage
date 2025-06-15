@@ -6,7 +6,8 @@ import {
 } from "../middlewares/authMiddleware.js";
 
 import {
-  deleteUsingRole,
+  deleteUsingRoleByHardDelete,
+  deleteUsingRoleBySoftDelete,
   getAllUsers,
   getCurrentUser,
   login,
@@ -32,7 +33,20 @@ router.get("/all", checkAuth, checkForRole, getAllUsers);
 
 //logout by admin and Manager
 router.post("/:userId/logout", checkAuth, checkForRole, logoutUsingRole);
-//delete by admin only
-router.delete("/:userId", checkAuth, checkForAdminOnly, deleteUsingRole);
+//delete by admin only and softDelete
+router.delete(
+  "/:userId",
+  checkAuth,
+  checkForAdminOnly,
+  deleteUsingRoleBySoftDelete,
+);
+
+//delete by admin only and hardDelete
+router.delete(
+  "/:userId/hard",
+  checkAuth,
+  checkForAdminOnly,
+  deleteUsingRoleByHardDelete,
+);
 
 export default router;
