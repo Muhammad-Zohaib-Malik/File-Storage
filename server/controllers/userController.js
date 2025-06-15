@@ -6,6 +6,8 @@ import { verifyGoogleToken } from "../utils/googleAuth.js";
 import { sendOtp } from "../utils/sendOTP.js";
 import mongoose, { Types } from "mongoose";
 import redisClient from "../config/redis.js";
+import { rm } from "fs/promises";
+import path from "path";
 
 export const register = async (req, res, next) => {
   const { name, email, password, otp } = req.body;
@@ -35,7 +37,7 @@ export const register = async (req, res, next) => {
           userId,
         },
       ],
-      { session }
+      { session },
     );
 
     await User.create(
@@ -48,7 +50,7 @@ export const register = async (req, res, next) => {
           rootDirId,
         },
       ],
-      { session }
+      { session },
     );
 
     await session.commitTransaction();
@@ -88,7 +90,7 @@ export const login = async (req, res, next) => {
     `@userId:{${user.id}}`,
     {
       RETURN: [],
-    }
+    },
   );
 
   if (allSessions.documents.length >= 2) {
@@ -138,7 +140,7 @@ export const logoutFromAllDevices = async (req, res) => {
     `@userId:{${session.userId}}`,
     {
       RETURN: [],
-    }
+    },
   );
   for (const session of allSession.documents) {
     await redisClient.del(session.id);
@@ -189,7 +191,7 @@ export const loginWithGoogle = async (req, res, next) => {
       `@userId:{${existingUser._id}}`,
       {
         RETURN: [],
-      }
+      },
     );
 
     if (allSessions.documents.length >= 2) {
@@ -326,7 +328,7 @@ export const logoutUsingRole = async (req, res, next) => {
       `@userId:{${userId}}`,
       {
         RETURN: [],
-      }
+      },
     );
 
     for (const session of allSessions.documents) {
@@ -341,20 +343,14 @@ export const logoutUsingRole = async (req, res, next) => {
   }
 };
 
-export const deleteUsingRole = async (req, res, next) => {
+export const deleteUsingRoleBySoftDelete = async (req, res, next) => {
   const { userId } = req.params;
-  console.log(userId);
 
   if (req.user._id.toString() === userId.toString()) {
     return res.status(403).json({ message: "You can't delete yourself." });
   }
 
   try {
-    const user = await User.findById(userId);
-    if (!user) {
-      throw new Error("User not found");
-    }
-
     await User.findByIdAndUpdate(userId, {
       IsDeleted: true,
     });
@@ -362,9 +358,57 @@ export const deleteUsingRole = async (req, res, next) => {
     return res
       .status(200)
       .json({ message: "User and all related data deleted successfully." });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: error.message || "Deletion failed." });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteUsingRoleByHardDelete = async (req, res, next) => {
+  const session = await mongoose.startSession();
+
+  try {
+    const { userId } = req.params;
+
+    if (req.user._id.toString() === userId.toString()) {
+      return res.status(403).json({ message: "You can't delete yourself." });
+    }
+
+    session.startTransaction();
+
+    // Step 1: Delete files from disk
+    const userFiles = await File.find({ userId }).session(session);
+
+    for (const file of userFiles) {
+      const filePath = path.resolve("storage", `${file._id}${file.extension}`);
+      try {
+        await rm(filePath);
+      } catch (err) {
+        console.warn(`Could not delete file: ${filePath}`, err.message);
+      }
+    }
+
+    // Step 2: Delete related DB entries
+    await File.deleteMany({ userId }).session(session);
+    await Directory.deleteMany({ userId }).session(session);
+    await User.deleteOne({ _id: userId }).session(session);
+
+    // Step 3: Clear sessions from Redis
+    const allSessions = await redisClient.ft.search(
+      "userIdIdx",
+      `@userId:{${userId}}`,
+      { RETURN: [] },
+    );
+
+    for (const redisSession of allSessions.documents) {
+      await redisClient.del(redisSession.id);
+    }
+
+    await session.commitTransaction();
+    res.status(200).json("User Deleted successfully");
+  } catch (err) {
+    await session.abortTransaction();
+    next(err);
+  } finally {
+    session.endSession();
   }
 };
