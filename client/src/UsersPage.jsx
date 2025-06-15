@@ -5,13 +5,18 @@ import {
   fetchUser,
   deleteUserById,
   logoutUserById,
-} from "./api/userApi";
+  permanentDeleteUserById,
+} from "./api/userApi"; 
+import ConfirmDeleteModal from "./components/ConfirmDeleteModel";
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [userName, setUserName] = useState("Guest User");
   const [userEmail, setUserEmail] = useState("");
   const [userRole, setUserRole] = useState("User");
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [permanentMode, setPermanentMode] = useState(false);
+
   const navigate = useNavigate();
 
   const logoutUser = async (user) => {
@@ -25,15 +30,35 @@ export default function UsersPage() {
     }
   };
 
-  const deleteUser = async (user) => {
-    const confirmed = confirm(`You are about to delete ${user.email}`);
-    if (!confirmed) return;
+  const handleSoftDelete = (user) => {
+    setSelectedUser(user);
+    setPermanentMode(false);
+  };
+
+  const handlePermanentDelete = (user) => {
+    setSelectedUser(user);
+    setPermanentMode(true);
+  };
+
+  const confirmDelete = async (user) => {
     try {
-      await deleteUserById(user.id);
+      if (permanentMode) {
+        await permanentDeleteUserById(user.id);
+      } else {
+        await deleteUserById(user.id);
+      }
       fetchUsers();
     } catch (err) {
       console.error("Delete error:", err);
+    } finally {
+      setSelectedUser(null);
+      setPermanentMode(false);
     }
+  };
+
+  const cancelDelete = () => {
+    setSelectedUser(null);
+    setPermanentMode(false);
   };
 
   useEffect(() => {
@@ -44,7 +69,7 @@ export default function UsersPage() {
   async function fetchUsers() {
     try {
       const data = await fetchAllUsers();
-      setUsers(data); // already an array of users
+      setUsers(data);
     } catch (err) {
       if (err.response?.status === 403) navigate("/");
       else if (err.response?.status === 401) navigate("/login");
@@ -77,9 +102,14 @@ export default function UsersPage() {
             <th className="border p-3 bg-gray-200 text-left">Name</th>
             <th className="border p-3 bg-gray-200 text-left">Email</th>
             <th className="border p-3 bg-gray-200 text-left">Status</th>
-            <th className="border p-3 bg-gray-200 text-left"></th>
+            <th className="border p-3 bg-gray-200 text-left">Logout</th>
             {userRole === "Admin" && (
-              <th className="border p-3 bg-gray-200 text-left">Delete</th>
+              <>
+                <th className="border p-3 bg-gray-200 text-left">Delete</th>
+                <th className="border p-3 bg-gray-200 text-left">
+                  Permanent Delete
+                </th>
+              </>
             )}
           </tr>
         </thead>
@@ -105,24 +135,50 @@ export default function UsersPage() {
                 </button>
               </td>
               {userRole === "Admin" && (
-                <td className="border p-3">
-                  <button
-                    onClick={() => deleteUser(user)}
-                    disabled={user.email === userEmail}
-                    className={`px-3 py-1 text-sm text-white rounded ${
-                      user.email === userEmail
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-red-600 hover:bg-red-700"
-                    }`}
-                  >
-                    Delete
-                  </button>
-                </td>
+                <>
+                  <td className="border p-3">
+                    <button
+                      onClick={() => handleSoftDelete(user)}
+                      disabled={user.email === userEmail}
+                      className={`px-3 py-1 text-sm text-white rounded ${
+                        user.email === userEmail
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-yellow-500 hover:bg-yellow-600"
+                      }`}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                  <td className="border p-3">
+                    <button
+                      onClick={() => handlePermanentDelete(user)}
+                      disabled={user.email === userEmail}
+                      className={`px-3 py-1 text-sm text-white rounded ${
+                        user.email === userEmail
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-red-700 hover:bg-red-800"
+                      }`}
+                    >
+                      Permanent Delete
+                    </button>
+                  </td>
+                </>
               )}
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* Confirmation Modal */}
+      {selectedUser && (
+        <ConfirmDeleteModal
+          item={selectedUser}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+          isPermanent={permanentMode}
+          
+        />
+      )}
     </div>
   );
 }

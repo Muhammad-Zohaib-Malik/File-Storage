@@ -27,7 +27,6 @@ export async function checkForRole(req, res, next) {
 }
 
 export async function checkForAdminOnly(req, res, next) {
-  console.log("User in middleware:", req.user);
   if (req.user.role === "Admin") return next();
   res.status(403).json({ error: "You cannot access users" });
 }
