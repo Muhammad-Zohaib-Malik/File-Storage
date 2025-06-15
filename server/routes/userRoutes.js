@@ -1,7 +1,7 @@
 import express from "express";
 import {
   checkAuth,
-  checkForAdminOnly,
+  checkForAdminOwner,
   checkForRole,
 } from "../middlewares/authMiddleware.js";
 
@@ -33,20 +33,20 @@ router.get("/all", checkAuth, checkForRole, getAllUsers);
 
 //logout by admin and Manager
 router.post("/:userId/logout", checkAuth, checkForRole, logoutUsingRole);
-//delete by admin only and softDelete
+//delete by admin and Owner and softDelete
 router.delete(
   "/:userId",
   checkAuth,
-  checkForAdminOnly,
-  deleteUsingRoleBySoftDelete,
+  checkForAdminOwner,
+  deleteUsingRoleBySoftDelete
 );
 
-//delete by admin only and hardDelete
+//delete by admin and Owner for hardDelete
 router.delete(
   "/:userId/hard",
   checkAuth,
-  checkForAdminOnly,
-  deleteUsingRoleByHardDelete,
+  checkForAdminOwner,
+  deleteUsingRoleByHardDelete
 );
 
 export default router;
