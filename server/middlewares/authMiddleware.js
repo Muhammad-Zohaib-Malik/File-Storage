@@ -13,7 +13,11 @@ export async function checkAuth(req, res, next) {
     return res.status(401).json({ error: "Not logged In !" });
   }
 
-  req.user = { _id: session.userId, rootDirId: session.rootDirId };
+  req.user = {
+    _id: session.userId,
+    rootDirId: session.rootDirId,
+    role: session.role,
+  };
   next();
 }
 
@@ -23,6 +27,7 @@ export async function checkForRole(req, res, next) {
 }
 
 export async function checkForAdminOnly(req, res, next) {
+  console.log("User in middleware:", req.user);
   if (req.user.role === "Admin") return next();
   res.status(403).json({ error: "You cannot access users" });
 }
