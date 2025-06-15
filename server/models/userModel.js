@@ -38,9 +38,9 @@ const userSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Directory",
     },
-    IsDeleted:{
-      type:Boolean,
-      default:false
+    IsDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {
