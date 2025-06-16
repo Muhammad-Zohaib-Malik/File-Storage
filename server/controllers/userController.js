@@ -430,9 +430,18 @@ export const recoverUserById = async (req, res, next) => {
       return res.status(403).json({ message: "You can't recover yourself." });
     }
 
-    await User.findByIdAndUpdate(userId, {
-      IsDeleted: false,
-    });
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (user.IsDeleted === false) {
+      return res.status(400).json({ message: "User is already active." });
+    }
+
+    user.IsDeleted = false;
+    await user.save();
+
     return res
       .status(200)
       .json({ message: "User and all related data recover successfully." });
