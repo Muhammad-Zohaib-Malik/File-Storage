@@ -31,7 +31,6 @@ export default function UsersPage() {
     try {
       const data = await fetchAllUsers();
       setUsers(data);
-      console.log("✅ Users fetched successfully:", data);
     } catch (err) {
       console.error("❌ Fetching users failed:", err);
       if (err.response?.status === 403) navigate("/");
@@ -125,9 +124,7 @@ export default function UsersPage() {
                 <th className="p-2 text-left">Permanent Delete</th>
               </>
             )}
-            {userRole === "Owner" && (
-              <th className="p-2 text-left">Recover User</th>
-            )}
+            <th className="p-2 text-left">Recover</th>
           </tr>
         </thead>
         <tbody>
@@ -180,23 +177,26 @@ export default function UsersPage() {
                       Permanent Delete
                     </button>
                   </td>
-                  {userRole === "Owner" && (
-                    <td className="p-2">
-                      <button
-                        onClick={() => handleRecover(user)}
-                        disabled={user.email === userEmail}
-                        className={`px-3 py-1 text-sm text-white rounded ${
-                          user.email === userEmail
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-green-700 hover:bg-green-800"
-                        }`}
-                      >
-                        Recover User
-                      </button>
-                    </td>
-                  )}
                 </>
               )}
+
+              <td className="p-2">
+                {userRole === "Owner" && user.isDeleted === true ? (
+                  <button
+                    onClick={() => handleRecover(user)}
+                    disabled={user.email === userEmail}
+                    className={`px-3 py-1 text-sm text-white rounded ${
+                      user.email === userEmail
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-green-700 hover:bg-green-800"
+                    }`}
+                  >
+                    Recover User
+                  </button>
+                ) : (
+                  "-"
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
