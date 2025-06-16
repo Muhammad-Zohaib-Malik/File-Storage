@@ -12,7 +12,6 @@ export async function checkAuth(req, res, next) {
     res.clearCookie("sid");
     return res.status(401).json({ error: "Not logged In !" });
   }
-  console.log("Session found:", session.role);
 
   req.user = {
     _id: session.userId,
