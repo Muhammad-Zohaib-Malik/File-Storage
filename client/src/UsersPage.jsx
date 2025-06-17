@@ -7,8 +7,12 @@ import {
   logoutUserById,
   permanentDeleteUserById,
   recoverUserById,
+  changeUserRoleById,
 } from "./api/userApi";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModel";
+import toast from 'react-hot-toast';
+
+
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -19,6 +23,7 @@ export default function UsersPage() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [permanentMode, setPermanentMode] = useState(false);
   const [recoverMode, setRecoverMode] = useState(false);
+
 
   const navigate = useNavigate();
 
@@ -79,6 +84,19 @@ export default function UsersPage() {
     setPermanentMode(false);
   };
 
+  const changeUserRole = async (user, newRole) => {
+  if (newRole === user.role) return;
+
+  try {
+    const res = await changeUserRoleById(user.id, newRole);
+    fetchUsers();
+    toast.success(res.message || "Role updated successfully.");
+  } catch (err) {
+    console.error("❌ Role change failed:", err);
+    toast.error(err.response?.data?.message || "Failed to change role.");
+  }
+};
+
   const confirmAction = async (user) => {
     try {
       if (recoverMode) {
@@ -125,6 +143,9 @@ export default function UsersPage() {
               </>
             )}
             <th className="p-2 text-left">Recover</th>
+            {(userRole === "Admin" || userRole === "Owner") && (
+              <th className="p-2 text-left">Change Role</th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -197,6 +218,30 @@ export default function UsersPage() {
                   "-"
                 )}
               </td>
+
+              {(userRole === "Admin" || userRole === "Owner") && (
+                <td className="p-2">
+                  {user.email === userEmail ? (
+                    "-"
+                  ) : (
+                    <select
+                      value={user.role}
+                      onChange={(e) => changeUserRole(user, e.target.value)}
+                      className="px-2 py-1 text-sm border rounded"
+                    >
+                      <option value="Owner">
+                        Owner {user.role === "Owner" ? "✅" : ""}
+                      </option>
+                      <option value="Admin">
+                        Admin {user.role === "Admin" ? "✅" : ""}
+                      </option>
+                      <option value="Manager">
+                        Manager {user.role === "Manager" ? "✅" : ""}
+                      </option>
+                    </select>
+                  )}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
