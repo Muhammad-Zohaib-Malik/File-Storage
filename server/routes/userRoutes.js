@@ -6,6 +6,7 @@ import {
 } from "../middlewares/authMiddleware.js";
 
 import {
+  changeRole,
   deleteUsingRoleByHardDelete,
   deleteUsingRoleBySoftDelete,
   getAllUsers,
@@ -49,12 +50,15 @@ router.delete(
   checkForAdminOwner,
   deleteUsingRoleByHardDelete
 );
-
+//update by admin hardDelete
 router.patch(
   "/:userId/recover",
   checkAuth,
   checkForAdminOwner,
   recoverUserById
 );
+
+//change Role
+router.patch("/:userId/change-role", checkAuth, checkForRole, changeRole);
 
 export default router;
