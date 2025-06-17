@@ -282,7 +282,7 @@ export const getAllUsers = async (req, res) => {
     const query = isOwner ? {} : { IsDeleted: false };
 
     const users = await User.find(query)
-      .select("_id name email IsDeleted")
+      .select("_id name email IsDeleted role")
       .lean();
 
     let cursor = "0";
@@ -310,6 +310,7 @@ export const getAllUsers = async (req, res) => {
       email: user.email,
       isLoggedIn: loggedInUserIds.has(user._id.toString()),
       isDeleted: user.IsDeleted,
+      role: user.role,
     }));
 
     res.status(200).json({ users: usersWithStatus });
@@ -445,6 +446,48 @@ export const recoverUserById = async (req, res, next) => {
     return res
       .status(200)
       .json({ message: "User and all related data recover successfully." });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changeRole = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const { role } = req.body;
+    const ownerProvidedRole = ["Admin", "Manager"];
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    if (req.user._id.toString() === userId.toString()) {
+      return res.status(403).json({ message: "You can't change your role." });
+    }
+
+    if (!ownerProvidedRole.includes(role)) {
+      return res
+        .status(400)
+        .json({ message: "You have no permission to change this role." });
+    }
+
+    if (req.user.role === "Owner") {
+      await User.findByIdAndUpdate(userId, { role }, { new: true });
+      return res.status(200).json({ message: "Role updated by Owner." });
+    }
+    if (req.user.role === "Admin") {
+      if (role === "Owner" || user.role === "Owner") {
+        return res
+          .status(403)
+          .json({ message: "Admin cannot change Owner's role." });
+      }
+      await User.findByIdAndUpdate(userId, { role }, { new: true });
+      return res.status(200).json({ message: "Role updated by Admin." });
+    }
+
+    return res
+      .status(403)
+      .json({ message: "You are not allowed to change roles." });
   } catch (error) {
     next(error);
   }
