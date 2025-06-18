@@ -6,12 +6,13 @@ function ContextMenu({ item, isUploadingItem }) {
     setDeleteItem,
     openRenameModal,
     openDetailsPopup,
-    BASE_URL,
+    
   } = useDirectoryContext();
 
   const menuClass =
     "absolute bg-white border border-blue-400 shadow-md rounded text-sm z-50 right-2 top-4/5 overflow-hidden";
   const itemClass = "px-4 py-2 hover:bg-blue-100 cursor-pointer";
+  const BASE_URL= "http://localhost:4000"
 
   if (item.isDirectory) {
     return (
