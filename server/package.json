@@ -24,7 +24,8 @@
     "passport-github2": "^0.1.12",
     "rate-limit-redis": "^4.2.1",
     "redis": "^5.1.1",
-    "resend": "^4.3.0"
+    "resend": "^4.3.0",
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "prettier": "^3.4.2"
