@@ -8,9 +8,22 @@ import mongoose, { Types } from "mongoose";
 import redisClient from "../config/redis.js";
 import { rm } from "fs/promises";
 import path from "path";
+import {
+  loginSchema,
+  loginWithGoogleSchema,
+  otpSchema,
+  registerSchema,
+  sendOtpSchema,
+} from "../validators/userSchema.js";
+import { z } from "zod/v4";
 
 export const register = async (req, res, next) => {
-  const { name, email, password, otp } = req.body;
+  const { success, data } = registerSchema.safeParse(req.body);
+  if (!success) {
+    return res.status(400).json({ error: z.flattenError(error).fieldErrors });
+  }
+
+  const { name, email, password, otp } = data;
 
   const otpRecord = await Otp.findOne({ email, otp });
 
@@ -72,8 +85,12 @@ export const register = async (req, res, next) => {
     next(err);
   }
 };
-export const login = async (req, res, next) => {
-  const { email, password } = req.body;
+export const login = async (req, res) => {
+  const { success, data } = loginSchema.safeParse(req.body);
+  if (!success) {
+    return res.status(400).json({ error: "Invalid Credentials" });
+  }
+  const { email, password } = data;
   const user = await User.findOne({ email });
 
   if (!user) {
@@ -116,13 +133,26 @@ export const login = async (req, res, next) => {
 };
 
 export const getCurrentUser = async (req, res) => {
-  const user = await User.findById(req.user._id).lean();
-  res.status(200).json({
-    name: user.name,
-    email: user.email,
-    picture: user.picture,
-    role: user.role,
-  });
+  try {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Unauthorized: User ID missing" });
+    }
+
+    const user = await User.findById(req.user._id).lean();
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      name: user.name,
+      email: user.email,
+      picture: user.picture,
+      role: user.role,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 };
 
 export const logout = async (req, res) => {
@@ -151,14 +181,23 @@ export const logoutFromAllDevices = async (req, res) => {
 };
 
 export const sendOTP = async (req, res) => {
-  const { email } = req.body;
+  const { success, data } = sendOtpSchema.safeParse(req.body);
+  if (!success) {
+    return res.status(400).json({ error: z.flattenError(error).fieldErrors });
+  }
+  const { email } = data;
   const resData = await sendOtp(email);
   res.json(resData);
 };
 
 export const verifyOTP = async (req, res) => {
+  const { success, data } = otpSchema.safeParse(req.body);
+  if (!success) {
+    return res.status(400).json({ error: z.flattenError(error).fieldErrors });
+  }
+
   try {
-    const { email, otp } = req.body;
+    const { email, otp } = data;
     const otpRecord = await Otp.findOne({ email, otp });
 
     if (!otpRecord) {
@@ -173,7 +212,11 @@ export const verifyOTP = async (req, res) => {
 };
 
 export const loginWithGoogle = async (req, res, next) => {
-  const { idToken } = req.body;
+  const { success, data, error } = loginWithGoogleSchema.safeParse(req.body);
+  if (!success) {
+    return res.status(400).json({ error });
+  }
+  const { idToken } = data;
   const userData = await verifyGoogleToken(idToken);
   const { email, name, picture } = userData;
 
