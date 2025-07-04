@@ -6,6 +6,7 @@ import fileRoutes from "./routes/fileRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import { checkAuth } from "./middlewares/authMiddleware.js";
 import { connectDB } from "./config/db.js";
+import logger from "./utils/logger.js";
 
 const mySecretKey = process.env.COOKIE_PARSER_SECRET;
 await connectDB();
@@ -17,7 +18,7 @@ app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
-  }),
+  })
 );
 
 app.use("/directory", checkAuth, directoryRoutes);
@@ -25,10 +26,10 @@ app.use("/file", checkAuth, fileRoutes);
 app.use("/user", userRoutes);
 
 app.use((err, req, res, next) => {
-  console.log(err);
+  logger.error("Error occurred:", err);
   res.status(err.status || 500).json({ error: "Something went wrong!" });
 });
 
 app.listen(4000, () => {
-  console.log(`Server Started`);
+  logger.info("Server is running on port 4000");
 });

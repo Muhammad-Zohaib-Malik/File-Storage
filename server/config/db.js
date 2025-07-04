@@ -1,19 +1,20 @@
 import mongoose from "mongoose";
+import logger from "../utils/logger.js";
 
 export async function connectDB() {
   try {
     await mongoose.connect("mongodb://localhost:27017/storageApp");
-    console.log("Database connected");
+    logger.info("Database Connected Successfully!");
     return mongoose.connection;
   } catch (err) {
-    console.log(err);
-    console.log("Could Not Connect to the Database");
+    logger.error("Database Connection Failed!");
+    logger.error(err.message);
     process.exit(1);
   }
 }
 
 process.on("SIGINT", async () => {
   await mongoose.disconnect();
-  console.log("Database Disconnected!");
+  logger.info("Database Disconnected!");
   process.exit(0);
 });
