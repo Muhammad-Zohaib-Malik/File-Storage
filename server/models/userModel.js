@@ -31,7 +31,7 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ["Owner","Admin", "Manager", "User"],
+      enum: ["Owner", "Admin", "Manager", "User"],
       default: "User",
     },
     rootDirId: {

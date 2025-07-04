@@ -23,6 +23,7 @@ import {
 } from "../controllers/userController.js";
 
 const router = express.Router();
+
 router.post("/register", register);
 router.post("/login", login);
 router.get("/", checkAuth, getCurrentUser);
@@ -40,7 +41,7 @@ router.delete(
   "/:userId",
   checkAuth,
   checkForAdminOwner,
-  deleteUsingRoleBySoftDelete
+  deleteUsingRoleBySoftDelete,
 );
 
 //delete by admin and Owner for hardDelete
@@ -48,14 +49,14 @@ router.delete(
   "/:userId/hard",
   checkAuth,
   checkForAdminOwner,
-  deleteUsingRoleByHardDelete
+  deleteUsingRoleByHardDelete,
 );
 //update by admin hardDelete
 router.patch(
   "/:userId/recover",
   checkAuth,
   checkForAdminOwner,
-  recoverUserById
+  recoverUserById,
 );
 
 //change Role

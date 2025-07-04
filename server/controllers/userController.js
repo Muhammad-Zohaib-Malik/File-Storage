@@ -50,7 +50,7 @@ export const register = async (req, res, next) => {
           userId,
         },
       ],
-      { session }
+      { session },
     );
 
     await User.create(
@@ -63,7 +63,7 @@ export const register = async (req, res, next) => {
           rootDirId,
         },
       ],
-      { session }
+      { session },
     );
 
     await session.commitTransaction();
@@ -107,7 +107,7 @@ export const login = async (req, res) => {
     `@userId:{${user.id}}`,
     {
       RETURN: [],
-    }
+    },
   );
 
   if (allSessions.documents.length >= 2) {
@@ -170,7 +170,7 @@ export const logoutFromAllDevices = async (req, res) => {
     `@userId:{${session.userId}}`,
     {
       RETURN: [],
-    }
+    },
   );
   for (const session of allSession.documents) {
     await redisClient.del(session.id);
@@ -234,7 +234,7 @@ export const loginWithGoogle = async (req, res, next) => {
       `@userId:{${existingUser._id}}`,
       {
         RETURN: [],
-      }
+      },
     );
 
     if (allSessions.documents.length >= 2) {
@@ -376,7 +376,7 @@ export const logoutUsingRole = async (req, res, next) => {
       `@userId:{${userId}}`,
       {
         RETURN: [],
-      }
+      },
     );
 
     for (const session of allSessions.documents) {
@@ -444,7 +444,7 @@ export const deleteUsingRoleByHardDelete = async (req, res, next) => {
     const allSessions = await redisClient.ft.search(
       "userIdIdx",
       `@userId:{${userId}}`,
-      { RETURN: [] }
+      { RETURN: [] },
     );
 
     for (const redisSession of allSessions.documents) {
