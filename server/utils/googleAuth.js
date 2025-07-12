@@ -10,5 +10,6 @@ export const verifyGoogleToken = async (idToken) => {
   });
 
   const userData = loginTicket.getPayload();
+
   return userData;
 };

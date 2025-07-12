@@ -25,3 +25,11 @@ export const renameDirectory = async (id, newDirName) => {
   });
   return data;
 };
+
+export const importFromDrive = async (fileId, fileName) => {
+  const { data } = await axiosWithCreds.post(
+    "/import-from-drive",
+    { fileId, fileName },
+  );
+  return data;
+}

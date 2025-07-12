@@ -217,6 +217,7 @@ export const loginWithGoogle = async (req, res, next) => {
     return res.status(400).json({ error });
   }
   const { idToken } = data;
+
   const userData = await verifyGoogleToken(idToken);
   const { email, name, picture } = userData;
 
