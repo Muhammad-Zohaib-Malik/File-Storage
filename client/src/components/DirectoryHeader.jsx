@@ -8,6 +8,7 @@ import {
   FaSignOutAlt,
   FaSignInAlt,
 } from "react-icons/fa";
+import useDrivePicker from "react-google-drive-picker";
 
 function DirectoryHeader({
   directoryName,
@@ -23,6 +24,8 @@ function DirectoryHeader({
   const [userEmail, setUserEmail] = useState("guest@example.com");
   const [userPicture, setUserPicture] = useState("");
   const userMenuRef = useRef(null);
+  const [openPicker,data, authResponse] = useDrivePicker();
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -83,6 +86,34 @@ function DirectoryHeader({
     return () => document.removeEventListener("mousedown", handleDocumentClick);
   }, []);
 
+  const handleOpenPicker = () => {
+    openPicker({
+      clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID, 
+      developerKey: import.meta.env.VITE_GOOGLE_API_KEY, 
+      viewId: "DOCS",
+      token: authResponse,
+      showUploadView: true,
+      showUploadFolders: true,
+      supportDrives: true,
+      multiselect: true,
+      // callbackFunction: (data) => {
+      //   if (data.action === "picked") {
+      //     console.log("Picked files:", data.docs);
+      //     // TODO: Send data.docs to backend
+      //   }
+      // },
+    });
+  };
+  console.log("authResponse", authResponse);
+
+  useEffect(() => {
+    if(data){
+      if (data.action === "picked") {
+        console.log("Picked files:", data.docs);
+      }
+    }
+  },[data])
+
   return (
     <header className="flex items-center justify-between border-b border-gray-300 py-2 mb-4">
       <h1 className="text-xl font-semibold">{directoryName}</h1>
@@ -111,6 +142,14 @@ function DirectoryHeader({
           multiple
           onChange={handleFileSelect}
         />
+        <button
+          className="text-blue-500 hover:text-blue-700 text-sm font-medium disabled:text-blue-300 disabled:cursor-not-allowed"
+          title="Import from Google Drive"
+          onClick={handleOpenPicker}
+          disabled={disabled}
+        >
+          Import from Drive
+        </button>
         <div className="relative flex" ref={userMenuRef}>
           <button
             className="text-blue-500 hover:text-blue-700 text-xl"
