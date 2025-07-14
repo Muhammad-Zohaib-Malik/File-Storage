@@ -9,6 +9,7 @@ import {
   FaSignInAlt,
 } from "react-icons/fa";
 import useDrivePicker from "react-google-drive-picker";
+import { importFromDrive } from "../api/directoryApi";
 
 function DirectoryHeader({
   directoryName,
@@ -24,7 +25,7 @@ function DirectoryHeader({
   const [userEmail, setUserEmail] = useState("guest@example.com");
   const [userPicture, setUserPicture] = useState("");
   const userMenuRef = useRef(null);
-  const [openPicker,data, authResponse] = useDrivePicker();
+  const [openPicker, authResponse] = useDrivePicker();
 
   const navigate = useNavigate();
 
@@ -85,34 +86,39 @@ function DirectoryHeader({
     document.addEventListener("mousedown", handleDocumentClick);
     return () => document.removeEventListener("mousedown", handleDocumentClick);
   }, []);
-
   const handleOpenPicker = () => {
     openPicker({
-      clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID, 
-      developerKey: import.meta.env.VITE_GOOGLE_API_KEY, 
+      clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      developerKey: import.meta.env.VITE_GOOGLE_API_KEY,
       viewId: "DOCS",
-      token: authResponse,
+      token: authResponse?.access_token,
       showUploadView: true,
       showUploadFolders: true,
       supportDrives: true,
-      multiselect: true,
-      // callbackFunction: (data) => {
-      //   if (data.action === "picked") {
-      //     console.log("Picked files:", data.docs);
-      //     // TODO: Send data.docs to backend
-      //   }
-      // },
+      multiselect: true, // ✅ already enabled
+      callbackFunction: async (data) => {
+        if (data.action === "picked") {
+          for (const file of data.docs) {
+            const payload = {
+              fileId: file.id,
+              fileName: file.name,
+              mimeType: file.mimeType,
+              sizeBytes: file.sizeBytes,
+              accessToken: authResponse?.access_token,
+            };
+            console.log("Importing file:", payload);
+
+            try {
+              const response = await importFromDrive(payload);
+              console.log("Import successful:", response);
+            } catch (err) {
+              console.error("Import failed for:", file.name, err);
+            }
+          }
+        }
+      },
     });
   };
-  console.log("authResponse", authResponse);
-
-  useEffect(() => {
-    if(data){
-      if (data.action === "picked") {
-        console.log("Picked files:", data.docs);
-      }
-    }
-  },[data])
 
   return (
     <header className="flex items-center justify-between border-b border-gray-300 py-2 mb-4">

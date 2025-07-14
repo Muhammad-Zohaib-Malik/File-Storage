@@ -10,9 +10,7 @@ import {
   changeUserRoleById,
 } from "./api/userApi";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModel";
-import toast from 'react-hot-toast';
-
-
+import toast from "react-hot-toast";
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -23,7 +21,6 @@ export default function UsersPage() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [permanentMode, setPermanentMode] = useState(false);
   const [recoverMode, setRecoverMode] = useState(false);
-
 
   const navigate = useNavigate();
 
@@ -85,17 +82,17 @@ export default function UsersPage() {
   };
 
   const changeUserRole = async (user, newRole) => {
-  if (newRole === user.role) return;
+    if (newRole === user.role) return;
 
-  try {
-    const res = await changeUserRoleById(user.id, newRole);
-    fetchUsers();
-    toast.success(res.message || "Role updated successfully.");
-  } catch (err) {
-    console.error("❌ Role change failed:", err);
-    toast.error(err.response?.data?.message || "Failed to change role.");
-  }
-};
+    try {
+      const res = await changeUserRoleById(user.id, newRole);
+      fetchUsers();
+      toast.success(res.message || "Role updated successfully.");
+    } catch (err) {
+      console.error("❌ Role change failed:", err);
+      toast.error(err.response?.data?.message || "Failed to change role.");
+    }
+  };
 
   const confirmAction = async (user) => {
     try {

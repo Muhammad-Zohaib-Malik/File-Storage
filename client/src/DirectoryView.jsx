@@ -137,8 +137,8 @@ function DirectoryView() {
     const [currentItem, ...restQueue] = queue;
     setFilesList((prev) =>
       prev.map((f) =>
-        f.id === currentItem.id ? { ...f, isUploading: true } : f
-      )
+        f.id === currentItem.id ? { ...f, isUploading: true } : f,
+      ),
     );
 
     const xhr = new XMLHttpRequest();
