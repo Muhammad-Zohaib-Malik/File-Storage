@@ -3,6 +3,7 @@ import { rm } from "fs/promises";
 import path from "path";
 import Directory from "../models/directoryModel.js";
 import File from "../models/fileModel.js";
+import { google } from "googleapis";
 
 export const uploadFile = async (req, res, next) => {
   const parentDirId = req.params.parentDirId || req.user.rootDirId;
@@ -114,5 +115,66 @@ export const deleteFile = async (req, res, next) => {
     return res.status(200).json({ message: "File Deleted Successfully" });
   } catch (err) {
     next(err);
+  }
+};
+
+export const importFromDrive = async (req, res, next) => {
+  const parentDirId = req.params.parentDirId || req.user.rootDirId;
+  const { fileId, fileName, access_token } = req.body;
+
+  if (!fileId || !fileName || !access_token) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    const parentDirData = await Directory.findOne({
+      _id: parentDirId,
+      userId: req.user._id,
+    });
+
+    if (!parentDirData) {
+      return res.status(404).json({ error: "Parent directory not found!" });
+    }
+
+    const auth = new google.auth.OAuth2();
+    auth.setCredentials({ access_token });
+
+    const drive = google.drive({ version: "v3", auth });
+
+    const { data } = await drive.files.get(
+      { fileId, alt: "media" },
+      { responseType: "stream" },
+    );
+
+    const extension = path.extname(fileName);
+
+    const newFile = await File.create({
+      extension,
+      name: fileName,
+      userId: req.user._id,
+      parentDirId: parentDirData._id,
+    });
+
+    const internalFileId = newFile._id.toString();
+    const fullFileName = `${internalFileId}${extension}`;
+    const writeStream = createWriteStream(`./storage/${fullFileName}`);
+
+    data
+      .on("error", (err) => {
+        console.error("❌ Error downloading file:", err);
+        return res.status(500).json({ error: "Download failed" });
+      })
+      .pipe(writeStream)
+      .on("finish", () => {
+        console.log(`✅ Downloaded: ${fileName}`);
+        return res.status(200).json({
+          message: "File imported successfully",
+          fileName,
+          fileId: internalFileId,
+        });
+      });
+  } catch (err) {
+    console.error("❌ Google Drive import error:", err);
+    return next(err);
   }
 };
