@@ -138,13 +138,6 @@ The application provides seamless integration with Google Drive, allowing users 
 5. Create OAuth 2.0 credentials
 6. Download the credentials and add them to your `.env` file
 
-## 🔒 Security
-
-- Rate limiting to prevent abuse
-- Secure HTTP headers
-- Input validation
-- Secure session management
-- Environment-based configuration
 
 ## 📊 Logging
 
