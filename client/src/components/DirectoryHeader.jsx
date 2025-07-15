@@ -7,6 +7,7 @@ import {
   FaUser,
   FaSignOutAlt,
   FaSignInAlt,
+  FaShieldAlt,
 } from "react-icons/fa";
 import useDrivePicker from "react-google-drive-picker";
 import { importFromDrive } from "../api/directoryApi";
@@ -179,6 +180,16 @@ function DirectoryHeader({
                   <div className="px-3 py-2 text-sm text-gray-800">
                     <div className="font-semibold">{userName}</div>
                     <div className="text-xs text-gray-500">{userEmail}</div>
+                  </div>
+                  <div className="border-t border-gray-200" />
+                  <div
+                    className="flex items-center gap-2 text-gray-700 cursor-pointer hover:bg-gray-200 px-4 py-2"
+                    onClick={() => {
+                      navigate("/sessions");
+                      setShowUserMenu(false);
+                    }}
+                  >
+                    <FaShieldAlt className="text-blue-600" /> Session Management
                   </div>
                   <div className="border-t border-gray-200" />
                   <div

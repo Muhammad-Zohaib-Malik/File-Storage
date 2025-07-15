@@ -5,6 +5,7 @@ import "./App.css";
 import Login from "./Login";
 import UsersPage from "./UsersPage";
 import UserProfile from "./UserProfile";
+import SessionManagement from "./SessionManagement";
 
 const router = createBrowserRouter([
   {
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
   {
     path: "/profile",
     element: <UserProfile />,
+  },
+  {
+    path: "/sessions",
+    element: <SessionManagement />,
   },
 ]);
 
