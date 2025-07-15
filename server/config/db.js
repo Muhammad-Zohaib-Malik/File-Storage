@@ -3,7 +3,7 @@ import logger from "../utils/logger.js";
 
 export async function connectDB() {
   try {
-    await mongoose.connect("mongodb://localhost:27017/storageApp");
+    await mongoose.connect(process.env.MONGODB_URI);
     logger.info("Database Connected Successfully!");
     return mongoose.connection;
   } catch (err) {
