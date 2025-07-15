@@ -4,6 +4,10 @@ import path from "path";
 import Directory from "../models/directoryModel.js";
 import File from "../models/fileModel.js";
 import { google } from "googleapis";
+import { JSDOM } from "jsdom";
+import DOMPurify from "dompurify";
+const window = new JSDOM("").window;
+const purify = DOMPurify(window);
 
 export const uploadFile = async (req, res, next) => {
   const parentDirId = req.params.parentDirId || req.user.rootDirId;
@@ -20,7 +24,6 @@ export const uploadFile = async (req, res, next) => {
 
     const filename = req.headers.filename || "untitled";
     const extension = path.extname(filename);
-
     const insertedFile = await File.insertOne({
       extension,
       name: filename,
@@ -82,13 +85,16 @@ export const renameFile = async (req, res, next) => {
     userId: req.user._id,
   });
 
+  let { newFilename } = req.body;
+  newFilename = purify.sanitize(newFilename);
+
   // Check if file exists
   if (!file) {
     return res.status(404).json({ error: "File not found!" });
   }
 
   try {
-    file.name = req.body.newFilename;
+    file.name = newFilename;
     await file.save();
     return res.status(200).json({ message: "Renamed" });
   } catch (err) {

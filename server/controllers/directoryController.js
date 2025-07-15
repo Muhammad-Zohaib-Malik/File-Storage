@@ -1,6 +1,10 @@
 import { rm } from "fs/promises";
 import Directory from "../models/directoryModel.js";
 import File from "../models/fileModel.js";
+import { JSDOM } from "jsdom";
+import DOMPurify from "dompurify";
+const window = new JSDOM("").window;
+const purify = DOMPurify(window);
 
 export const getDirectory = async (req, res) => {
   const user = req.user;
@@ -36,6 +40,9 @@ export const createDirectory = async (req, res, next) => {
         .status(404)
         .json({ message: "Parent Directory Does not exist!" });
 
+    let { dirname } = req.headers;
+    dirname = purify.sanitize(dirname);
+
     await Directory.insertOne({
       name: dirname,
       parentDirId,
@@ -57,7 +64,8 @@ export const createDirectory = async (req, res, next) => {
 export const renameDirectory = async (req, res, next) => {
   const user = req.user;
   const { id } = req.params;
-  const { newDirName } = req.body;
+  let { newDirName } = req.body;
+  newDirName = purify.sanitize(newDirName);
   try {
     await Directory.findOneAndUpdate(
       {

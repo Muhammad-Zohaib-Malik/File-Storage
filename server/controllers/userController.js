@@ -16,6 +16,10 @@ import {
   sendOtpSchema,
 } from "../validators/userSchema.js";
 import { z } from "zod/v4";
+import { JSDOM } from "jsdom";
+import DOMPurify from "dompurify";
+const window = new JSDOM("").window;
+const purify = DOMPurify(window);
 
 export const register = async (req, res, next) => {
   const { success, data } = registerSchema.safeParse(req.body);
@@ -23,7 +27,12 @@ export const register = async (req, res, next) => {
     return res.status(400).json({ error: z.flattenError(error).fieldErrors });
   }
 
-  const { name, email, password, otp } = data;
+  let { name, email, password, otp } = data;
+
+  name = purify.sanitize(name);
+  email = purify.sanitize(email);
+  password = purify.sanitize(password);
+  otp = purify.sanitize(otp);
 
   const otpRecord = await Otp.findOne({ email, otp });
 
@@ -90,7 +99,11 @@ export const login = async (req, res) => {
   if (!success) {
     return res.status(400).json({ error: "Invalid Credentials" });
   }
-  const { email, password } = data;
+  let { email, password } = data;
+
+  email = purify.sanitize(email);
+  password = purify.sanitize(password);
+
   const user = await User.findOne({ email });
 
   if (!user) {
@@ -128,7 +141,7 @@ export const login = async (req, res) => {
     httpOnly: true,
     signed: true,
     maxAge: 60 * 1000 * 60 * 24 * 7,
-    sameSite: 'lax'
+    sameSite: "lax",
   });
   res.json({ message: "Logged In" });
 };
@@ -186,7 +199,9 @@ export const sendOTP = async (req, res) => {
   if (!success) {
     return res.status(400).json({ error: z.flattenError(error).fieldErrors });
   }
-  const { email } = data;
+
+  let { email } = data;
+  email = purify.sanitize(email);
   const resData = await sendOtp(email);
   res.json(resData);
 };
@@ -198,7 +213,9 @@ export const verifyOTP = async (req, res) => {
   }
 
   try {
-    const { email, otp } = data;
+    let { email, otp } = data;
+    email = purify.sanitize(email);
+    otp = purify.sanitize(otp);
     const otpRecord = await Otp.findOne({ email, otp });
 
     if (!otpRecord) {
@@ -218,7 +235,6 @@ export const loginWithGoogle = async (req, res, next) => {
     return res.status(400).json({ error });
   }
   const { idToken } = data;
-
   const userData = await verifyGoogleToken(idToken);
   const { email, name, picture } = userData;
 
@@ -261,7 +277,7 @@ export const loginWithGoogle = async (req, res, next) => {
       httpOnly: true,
       signed: true,
       maxAge: 1000 * 60 * 60 * 24 * 7,
-      sameSite: 'lax'
+      sameSite: "lax",
     });
 
     return res.status(200).json({ message: "Logged In", userData });
@@ -306,7 +322,7 @@ export const loginWithGoogle = async (req, res, next) => {
       httpOnly: true,
       signed: true,
       maxAge: 1000 * 60 * 60 * 24 * 7,
-      sameSite: 'lax'
+      sameSite: "lax",
     });
 
     await mongooseSession.commitTransaction();
