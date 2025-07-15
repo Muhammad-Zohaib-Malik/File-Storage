@@ -16,7 +16,6 @@ import {
   sendOtpSchema,
 } from "../validators/userSchema.js";
 import { z } from "zod/v4";
-import { UAParser } from "ua-parser-js";
 
 export const register = async (req, res, next) => {
   const { success, data } = registerSchema.safeParse(req.body);
@@ -134,35 +133,6 @@ export const login = async (req, res) => {
 };
 
 export const getCurrentUser = async (req, res) => {
-  const userAgent = req.headers["user-agent"];
-
-  const parser = new UAParser();
-  parser.setUA(userAgent);
-  const deviceInfo = parser.getResult();
-
-  const ipAddress = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-
-  const loginTime = new Date().toLocaleString("en-US", {
-    timeZone: "Asia/Karachi", // Optional: adjust to your desired timezone
-    weekday: "short",
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
-
-  const sessionData = {
-    ipAddress,
-    loginTime,
-    browser: deviceInfo.browser,
-    os: deviceInfo.os,
-    device: deviceInfo.device,
-  };
-
-  console.log("Session Info:", sessionData);
-
   try {
     if (!req.user || !req.user._id) {
       return res.status(401).json({ message: "Unauthorized: User ID missing" });
@@ -179,7 +149,6 @@ export const getCurrentUser = async (req, res) => {
       email: user.email,
       picture: user.picture,
       role: user.role,
-      sessionData,
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
