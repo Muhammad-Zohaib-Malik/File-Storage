@@ -29,7 +29,8 @@ export const createDirectory = async (req, res, next) => {
   const user = req.user;
 
   const parentDirId = req.params.parentDirId || user.rootDirId.toString();
-  const dirname = req.headers.dirname || "New Folder";
+  let { dirname } = req.headers || "New Folder";
+  dirname = purify.sanitize(dirname);
   try {
     const parentDir = await Directory.findOne({
       _id: parentDirId,
@@ -39,9 +40,6 @@ export const createDirectory = async (req, res, next) => {
       return res
         .status(404)
         .json({ message: "Parent Directory Does not exist!" });
-
-    let { dirname } = req.headers;
-    dirname = purify.sanitize(dirname);
 
     await Directory.insertOne({
       name: dirname,
@@ -64,7 +62,7 @@ export const createDirectory = async (req, res, next) => {
 export const renameDirectory = async (req, res, next) => {
   const user = req.user;
   const { id } = req.params;
-  let { newDirName } = req.body;
+  let { newDirName } = req.body || "New Folder";
   newDirName = purify.sanitize(newDirName);
   try {
     await Directory.findOneAndUpdate(
@@ -72,7 +70,7 @@ export const renameDirectory = async (req, res, next) => {
         _id: id,
         userId: user._id,
       },
-      { name: newDirName },
+      { name: newDirName }
     );
     res.status(200).json({ message: "Directory Renamed!" });
   } catch (err) {
