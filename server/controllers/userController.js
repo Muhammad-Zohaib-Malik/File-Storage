@@ -128,6 +128,7 @@ export const login = async (req, res) => {
     httpOnly: true,
     signed: true,
     maxAge: 60 * 1000 * 60 * 24 * 7,
+    sameSite: 'lax'
   });
   res.json({ message: "Logged In" });
 };
@@ -259,7 +260,8 @@ export const loginWithGoogle = async (req, res, next) => {
     res.cookie("sid", sessionId, {
       httpOnly: true,
       signed: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+      sameSite: 'lax'
     });
 
     return res.status(200).json({ message: "Logged In", userData });
@@ -304,6 +306,7 @@ export const loginWithGoogle = async (req, res, next) => {
       httpOnly: true,
       signed: true,
       maxAge: 1000 * 60 * 60 * 24 * 7,
+      sameSite: 'lax'
     });
 
     await mongooseSession.commitTransaction();
