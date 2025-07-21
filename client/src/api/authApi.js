@@ -13,7 +13,7 @@ export const verifyOtp = async (email, otp) => {
   return data;
 };
 
-export const loginWithGoogle = async (idToken) => {
-  const { data } = await axiosWithCreds.post("/user/google", { idToken });
+export const loginWithGoogle = async (code) => {
+  const { data } = await axiosWithCreds.post("/user/google", { code });
   return data;
 };
