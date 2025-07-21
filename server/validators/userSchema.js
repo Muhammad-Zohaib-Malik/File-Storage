@@ -28,5 +28,5 @@ export const sendOtpSchema = registerSchema.pick({
 });
 
 export const loginWithGoogleSchema = z.object({
-  idToken: z.string().regex(/^[\w-]+\.[\w-]+\.[\w-]+$/, "Invalid token format"),
+  code: z.string(),
 });
