@@ -70,7 +70,7 @@ export const renameDirectory = async (req, res, next) => {
         _id: id,
         userId: user._id,
       },
-      { name: newDirName }
+      { name: newDirName },
     );
     res.status(200).json({ message: "Directory Renamed!" });
   } catch (err) {
