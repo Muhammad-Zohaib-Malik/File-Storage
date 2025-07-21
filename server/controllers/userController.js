@@ -234,8 +234,8 @@ export const loginWithGoogle = async (req, res, next) => {
   if (!success) {
     return res.status(400).json({ error });
   }
-  const { idToken } = data;
-  const userData = await verifyGoogleToken(idToken);
+  const { code } = data;
+  const userData = await verifyGoogleToken(code);
   const { email, name, picture } = userData;
 
   const existingUser = await User.findOne({ email }).select("-__v");
