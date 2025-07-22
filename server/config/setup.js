@@ -90,7 +90,6 @@ try {
         },
         additionalProperties: false,
       },
-
     },
     validationAction: "error",
     validationLevel: "strict",
