@@ -35,6 +35,7 @@ const UserProfile = () => {
   const handleLogout = async () => {
     try {
       await logoutUser();
+      toast.success("Logged out successfully!");
       navigate("/login");
     } catch (err) {
       console.error("Logout failed", err);
@@ -44,6 +45,7 @@ const UserProfile = () => {
   const handleLogoutAll = async () => {
     try {
       await logoutAllSessions();
+      toast.success("Logged out from all sessions successfully!");
       navigate("/login");
     } catch (err) {
       console.error("Logout All failed", err);
@@ -66,9 +68,9 @@ const UserProfile = () => {
         toast.error("Password must be at least 6 characters");
         return;
       }
-      
+
       const response = await changePasswordForGoogleUser(newPassword);
-      
+
       if (response.error) {
         toast.error(response.error);
       } else {
@@ -77,8 +79,9 @@ const UserProfile = () => {
       }
     } catch (err) {
       console.error("Password change failed:", err);
-      const errorMessage = err.response?.data?.error || 
-                         "Password change failed. Please try again.";
+      const errorMessage =
+        err.response?.data?.error ||
+        "Password change failed. Please try again.";
       toast.error(errorMessage);
     }
   };
@@ -131,10 +134,7 @@ const UserProfile = () => {
             <div className="flex flex-col md:flex-row items-center gap-8 mb-12 px-6">
               <div className="relative group">
                 <img
-                  src={
-                    user.picture ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || "User")}&background=4f46e5&color=fff&size=128`
-                  }
+                  src={user.picture}
                   alt="Profile"
                   className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover transition-transform duration-300 group-hover:scale-105"
                 />
@@ -246,9 +246,6 @@ const UserProfile = () => {
                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
                       />
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">
-                      Contact support to change your email
-                    </p>
                   </div>
                 </div>
                 <div className="mt-10 flex justify-end">
@@ -275,10 +272,8 @@ const UserProfile = () => {
                 </div>
               </div>
 
-
               {/* Connected Accounts */}
-              {
-                isGoogleUser &&
+              {isGoogleUser && (
                 <div className="mt-8">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
                     <svg
@@ -334,18 +329,68 @@ const UserProfile = () => {
                     </div>
                   </div>
                 </div>
-
-              }
-
+              )}
 
               {/* Change Password */}
-              {
-                isGoogleUser && (
-
-                  <div className="mt-8">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
+              {isGoogleUser && (
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
+                    <svg
+                      className="inline-block w-5 h-5 mr-2 text-purple-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
+                    </svg>
+                    Change Password
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="md:col-span-2 grid md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          New Password
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg
+                              className="h-5 w-5 text-gray-400"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1.5}
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                              />
+                            </svg>
+                          </div>
+                          <input
+                            type="password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                            placeholder="••••••••"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-10 flex justify-end">
+                    <button
+                      onClick={handlePasswordForGoogleUser}
+                      className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200"
+                    >
                       <svg
-                        className="inline-block w-5 h-5 mr-2 text-purple-600"
+                        className="-ml-1 mr-2 h-4 w-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -359,66 +404,10 @@ const UserProfile = () => {
                         />
                       </svg>
                       Change Password
-                    </h3>
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="md:col-span-2 grid md:grid-cols-2 gap-6">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            New Password
-                          </label>
-                          <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                              <svg
-                                className="h-5 w-5 text-gray-400"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={1.5}
-                                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                />
-                              </svg>
-                            </div>
-                            <input
-                              type="password"
-                              value={newPassword}
-                              onChange={(e) => setNewPassword(e.target.value)}
-                              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                              placeholder="••••••••"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mt-10 flex justify-end">
-                      <button
-                        onClick={handlePasswordForGoogleUser}
-                        className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200"
-                      >
-                        <svg
-                          className="-ml-1 mr-2 h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                          />
-                        </svg>
-                        Change Password
-                      </button>
-                    </div>
+                    </button>
                   </div>
-                )
-              }
-
+                </div>
+              )}
 
               {/* Session Management */}
               <div className="mt-16">
