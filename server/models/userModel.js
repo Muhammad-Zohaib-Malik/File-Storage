@@ -34,6 +34,10 @@ const userSchema = new Schema(
       enum: ["Owner", "Admin", "Manager", "User"],
       default: "User",
     },
+    createdWith: {
+      type: String,
+      enum: ["email", "google", "github"],
+    },
     rootDirId: {
       type: Schema.Types.ObjectId,
       ref: "Directory",
@@ -50,7 +54,7 @@ const userSchema = new Schema(
 );
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password") ) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
