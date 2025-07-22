@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --env-file=.env --watch app.js",
+    "setup": "node --env-file=.env config/setup.js",
     "format": "prettier . --write"
   },
   "keywords": [],

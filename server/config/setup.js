@@ -91,7 +91,7 @@ try {
     validator: {
       $jsonSchema: {
         bsonType: "object",
-        required: ["_id", "name", "extension", "userId", "parentDirId"],
+        required: ["_id", "name", "extension", "userId", "parentDirId", "size"],
         properties: {
           _id: {
             bsonType: "objectId",
@@ -107,6 +107,9 @@ try {
           },
           parentDirId: {
             bsonType: "objectId",
+          },
+          size: {
+            bsonType: "int",
           },
           __v: {
             bsonType: "int",

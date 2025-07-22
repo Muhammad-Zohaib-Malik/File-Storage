@@ -22,7 +22,7 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      minLength: 4,
+      minLength: 4
     },
     picture: {
       type: String,
@@ -45,6 +45,7 @@ const userSchema = new Schema(
   },
   {
     strict: "throw",
+    timestamps: true,
   },
 );
 

@@ -14,6 +14,7 @@ const sessionSchema = new Schema(
   },
   {
     strict: "throw",
+    timestamps: true,
   },
 );
 
