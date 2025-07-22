@@ -17,3 +17,16 @@ export const loginWithGoogle = async (code) => {
   const { data } = await axiosWithCreds.post("/user/google", { code });
   return data;
 };
+
+export const changePasswordForGoogleUser = async (password) => {
+  const { data } = await axiosWithCreds.post("/user/set-password-for-google", {
+    password,
+  });
+  return data;
+};
+
+export const connectWithGoogleDrive = async (code) => {
+  const { data } = await axiosWithCreds.post("/user/google/drive", { code });
+  return data;
+};
+
