@@ -62,10 +62,24 @@ const UserProfile = () => {
 
   const handlePasswordForGoogleUser = async () => {
     try {
-      await changePasswordForGoogleUser(newPassword);
-      toast.success("Password changed successfully!");
+      if (newPassword.length < 6) {
+        toast.error("Password must be at least 6 characters");
+        return;
+      }
+      
+      const response = await changePasswordForGoogleUser(newPassword);
+      
+      if (response.error) {
+        toast.error(response.error);
+      } else {
+        toast.success(response.message || "Password changed successfully!");
+        setNewPassword(""); // Clear the password field on success
+      }
     } catch (err) {
-      console.error("Password change failed", err);
+      console.error("Password change failed:", err);
+      const errorMessage = err.response?.data?.error || 
+                         "Password change failed. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
