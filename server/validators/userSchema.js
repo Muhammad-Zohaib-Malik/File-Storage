@@ -26,6 +26,9 @@ export const otpSchema = registerSchema.pick({
 export const sendOtpSchema = registerSchema.pick({
   email: true,
 });
+export const setPasswordForGoogle = registerSchema.pick({
+  password: true,
+});
 
 export const loginWithGoogleSchema = z.object({
   code: z.string(),
