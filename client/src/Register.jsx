@@ -77,11 +77,27 @@ const Register = () => {
     e.preventDefault();
     if (!otpVerified) return setOtpError("Please verify your email with OTP.");
     try {
-      await registerUser({ ...formData, otp });
-      setIsSuccess(true);
-      setTimeout(() => navigate("/"), 2000);
+      const response = await registerUser({ ...formData, otp });
+      if (response.error) {
+        // Handle error object with field-specific errors
+        if (typeof response.error === 'object') {
+          const errorMessages = Object.values(response.error).flat().join(' ');
+          setServerError(errorMessages);
+        } else {
+          setServerError(response.error);
+        }
+      } else {
+        setIsSuccess(true);
+        setTimeout(() => navigate("/"), 2000);
+      }
     } catch (err) {
-      setServerError(err.response?.data?.error || "Something went wrong.");
+      console.error("Registration error:", err);
+      const errorData = err.response?.data?.error;
+      // Handle both string and object error responses
+      const errorMessage = typeof errorData === 'object'
+        ? Object.values(errorData).flat().join(' ')
+        : errorData || "Something went wrong. Please try again.";
+      setServerError(errorMessage);
     }
   };
 

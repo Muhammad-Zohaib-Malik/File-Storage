@@ -28,13 +28,24 @@ const Login = () => {
     try {
       const data = await loginUser(formData);
       if (data.error) {
-        setServerError(data.error);
+        // Handle error object with field-specific errors
+        if (typeof data.error === 'object') {
+          const errorMessages = Object.values(data.error).flat().join(' ');
+          setServerError(errorMessages);
+        } else {
+          setServerError(data.error);
+        }
       } else {
         navigate("/");
       }
     } catch (err) {
       console.error("Login error:", err);
-      setServerError(err.response?.data?.error || "Something went wrong. Please try again.");
+      const errorData = err.response?.data?.error;
+      // Handle both string and object error responses
+      const errorMessage = typeof errorData === 'object' 
+        ? Object.values(errorData).flat().join(' ') 
+        : errorData || "Something went wrong. Please try again.";
+      setServerError(errorMessage);
     } finally {
       setIsLoading(false);
     }
