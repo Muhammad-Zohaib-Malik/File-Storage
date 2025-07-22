@@ -37,7 +37,12 @@ try {
             bsonType: "objectId",
           },
           role: {
+            bsonType: "string",
             enum: ["Owner", "Admin", "Manager", "User"],
+          },
+          createdWith: {
+            bsonType: ["string", "null"],
+            enum: ["email", "google", "github", null],
           },
           picture: {
             bsonType: "string",
@@ -48,6 +53,8 @@ try {
           __v: {
             bsonType: "int",
           },
+          createdAt: { bsonType: "date" },
+          updatedAt: { bsonType: "date" },
         },
         additionalProperties: false,
       },
@@ -78,9 +85,12 @@ try {
           __v: {
             bsonType: "int",
           },
+          createdAt: { bsonType: "date" },
+          updatedAt: { bsonType: "date" },
         },
         additionalProperties: false,
       },
+
     },
     validationAction: "error",
     validationLevel: "strict",
@@ -114,6 +124,8 @@ try {
           __v: {
             bsonType: "int",
           },
+          createdAt: { bsonType: "date" },
+          updatedAt: { bsonType: "date" },
         },
         additionalProperties: false,
       },
