@@ -111,6 +111,7 @@ function DirectoryView() {
       name: file.name,
       id: `temp-${Date.now()}-${Math.random()}`,
       isUploading: false,
+      size: file.size,
     }));
 
     setFilesList((prev) => [...newItems, ...prev]);
@@ -145,6 +146,7 @@ function DirectoryView() {
     xhr.open("POST", `http://localhost:4000/file/${dirId || ""}`);
     xhr.withCredentials = true;
     xhr.setRequestHeader("filename", currentItem.name);
+    xhr.setRequestHeader("filesize", currentItem.size);
 
     xhr.upload.addEventListener("progress", (evt) => {
       if (evt.lengthComputable) {
