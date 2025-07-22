@@ -12,6 +12,7 @@ import {
   loginSchema,
   loginWithGoogleSchema,
   otpSchema,
+  passwordForGoogleSchema,
   registerSchema,
   sendOtpSchema,
 } from "../validators/userSchema.js";
@@ -24,9 +25,9 @@ import bcrypt from "bcrypt";
 
 
 export const register = async (req, res, next) => {
-  const { success, data } = registerSchema.safeParse(req.body);
+  const { success, error, data } = registerSchema.safeParse(req.body);
   if (!success) {
-    return res.status(400).json({ error: z.flattenError(error).fieldErrors });
+    return res.status(400).json({ error: error.flatten().fieldErrors });
   }
 
   let { name, email, password, otp } = data;
@@ -100,11 +101,13 @@ export const register = async (req, res, next) => {
 };
 
 export const login = async (req, res) => {
-  const { success, data } = loginSchema.safeParse(req.body);
+  const { success,error,data } = loginSchema.safeParse(req.body);
+
   if (!success) {
-    return res.status(400).json({ error: "Invalid Credentials" });
+    return res.status(400).json({ error: error.flatten().fieldErrors });
   }
   let { email, password } = data;
+  console.log(data)
 
   email = purify.sanitize(email);
   password = purify.sanitize(password);
@@ -352,15 +355,16 @@ export const loginWithGoogle = async (req, res, next) => {
 };
 
 export const setPasswordForGoogleUser = async (req, res, next) => {
-  const { success, data, error } = registerSchema.safeParse(req.body);
+  const result = passwordForGoogleSchema.safeParse(req.body);
 
-  if (!success) {
+
+  if (!result.success) {
     return res.status(400).json({
-      error: error.flatten().fieldErrors,
+      error: result.error.flatten().fieldErrors,
     });
   }
 
-  let { password } = data;
+  let { password } = result.data;
   password = purify.sanitize(password);
 
   try {
@@ -368,6 +372,9 @@ export const setPasswordForGoogleUser = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+
+
+
 
     if (user.password) {
       return res.status(400).json({ error: "Password already set" });
@@ -382,7 +389,7 @@ export const setPasswordForGoogleUser = async (req, res, next) => {
       .json({ message: "Password set successfully. You can now log in with email/password." });
   } catch (err) {
     console.error("Set Password Error:", err);
-    return res.status(500).json({ error: "Server error" });
+    next(err);
   }
 };
 
