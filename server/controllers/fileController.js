@@ -23,11 +23,13 @@ export const uploadFile = async (req, res, next) => {
     }
 
     let { filename } = req.headers || "untitled";
+    let { filesize } = req.headers;
     filename = purify.sanitize(filename);
     const extension = path.extname(filename);
     const insertedFile = await File.insertOne({
       extension,
       name: filename,
+      size: filesize,
       parentDirId: parentDirData._id,
       userId: req.user._id,
     });
