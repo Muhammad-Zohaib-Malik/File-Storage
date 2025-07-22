@@ -2,7 +2,7 @@ import Directory from "../models/directoryModel.js";
 import File from "../models/fileModel.js";
 import Otp from "../models/otp.model.js";
 import User from "../models/userModel.js";
-import { verifyGoogleToken } from "../utils/googleAuth.js";
+import { connectGoogleDrive, verifyGoogleToken } from "../utils/googleAuth.js";
 import { sendOtp } from "../utils/sendOTP.js";
 import mongoose, { Types } from "mongoose";
 import redisClient from "../config/redis.js";
@@ -20,6 +20,8 @@ import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
+import bcrypt from "bcrypt";
+
 
 export const register = async (req, res, next) => {
   const { success, data } = registerSchema.safeParse(req.body);
@@ -70,6 +72,7 @@ export const register = async (req, res, next) => {
           email,
           password,
           rootDirId,
+          createdWith: "email"
         },
       ],
       { session },
@@ -91,9 +94,11 @@ export const register = async (req, res, next) => {
       });
     }
 
+
     next(err);
   }
 };
+
 export const login = async (req, res) => {
   const { success, data } = loginSchema.safeParse(req.body);
   if (!success) {
@@ -105,6 +110,8 @@ export const login = async (req, res) => {
   password = purify.sanitize(password);
 
   const user = await User.findOne({ email });
+
+
 
   if (!user) {
     return res.status(404).json({ error: "Invalid Credentials" });
@@ -163,6 +170,7 @@ export const getCurrentUser = async (req, res) => {
       email: user.email,
       picture: user.picture,
       role: user.role,
+      createdWith: user.createdWith
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
@@ -240,6 +248,7 @@ export const loginWithGoogle = async (req, res, next) => {
 
   const existingUser = await User.findOne({ email }).select("-__v");
 
+
   if (existingUser) {
     if (existingUser.IsDeleted) {
       return res.status(403).json({
@@ -283,6 +292,8 @@ export const loginWithGoogle = async (req, res, next) => {
     return res.status(200).json({ message: "Logged In", userData });
   }
 
+
+
   const mongooseSession = await mongoose.startSession();
 
   try {
@@ -304,6 +315,7 @@ export const loginWithGoogle = async (req, res, next) => {
       email,
       picture,
       rootDirId,
+      createdWith: "google",
     });
 
     await directory.save({ session: mongooseSession });
@@ -338,6 +350,42 @@ export const loginWithGoogle = async (req, res, next) => {
     mongooseSession.endSession();
   }
 };
+
+export const setPasswordForGoogleUser = async (req, res, next) => {
+  const { success, data, error } = registerSchema.safeParse(req.body);
+
+  if (!success) {
+    return res.status(400).json({
+      error: error.flatten().fieldErrors,
+    });
+  }
+
+  let { password } = data;
+  password = purify.sanitize(password);
+
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.password) {
+      return res.status(400).json({ error: "Password already set" });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+    user.password = hash;
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ message: "Password set successfully. You can now log in with email/password." });
+  } catch (err) {
+    console.error("Set Password Error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+};
+
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -552,6 +600,21 @@ export const changeRole = async (req, res, next) => {
       .status(403)
       .json({ message: "You are not allowed to change roles." });
   } catch (error) {
+    next(error);
+  }
+};
+
+export const connecToDrive = async (req, res, next) => {
+  const code = req.body.code;
+  try {
+    const files = await connectGoogleDrive(code);
+    res.status(200).json({
+      message: "Connected successfully",
+      files,
+    });
+    console.log("files", files);
+  } catch (error) {
+    console.error("Drive connection failed:", error);
     next(error);
   }
 };
