@@ -23,7 +23,6 @@ const window = new JSDOM("").window;
 const purify = DOMPurify(window);
 import bcrypt from "bcrypt";
 
-
 export const register = async (req, res, next) => {
   const { success, error, data } = registerSchema.safeParse(req.body);
   if (!success) {
@@ -46,6 +45,13 @@ export const register = async (req, res, next) => {
   await otpRecord.deleteOne();
 
   const session = await mongoose.startSession();
+
+  // const user = await User.findOne({ email })
+  // if (user) {
+  //   return res.status(409).json({
+  //     error: "This email already exists"
+  //   });
+  // }
 
   try {
     const rootDirId = new Types.ObjectId();
@@ -73,7 +79,7 @@ export const register = async (req, res, next) => {
           email,
           password,
           rootDirId,
-          createdWith: "email"
+          createdWith: "email",
         },
       ],
       { session },
@@ -95,26 +101,22 @@ export const register = async (req, res, next) => {
       });
     }
 
-
     next(err);
   }
 };
 
 export const login = async (req, res) => {
-  const { success,error,data } = loginSchema.safeParse(req.body);
+  const { success, error, data } = loginSchema.safeParse(req.body);
 
   if (!success) {
     return res.status(400).json({ error: error.flatten().fieldErrors });
   }
   let { email, password } = data;
-  console.log(data)
 
   email = purify.sanitize(email);
   password = purify.sanitize(password);
 
   const user = await User.findOne({ email });
-
-
 
   if (!user) {
     return res.status(404).json({ error: "Invalid Credentials" });
@@ -173,7 +175,7 @@ export const getCurrentUser = async (req, res) => {
       email: user.email,
       picture: user.picture,
       role: user.role,
-      createdWith: user.createdWith
+      createdWith: user.createdWith,
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
@@ -243,7 +245,7 @@ export const verifyOTP = async (req, res) => {
 export const loginWithGoogle = async (req, res, next) => {
   const { success, data, error } = loginWithGoogleSchema.safeParse(req.body);
   if (!success) {
-    return res.status(400).json({ error });
+    return res.status(400).json({ error: error.flatten().fieldErrors });
   }
   const { code } = data;
   const userData = await verifyGoogleToken(code);
@@ -252,7 +254,13 @@ export const loginWithGoogle = async (req, res, next) => {
   const existingUser = await User.findOne({ email }).select("-__v");
 
 
+
   if (existingUser) {
+    if (existingUser.createdWith === "email") {
+      return res.status(400).json({
+        error: "you already have an account with email. Please login with email"
+      })
+    }
     if (existingUser.IsDeleted) {
       return res.status(403).json({
         error: "Your account has been deleted. Contact App Owner to recover",
@@ -294,8 +302,6 @@ export const loginWithGoogle = async (req, res, next) => {
 
     return res.status(200).json({ message: "Logged In", userData });
   }
-
-
 
   const mongooseSession = await mongoose.startSession();
 
@@ -357,7 +363,6 @@ export const loginWithGoogle = async (req, res, next) => {
 export const setPasswordForGoogleUser = async (req, res, next) => {
   const result = passwordForGoogleSchema.safeParse(req.body);
 
-
   if (!result.success) {
     return res.status(400).json({
       error: result.error.flatten().fieldErrors,
@@ -373,9 +378,6 @@ export const setPasswordForGoogleUser = async (req, res, next) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-
-
-
     if (user.password) {
       return res.status(400).json({ error: "Password already set" });
     }
@@ -386,13 +388,15 @@ export const setPasswordForGoogleUser = async (req, res, next) => {
 
     return res
       .status(200)
-      .json({ message: "Password set successfully. You can now log in with email/password." });
+      .json({
+        message:
+          "Password set successfully. You can now log in with email/password.",
+      });
   } catch (err) {
     console.error("Set Password Error:", err);
     next(err);
   }
 };
-
 
 export const getAllUsers = async (req, res) => {
   try {
