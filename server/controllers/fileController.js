@@ -22,10 +22,14 @@ export const uploadFile = async (req, res, next) => {
       return res.status(404).json({ error: "Parent directory not found!" });
     }
 
-    let { filename } = req.headers || "untitled";
-    let { filesize } = req.headers;
-    filename = purify.sanitize(filename);
+    const filename = purify.sanitize(req.headers?.filename || "untitled");
+    const filesize = req.headers?.filesize;
     const extension = path.extname(filename);
+
+    if (filesize > 1024 * 1024 * 50) {
+      return res.destroy();
+    }
+
     const insertedFile = await File.insertOne({
       extension,
       name: filename,
@@ -37,17 +41,41 @@ export const uploadFile = async (req, res, next) => {
     const fileId = insertedFile.id;
 
     const fullFileName = `${fileId}${extension}`;
+    const filePath = `./storage/${fullFileName}`;
 
-    const writeStream = createWriteStream(`./storage/${fullFileName}`);
-    req.pipe(writeStream);
+    const writeStream = createWriteStream(filePath);
+    let totolSize = 0;
+    let aborted = false;
 
-    req.on("end", async () => {
-      return res.status(201).json({ message: "File Uploaded" });
+    req.on("data", async (chunk) => {
+      if (aborted) return;
+      totolSize += chunk.length;
+      if (totolSize > filesize) {
+        aborted = true;
+        writeStream.close();
+        await insertedFile.deleteOne();
+        await rm(filePath);
+        req.destroy();
+      }
+      const isEmpty = writeStream.write(chunk);
+      if (!isEmpty) {
+        req.pause();
+        writeStream.on("drain", () => {
+          req.resume();
+        });
+      }
     });
 
-    req.on("error", async () => {
-      await File.deleteOne({ _id: insertedFile.insertedId });
-      return res.status(404).json({ message: "Could not Upload File" });
+    req.on("end", () => {
+      if (!aborted) {
+        writeStream.end();
+      }
+    });
+
+    writeStream.on("finish", () => {
+      if (!aborted) {
+        return res.status(201).json({ message: "File uploaded successfully" });
+      }
     });
   } catch (err) {
     console.log(err);
@@ -152,7 +180,7 @@ export const importFromDrive = async (req, res, next) => {
 
     const { data } = await drive.files.get(
       { fileId, alt: "media" },
-      { responseType: "stream" },
+      { responseType: "stream" }
     );
 
     const extension = path.extname(fileName);
