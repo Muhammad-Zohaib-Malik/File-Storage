@@ -27,6 +27,7 @@ export const uploadFile = async (req, res, next) => {
     const extension = path.extname(filename);
 
     if (filesize > 1024 * 1024 * 50) {
+      console.log("destroy")
       return res.destroy();
     }
 
@@ -44,13 +45,13 @@ export const uploadFile = async (req, res, next) => {
     const filePath = `./storage/${fullFileName}`;
 
     const writeStream = createWriteStream(filePath);
-    let totolSize = 0;
+    let totolFileSize = 0;
     let aborted = false;
 
     req.on("data", async (chunk) => {
       if (aborted) return;
-      totolSize += chunk.length;
-      if (totolSize > filesize) {
+      totolFileSize += chunk.length;
+      if (totolFileSize > filesize) {
         aborted = true;
         writeStream.close();
         await insertedFile.deleteOne();
@@ -71,6 +72,12 @@ export const uploadFile = async (req, res, next) => {
         writeStream.end();
       }
     });
+
+    req.on('end', () => {
+      console.log({ filesize })
+      console.log({ totolFileSize })
+    })
+
 
     writeStream.on("finish", () => {
       if (!aborted) {
