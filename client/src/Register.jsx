@@ -109,14 +109,14 @@ const Register = () => {
         await loginWithGoogle(code);
         navigate("/");
       } catch (err) {
-        console.error('Google login error:', err);
+        console.error("Google login error:", err);
         toast.error(err.response.data.error);
       }
     },
     flow: "auth-code",
     ux_mode: "popup",
     onError: (error) => {
-      console.error('Google auth error:', error.response.data.error);
+      console.error("Google auth error:", error.response.data.error);
       toast.error(error.response.data.error);
     },
   });
