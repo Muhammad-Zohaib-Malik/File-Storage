@@ -2,7 +2,7 @@ import Directory from "../models/directoryModel.js";
 import File from "../models/fileModel.js";
 import Otp from "../models/otp.model.js";
 import User from "../models/userModel.js";
-import { connectGoogleDrive, verifyGoogleToken } from "../utils/googleAuth.js";
+import {verifyGoogleToken } from "../utils/googleAuth.js";
 import { sendOtp } from "../utils/sendOTP.js";
 import mongoose, { Types } from "mongoose";
 import redisClient from "../config/redis.js";
@@ -256,11 +256,6 @@ export const loginWithGoogle = async (req, res, next) => {
 
 
   if (existingUser) {
-    if (existingUser.createdWith === "email") {
-      return res.status(400).json({
-        error: "you already have an account with email. Please login with email"
-      })
-    }
     if (existingUser.IsDeleted) {
       return res.status(403).json({
         error: "Your account has been deleted. Contact App Owner to recover",
@@ -611,21 +606,6 @@ export const changeRole = async (req, res, next) => {
       .status(403)
       .json({ message: "You are not allowed to change roles." });
   } catch (error) {
-    next(error);
-  }
-};
-
-export const connecToDrive = async (req, res, next) => {
-  const code = req.body.code;
-  try {
-    const files = await connectGoogleDrive(code);
-    res.status(200).json({
-      message: "Connected successfully",
-      files,
-    });
-    console.log("files", files);
-  } catch (error) {
-    console.error("Drive connection failed:", error);
     next(error);
   }
 };
