@@ -3,6 +3,7 @@ import Directory from "../models/directoryModel.js";
 import File from "../models/fileModel.js";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
+import { updateDirectoriesSize } from "./fileController.js";
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
 
@@ -29,7 +30,7 @@ export const createDirectory = async (req, res, next) => {
   const user = req.user;
 
   const parentDirId = req.params.parentDirId || user.rootDirId.toString();
-  let { dirname } = req.headers || "New Folder";
+  let dirname = req.headers.dirname || "New Folder";
   dirname = purify.sanitize(dirname);
   try {
     const parentDir = await Directory.findOne({
@@ -70,7 +71,7 @@ export const renameDirectory = async (req, res, next) => {
         _id: id,
         userId: user._id,
       },
-      { name: newDirName },
+      { name: newDirName }
     );
     res.status(200).json({ message: "Directory Renamed!" });
   } catch (err) {
@@ -125,6 +126,8 @@ export const deleteDirectory = async (req, res, next) => {
     await Directory.deleteMany({
       _id: { $in: [...directories.map(({ _id }) => _id), id] },
     });
+
+    await updateDirectoriesSize(directoryData.parentDirId, -directoryData.size);
   } catch (err) {
     next(err);
   }
