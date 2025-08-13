@@ -28,7 +28,9 @@ export const sendOtpSchema = registerSchema.pick({
 });
 
 export const passwordForGoogleSchema = z.object({
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters" }),
 });
 
 export const loginWithGoogleSchema = z.object({

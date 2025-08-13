@@ -2,7 +2,7 @@ import Directory from "../models/directoryModel.js";
 import File from "../models/fileModel.js";
 import Otp from "../models/otp.model.js";
 import User from "../models/userModel.js";
-import {verifyGoogleToken } from "../utils/googleAuth.js";
+import { verifyGoogleToken } from "../utils/googleAuth.js";
 import { sendOtp } from "../utils/sendOTP.js";
 import mongoose, { Types } from "mongoose";
 import redisClient from "../config/redis.js";
@@ -253,8 +253,6 @@ export const loginWithGoogle = async (req, res, next) => {
 
   const existingUser = await User.findOne({ email }).select("-__v");
 
-
-
   if (existingUser) {
     if (existingUser.IsDeleted) {
       return res.status(403).json({
@@ -381,12 +379,10 @@ export const setPasswordForGoogleUser = async (req, res, next) => {
     user.password = hash;
     await user.save();
 
-    return res
-      .status(200)
-      .json({
-        message:
-          "Password set successfully. You can now log in with email/password.",
-      });
+    return res.status(200).json({
+      message:
+        "Password set successfully. You can now log in with email/password.",
+    });
   } catch (err) {
     console.error("Set Password Error:", err);
     next(err);

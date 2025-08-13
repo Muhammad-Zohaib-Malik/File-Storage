@@ -46,6 +46,13 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    isMfaActive: {
+      type: Boolean,
+      required: false,
+    },
+    twoFactorSecret: {
+      type: String,
+    },
   },
   {
     strict: "throw",
