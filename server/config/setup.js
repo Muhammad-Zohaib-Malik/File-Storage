@@ -82,6 +82,9 @@ try {
           parentDirId: {
             bsonType: ["objectId", "null"],
           },
+          size: {
+            bsonType: "int",
+          },
           __v: {
             bsonType: "int",
           },
