@@ -46,18 +46,16 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    isMfaActive: {
-      type: Boolean,
-      required: false,
-    },
-    twoFactorSecret: {
-      type: String,
+    maxStorageInBytes: {
+      type: Number,
+      required: true,
+      default: 1 * 1024 ** 3,
     },
   },
   {
     strict: "throw",
     timestamps: true,
-  },
+  }
 );
 
 userSchema.pre("save", async function (next) {
