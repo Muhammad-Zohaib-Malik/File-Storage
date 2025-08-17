@@ -4,7 +4,6 @@ import cookieParser from "cookie-parser";
 import directoryRoutes from "./routes/directoryRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
-import driveRoutes from "./routes/driveRoutes.js";
 import { checkAuth } from "./middlewares/authMiddleware.js";
 import { connectDB } from "./config/db.js";
 import logger from "./utils/logger.js";
@@ -30,8 +29,6 @@ const PORT = process.env.PORT || 4000;
 app.use("/directory", checkAuth, directoryRoutes);
 app.use("/file", checkAuth, fileRoutes);
 app.use("/user", userRoutes);
-app.use("/", checkAuth, driveRoutes);
-
 app.use((err, req, res, next) => {
   logger.error("Error occurred:", err);
   res.status(err.status || 500).json({ error: "Something went wrong!" });

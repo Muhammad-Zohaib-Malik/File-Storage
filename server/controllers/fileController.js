@@ -55,6 +55,7 @@ export const uploadFile = async (req, res, next) => {
     const writeStream = createWriteStream(filePath);
     let totalFileSize = 0;
     let aborted = false;
+    let fileUploadCompleted = false;
 
     req.on("data", async (chunk) => {
       if (aborted) return;
@@ -64,7 +65,7 @@ export const uploadFile = async (req, res, next) => {
         writeStream.close();
         await insertedFile.deleteOne();
         await rm(filePath);
-        req.destroy();
+        return req.destroy();
       }
       const isEmpty = writeStream.write(chunk);
       if (!isEmpty) {
@@ -74,24 +75,28 @@ export const uploadFile = async (req, res, next) => {
         });
       }
     });
-
     req.on("end", async () => {
+      fileUploadCompleted = true;
       await updateDirectoriesSize(parentDirId, totalFileSize);
-
-      // while (parentId) {
-      //   const dir = await Directory.findById(parentId);
-      //   dir.size += totalFileSize;
-      //   await dir.save();
-      //   parentId = dir.parentDirId;
-      // }
-      return res.status(201).json({ message: "File uploaded successfully" });
+      return res.status(201).json({ message: "File Uploaded" });
     });
 
-    // writeStream.on("finish", () => {
-    //   if (!aborted) {
-    //     return res.status(201).json({ message: "File uploaded successfully" });
-    //   }
-    // });
+    req.on("close", async () => {
+      if (!fileUploadCompleted) {
+        try {
+          await insertedFile.deleteOne();
+          await rm(filePath);
+          console.log("file cleaned");
+        } catch (err) {
+          console.error("Error cleaning up aborted upload:", err);
+        }
+      }
+    });
+
+    req.on("error", async () => {
+      await File.deleteOne({ _id: insertedFile.insertedId });
+      return res.status(404).json({ message: "Could not Upload File" });
+    });
   } catch (err) {
     console.log(err);
     next(err);
@@ -162,9 +167,9 @@ export const deleteFile = async (req, res, next) => {
   }
 
   try {
-    await rm(`./storage/${id}${file.extension}`);
     await file.deleteOne();
     await updateDirectoriesSize(file.parentDirId, -file.size);
+    await rm(`./storage/${id}${file.extension}`);
     return res.status(200).json({ message: "File Deleted Successfully" });
   } catch (err) {
     next(err);

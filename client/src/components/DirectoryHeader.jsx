@@ -9,8 +9,6 @@ import {
   FaSignInAlt,
   FaShieldAlt,
 } from "react-icons/fa";
-import useDrivePicker from "react-google-drive-picker";
-import { importFromDrive } from "../api/directoryApi";
 
 function DirectoryHeader({
   directoryName,
@@ -26,7 +24,6 @@ function DirectoryHeader({
   const [userEmail, setUserEmail] = useState("guest@example.com");
   const [userPicture, setUserPicture] = useState("");
   const userMenuRef = useRef(null);
-  const [openPicker, authResponse] = useDrivePicker();
 
   const navigate = useNavigate();
 
@@ -87,40 +84,7 @@ function DirectoryHeader({
     document.addEventListener("mousedown", handleDocumentClick);
     return () => document.removeEventListener("mousedown", handleDocumentClick);
   }, []);
-  const handleOpenPicker = () => {
-    openPicker({
-      clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      developerKey: import.meta.env.VITE_GOOGLE_API_KEY,
-      viewId: "DOCS",
-      token: authResponse?.access_token,
-      showUploadView: true,
-      showUploadFolders: true,
-      supportDrives: true,
-      multiselect: true, // ✅ already enabled
-      callbackFunction: async (data) => {
-        if (data.action === "picked") {
-          for (const file of data.docs) {
-            const payload = {
-              fileId: file.id,
-              fileName: file.name,
-              mimeType: file.mimeType,
-              sizeBytes: file.sizeBytes,
-              accessToken: authResponse?.access_token,
-            };
-            console.log("Importing file:", payload);
-
-            try {
-              const response = await importFromDrive(payload);
-              console.log("Import successful:", response);
-            } catch (err) {
-              console.error("Import failed for:", file.name, err);
-            }
-          }
-        }
-      },
-    });
-  };
-
+ 
   return (
     <header className="flex items-center justify-between border-b border-gray-300 py-2 mb-4">
       <h1 className="text-xl font-semibold">{directoryName}</h1>
@@ -149,14 +113,7 @@ function DirectoryHeader({
           multiple
           onChange={handleFileSelect}
         />
-        <button
-          className="text-blue-500 hover:text-blue-700 text-sm font-medium disabled:text-blue-300 disabled:cursor-not-allowed"
-          title="Import from Google Drive"
-          onClick={handleOpenPicker}
-          disabled={disabled}
-        >
-          Import from Drive
-        </button>
+        
         <div className="relative flex" ref={userMenuRef}>
           <button
             className="text-blue-500 hover:text-blue-700 text-xl"
