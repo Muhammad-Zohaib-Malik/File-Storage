@@ -2,6 +2,7 @@ import { createWriteStream } from "fs";
 import { rm } from "fs/promises";
 import path from "path";
 import Directory from "../models/directoryModel.js";
+import User from "../models/userModel.js";
 import File from "../models/fileModel.js";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
@@ -33,9 +34,11 @@ export const uploadFile = async (req, res, next) => {
     const filename = purify.sanitize(req.headers?.filename || "untitled");
     const filesize = req.headers?.filesize;
     const extension = path.extname(filename);
+    const user = await User.findById(req.user._id);
+    const rootDir = await Directory.findById(req.user.rootDirId);
+    const remainingSpace = user.maxStorageInBytes - rootDir.size;
 
-    if (filesize > 1024 * 1024 * 50) {
-      console.log("destroy");
+    if (filesize > remainingSpace) {
       return res.destroy();
     }
 
