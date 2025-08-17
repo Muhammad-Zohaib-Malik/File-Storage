@@ -158,6 +158,7 @@ export const getCurrentUser = async (req, res) => {
     }
 
     const user = await User.findById(req.user._id).lean();
+    const rootDir = await Directory.findById(user.rootDirId).lean();
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -168,7 +169,9 @@ export const getCurrentUser = async (req, res) => {
       email: user.email,
       picture: user.picture,
       role: user.role,
+      maxStorageInBytes: user.maxStorageInBytes,
       createdWith: user.createdWith,
+      usedStorageInBytes: rootDir.size,
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
