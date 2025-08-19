@@ -13,7 +13,7 @@ import {
   renameDirectory,
 } from "./api/directoryApi";
 
-import { deleteFile, renameFile } from "./api/fileApi";
+import { deleteFile, renameFile, uploadInitiate } from "./api/fileApi";
 import DetailsPopup from "./components/DetailsPopup";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModel";
 
@@ -100,7 +100,7 @@ function DirectoryView() {
     else window.location.href = `http://localhost:4000/file/${id}`;
   }
 
-  function handleFileSelect(e) {
+  async function handleFileSelect(e) {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -115,27 +115,69 @@ function DirectoryView() {
       file,
       name: file.name,
       size: file.size,
+      type: file.type,
       id: `temp-${Date.now()}`,
       isUploading: true,
       progress: 0,
     };
+
+    const data = await uploadInitiate({
+      name: file.name,
+      size: file.size,
+      ContentType: file.type,
+      parentDirId: dirId,
+    });
+    const {uploadSignedUrl, fileId} = data;
 
     // Optimistically show the file in the list
     setFilesList((prev) => [tempItem, ...prev]);
     setUploadItem(tempItem);
     e.target.value = "";
 
-    startUpload(tempItem);
+    startUpload({item:tempItem, uploadUrl:uploadSignedUrl, fileId}); 
   }
 
-  function startUpload(item) {
+
+  //  function startUpload({item, uploadUrl, fileId}) {
+  //   const xhr = new XMLHttpRequest();
+  //   xhrRef.current = xhr;
+
+  //   xhr.open("PUT", uploadUrl);
+  //   xhr.withCredentials = true;
+  //   xhr.setRequestHeader("filename", item.name);
+  //   xhr.setRequestHeader("filesize", item.size);
+
+  //   xhr.upload.addEventListener("progress", (evt) => {
+  //     if (evt.lengthComputable) {
+  //       const progress = (evt.loaded / evt.total) * 100;
+  //       setUploadItem((prev) => (prev ? { ...prev, progress } : prev));
+  //     }
+  //   });
+
+  //   xhr.onload = () => {
+  //     // Clear upload state and refresh directory
+  //     setUploadItem(null);
+  //     loadDirectory();
+  //   };
+
+  //   xhr.onerror = () => {
+  //     setErrorMessage("This file is larger than the available space!");
+  //     // Remove temp item from the list
+  //     setFilesList((prev) => prev.filter((f) => f.id !== item.id));
+  //     setUploadItem(null);
+  //     setTimeout(() => setErrorMessage(""), 3000);
+  //   };
+
+  //   xhr.send(item.file);
+  // }
+
+
+  function startUpload({item, uploadUrl, fileId}) {
     const xhr = new XMLHttpRequest();
     xhrRef.current = xhr;
 
-    xhr.open("POST", `http://localhost:4000/file/${dirId || ""}`);
+    xhr.open("PUT", uploadUrl);
     xhr.withCredentials = true;
-    xhr.setRequestHeader("filename", item.name);
-    xhr.setRequestHeader("filesize", item.size);
 
     xhr.upload.addEventListener("progress", (evt) => {
       if (evt.lengthComputable) {
@@ -151,7 +193,7 @@ function DirectoryView() {
     };
 
     xhr.onerror = () => {
-      setErrorMessage("This file is larger than the available space!");
+      setErrorMessage("Something went wrong during upload!");
       // Remove temp item from the list
       setFilesList((prev) => prev.filter((f) => f.id !== item.id));
       setUploadItem(null);
@@ -304,7 +346,8 @@ function DirectoryView() {
             </p>
           ) : (
             <p className="text-center text-gray-600 mt-4 italic">
-              This folder is empty. Upload a file or create a folder to see some data.
+              This folder is empty. Upload a file or create a folder to see some
+              data.
             </p>
           )
         ) : (
