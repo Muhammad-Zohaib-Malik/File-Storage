@@ -5,6 +5,7 @@ import {
   getFile,
   renameFile,
   uploadFile,
+  uploadToAws,
 } from "../controllers/fileController.js";
 
 const router = express.Router();
@@ -19,5 +20,6 @@ router.get("/:id", getFile);
 router.patch("/:id", renameFile);
 
 router.delete("/:id", deleteFile);
+router.post("/uploads/initiate", uploadToAws);
 
 export default router;
