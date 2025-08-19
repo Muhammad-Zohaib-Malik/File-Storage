@@ -6,6 +6,7 @@ import User from "../models/userModel.js";
 import File from "../models/fileModel.js";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
+import { createGetSignedUrl, createUploadSignedUrl } from "../config/s3.js";
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
 
@@ -106,31 +107,31 @@ export const uploadFile = async (req, res, next) => {
   }
 };
 
-export const getFile = async (req, res) => {
-  const { id } = req.params;
-  const fileData = await File.findOne({
-    _id: id,
-    userId: req.user._id,
-  }).lean();
-  // Check if file exists
-  if (!fileData) {
-    return res.status(404).json({ error: "File not found!" });
-  }
+// export const getFile = async (req, res) => {
+//   const { id } = req.params;
+//   const fileData = await File.findOne({
+//     _id: id,
+//     userId: req.user._id,
+//   }).lean();
+//   // Check if file exists
+//   if (!fileData) {
+//     return res.status(404).json({ error: "File not found!" });
+//   }
 
-  // If "download" is requested, set the appropriate headers
-  const filePath = `${process.cwd()}/storage/${id}${fileData.extension}`;
+//   // If "download" is requested, set the appropriate headers
+//   const filePath = `${process.cwd()}/storage/${id}${fileData.extension}`;
 
-  if (req.query.action === "download") {
-    return res.download(filePath, fileData.name);
-  }
+//   if (req.query.action === "download") {
+//     return res.download(filePath, fileData.name);
+//   }
 
-  // Send file
-  return res.sendFile(filePath, (err) => {
-    if (!res.headersSent && err) {
-      return res.status(404).json({ error: "File not found!" });
-    }
-  });
-};
+//   // Send file
+//   return res.sendFile(filePath, (err) => {
+//     if (!res.headersSent && err) {
+//       return res.status(404).json({ error: "File not found!" });
+//     }
+//   });
+// };
 
 export const renameFile = async (req, res, next) => {
   const { id } = req.params;
@@ -177,4 +178,85 @@ export const deleteFile = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+export const uploadToAws = async (req, res, next) => {
+  const parentDirId = req.body.parentDirId || req.user.rootDirId;
+  const ContentType = req.body.ContentType;
+
+  try {
+    const parentDirData = await Directory.findOne({
+      _id: parentDirId,
+      userId: req.user._id,
+    });
+
+    // Check if parent directory exists
+    if (!parentDirData) {
+      return res.status(404).json({ error: "Parent directory not found!" });
+    }
+
+    const filename = req.body.name || "Untitled";
+    const filesize = req.body.size;
+    const extension = path.extname(filename);
+    const user = await User.findById(req.user._id);
+    const rootDir = await Directory.findById(req.user.rootDirId);
+    const remainingSpace = user.maxStorageInBytes - rootDir.size;
+
+    if (filesize > remainingSpace) {
+      return res.status(507).json({ error: "Not Enough Storage" });
+    }
+
+    const insertedFile = await File.insertOne({
+      extension,
+      name: filename,
+      size: filesize,
+      parentDirId: parentDirData._id,
+      userId: req.user._id,
+      isUploading: true,
+    });
+
+    const fileId = insertedFile.id;
+
+    const key = `${fileId}${extension}`;
+
+    const uploadSignedUrl = await createUploadSignedUrl({
+      key,
+      ContentType,
+    });
+
+    res.json({ uploadSignedUrl, fileId });
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+};
+
+export const getFile = async (req, res) => {
+  const { id } = req.params;
+  const fileData = await File.findOne({
+    _id: id,
+    userId: req.user._id,
+  }).lean();
+  // Check if file exists
+  if (!fileData) {
+    return res.status(404).json({ error: "File not found!" });
+  }
+
+  const key = `${id}${fileData.extension}`;
+  if (req.query.action === "download") {
+    const fileUrl = await createGetSignedUrl({
+      key,
+      download: true,
+      filename: fileData.name,
+    });
+
+    return res.redirect(fileUrl);
+  }
+
+  const fileUrl = await createGetSignedUrl({
+    key,
+    filename: fileData.name,
+  });
+
+  return res.redirect(fileUrl);
 };
