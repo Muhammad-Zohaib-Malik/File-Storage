@@ -4,6 +4,7 @@ import File from "../models/fileModel.js";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
 import { updateDirectoriesSize } from "./fileController.js";
+import { deleteS3FilesFromAws } from "../config/s3.js";
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
 
@@ -71,7 +72,7 @@ export const renameDirectory = async (req, res, next) => {
         _id: id,
         userId: user._id,
       },
-      { name: newDirName },
+      { name: newDirName }
     );
     res.status(200).json({ message: "Directory Renamed!" });
   } catch (err) {
@@ -86,9 +87,7 @@ export const deleteDirectory = async (req, res, next) => {
     const directoryData = await Directory.findOne({
       _id: id,
       userId: req.user._id,
-    })
-      .select("_id")
-      .lean();
+    }).lean();
 
     if (!directoryData) {
       return res.status(404).json({ error: "Directory not found!" });
@@ -115,9 +114,11 @@ export const deleteDirectory = async (req, res, next) => {
 
     const { files, directories } = await getDirectoryContents(id);
 
-    for (const { _id, extension } of files) {
-      await rm(`./storage/${_id.toString()}${extension}`);
-    }
+    const keys = files.map(({ _id, extension }) => ({
+      Key: `${_id}${extension}`,
+    }));
+
+    await deleteS3FilesFromAws({ keys });
 
     await File.deleteMany({
       _id: { $in: files.map(({ _id }) => _id) },
@@ -128,8 +129,8 @@ export const deleteDirectory = async (req, res, next) => {
     });
 
     await updateDirectoriesSize(directoryData.parentDirId, -directoryData.size);
+    return res.json({ message: "Files deleted successfully" });
   } catch (err) {
     next(err);
   }
-  return res.json({ message: "Files deleted successfully" });
 };
