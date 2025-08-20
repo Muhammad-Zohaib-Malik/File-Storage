@@ -13,7 +13,12 @@ import {
   renameDirectory,
 } from "./api/directoryApi";
 
-import { deleteFile, renameFile, uploadInitiate } from "./api/fileApi";
+import {
+  deleteFile,
+  renameFile,
+  uploadComplete,
+  uploadInitiate,
+} from "./api/fileApi";
 import DetailsPopup from "./components/DetailsPopup";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModel";
 
@@ -120,23 +125,30 @@ function DirectoryView() {
       isUploading: true,
       progress: 0,
     };
+    try {
+      const data = await uploadInitiate({
+        name: file.name,
+        size: file.size,
+        ContentType: file.type,
+        parentDirId: dirId,
+      });
+      const { uploadSignedUrl, fileId } = data;
 
-    const data = await uploadInitiate({
-      name: file.name,
-      size: file.size,
-      ContentType: file.type,
-      parentDirId: dirId,
-    });
-    const {uploadSignedUrl, fileId} = data;
+      // Optimistically show the file in the list
+      setFilesList((prev) => [tempItem, ...prev]);
+      setUploadItem(tempItem);
+      e.target.value = "";
 
-    // Optimistically show the file in the list
-    setFilesList((prev) => [tempItem, ...prev]);
-    setUploadItem(tempItem);
-    e.target.value = "";
-
-    startUpload({item:tempItem, uploadUrl:uploadSignedUrl, fileId}); 
+      startUpload({ item: tempItem, uploadUrl: uploadSignedUrl, fileId });
+    } catch (error) {
+      console.error(
+        "Upload initiation failed:",
+        error.response?.data?.error || error.message
+      );
+      setErrorMessage(error.response?.data?.error || error.message);
+      setTimeout(() => setErrorMessage(""), 3000);
+    }
   }
-
 
   //  function startUpload({item, uploadUrl, fileId}) {
   //   const xhr = new XMLHttpRequest();
@@ -171,8 +183,7 @@ function DirectoryView() {
   //   xhr.send(item.file);
   // }
 
-
-  function startUpload({item, uploadUrl, fileId}) {
+  function startUpload({ item, uploadUrl, fileId }) {
     const xhr = new XMLHttpRequest();
     xhrRef.current = xhr;
 
@@ -186,8 +197,16 @@ function DirectoryView() {
       }
     });
 
-    xhr.onload = () => {
+    xhr.onload = async () => {
+      if (xhr.status == 200) {
+        const fileUploadResponse = await uploadComplete(fileId);
+      } else {
+        setErrorMessage("File not uploaded successfully!");
+        setTimeout(() => setErrorMessage(""), 3000);
+      }
+
       // Clear upload state and refresh directory
+
       setUploadItem(null);
       loadDirectory();
     };
