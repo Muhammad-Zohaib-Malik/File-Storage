@@ -1,11 +1,11 @@
 import express from "express";
 import validateIdMiddleware from "../middlewares/validateIdMiddleware.js";
 import {
-  deleteFile,
-  getFile,
+  deleteFileFromAws,
+  getFileFromAws,
   renameFile,
-  uploadFile,
   uploadToAws,
+  uploadToAwsComplete,
 } from "../controllers/fileController.js";
 
 const router = express.Router();
@@ -13,13 +13,12 @@ const router = express.Router();
 router.param("parentDirId", validateIdMiddleware);
 router.param("id", validateIdMiddleware);
 
-router.post("/:parentDirId?", uploadFile);
-
-router.get("/:id", getFile);
+router.get("/:id", getFileFromAws);
 
 router.patch("/:id", renameFile);
 
-router.delete("/:id", deleteFile);
 router.post("/uploads/initiate", uploadToAws);
+router.post("/uploads/complete", uploadToAwsComplete);
+router.delete("/:id", deleteFileFromAws);
 
 export default router;
