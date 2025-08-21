@@ -1,10 +1,9 @@
-import { rm } from "fs/promises";
 import Directory from "../models/directoryModel.js";
 import File from "../models/fileModel.js";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
 import { updateDirectoriesSize } from "./fileController.js";
-import { deleteS3FilesFromAws } from "../config/s3.js";
+import { deleteS3FilesFromAws } from "../services/s3.js";
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
 
