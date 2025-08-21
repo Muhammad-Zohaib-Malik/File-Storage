@@ -1,12 +1,11 @@
 # 📁 File Storage App
 
-A secure and scalable file storage application with Google Drive integration, built with modern web technologies. This application allows users to upload, manage, and share files with robust security features and rate limiting.
+A secure and scalable file storage application with AWS S3 and CloudFront integration, built with modern web technologies. This application allows users to upload, manage, and share files with robust security features and rate limiting.
 
 ## ✨ Features
 
 - **User Authentication**
   - Secure session-based authentication
-  - Google OAuth login
   - Role-based access control
   - Session management with Redis
 
@@ -14,8 +13,7 @@ A secure and scalable file storage application with Google Drive integration, bu
   - Upload and download files
   - File organization with folders
   - File sharing capabilities
-  - Google Drive integration
-  - Direct uploads from Google Drive to server
+  - AWS S3 storage with CloudFront CDN
 
 - **Security**
   - Rate limiting with Redis
@@ -30,11 +28,11 @@ A secure and scalable file storage application with Google Drive integration, bu
 - **Framework**: Express.js
 - **Database**: MongoDB with Mongoose
 - **Caching & Sessions**: Redis
-- **Authentication**: Session-based with Google OAuth
+- **Authentication**: Session-based
 - **Security**: Helmet, CORS, Rate Limiting, CSRF Protection
 - **Logging**: Winston with daily rotation
 - **Email**: Nodemailer
-- **Google APIs**: Google Drive integration
+- **Storage**: AWS S3 with CloudFront CDN
 - **Validation**: Zod
 
 ### Frontend
@@ -93,18 +91,18 @@ A secure and scalable file storage application with Google Drive integration, bu
    SMTP_USER=your_email@gmail.com
    SMTP_PASS=your_email_password
    
-   # Google OAuth
-   GOOGLE_CLIENT_ID=your_google_client_id
-   GOOGLE_API_KEY=your_google_api_key
+   # AWS S3
+   AWS_ACCESS_KEY_ID=your_aws_access_key_id
+   AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
+   AWS_REGION=your_aws_region
+   AWS_S3_BUCKET_NAME=your_s3_bucket_name
+   CLOUDFRONT_DOMAIN=your_cloudfront_domain
    ```
    
    #### Client (.env)
    Create a `.env` file in the client directory:
    ```env
-   # Google OAuth
-   VITE_GOOGLE_CLIENT_ID=your_google_client_id
-   VITE_GOOGLE_API_KEY=your_google_api_key
-   VITE_SCOPE=https://www.googleapis.com/auth/drive.readonly
+   # No Google OAuth needed
    ```
    
    > **Note**: Replace all placeholder values with your actual configuration. Never commit the `.env` file to version control.
@@ -120,56 +118,9 @@ A secure and scalable file storage application with Google Drive integration, bu
    npm start
    ```
 
-## 🔌 Google Drive Integration
-
-The application provides seamless integration with Google Drive, allowing users to:
-
-- Browse and select files from their Google Drive
-- Upload files from Drive to the application
-- Manage permissions and sharing
-- View file metadata and previews
-
-### How to set up Google Drive API:
-
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select an existing one
-3. Enable the Google Drive API
-4. Configure the OAuth consent screen
-5. Create OAuth 2.0 credentials
-6. Download the credentials and add them to your `.env` file
-
-
 ## 📊 Logging
 
 Application logs are stored in the `logs` directory with daily rotation and retention of 14 days.
-
-## 🚀 Quick Start
-
-1. **Clone and install dependencies**
-   ```bash
-   git clone https://github.com/Muhammad-Zohaib-Malik/File-Storage.git
-   cd File-Storage
-   
-   # Install server dependencies
-   cd server
-   npm install
-   
-   # Install client dependencies
-   cd client
-   npm install
-   
-   # Start both servers
-   npm run dev
-   ```
-
-2. **Set up environment variables** as described above
-
-3. **Start the application**
-   ```bash
-   # In separate terminals
-   cd server && npm run dev
-   cd client && npm start
-   ```
 
 ## 🤝 Contributing
 
