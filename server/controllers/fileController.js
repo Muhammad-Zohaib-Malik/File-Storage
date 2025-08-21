@@ -5,11 +5,12 @@ import File from "../models/fileModel.js";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
 import {
-  createGetSignedUrl,
   createUploadSignedUrl,
   deleteS3FileFromAws,
   getS3FileMetaData,
-} from "../config/s3.js";
+} from "../services/s3.js";
+import { createCloudGetFrontSignedurl } from "../services/cloudfront.js";
+
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
 
@@ -143,16 +144,15 @@ export const getFileFromAws = async (req, res) => {
 
   const key = `${id}${fileData.extension}`;
   if (req.query.action === "download") {
-    const fileUrl = await createGetSignedUrl({
+    const fileUrl = createCloudGetFrontSignedurl({
       key,
       download: true,
       filename: fileData.name,
     });
-
     return res.redirect(fileUrl);
   }
 
-  const fileUrl = await createGetSignedUrl({
+  const fileUrl = createCloudGetFrontSignedurl({
     key,
     filename: fileData.name,
   });
