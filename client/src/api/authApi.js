@@ -24,8 +24,3 @@ export const changePasswordForGoogleUser = async (password) => {
   });
   return data;
 };
-
-export const connectWithGoogleDrive = async (code) => {
-  const { data } = await axiosWithCreds.post("/user/google/drive", { code });
-  return data;
-};
