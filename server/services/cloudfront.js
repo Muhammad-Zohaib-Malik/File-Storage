@@ -1,10 +1,9 @@
 import { getSignedUrl } from "@aws-sdk/cloudfront-signer";
 
 const privateKey = process.env.CLOUDFRONT_PRIVATE_KEY;
-console.log(privateKey);
 
 const keyPairId = process.env.CLOUDFRONT_KEYPAIR_ID;
-const dateLessThan = new Date(Date.now() + 1000 * 60 * 60).toISOString(); 
+const dateLessThan = new Date(Date.now() + 1000 * 60 * 60).toISOString();
 
 const distributionName = process.env.CLOUDFRONT_DISTRIBUTION_NAME;
 
@@ -20,6 +19,5 @@ export const createCloudGetFrontSignedurl = ({
     privateKey,
     dateLessThan,
   });
-  console.log(signedUrl);
   return signedUrl;
 };
