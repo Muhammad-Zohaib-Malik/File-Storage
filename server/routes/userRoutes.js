@@ -11,7 +11,9 @@ import {
   deleteUsingRoleBySoftDelete,
   getAllUsers,
   getCurrentUser,
+  githubLoginCallback,
   login,
+  loginWithGithub,
   loginWithGoogle,
   logout,
   logoutFromAllDevices,
@@ -35,6 +37,8 @@ router.post("/verify-otp", verifyOTP);
 router.post("/google", loginWithGoogle);
 router.get("/all", checkAuth, checkForRole, getAllUsers);
 router.post("/set-password-for-google", checkAuth, setPasswordForGoogleUser);
+router.get("/github",loginWithGithub)
+router.get("/github/callback",githubLoginCallback)
 
 //logout by admin and Manager
 router.post("/:userId/logout", checkAuth, checkForRole, logoutUsingRole);
