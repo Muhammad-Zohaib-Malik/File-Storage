@@ -22,6 +22,8 @@ import DOMPurify from "dompurify";
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
 import bcrypt from "bcrypt";
+import { github } from "../utils/github.js";
+import * as arctic from "arctic";
 
 export const register = async (req, res, next) => {
   const { success, error, data } = registerSchema.safeParse(req.body);
@@ -61,7 +63,7 @@ export const register = async (req, res, next) => {
           userId,
         },
       ],
-      { session },
+      { session }
     );
 
     await User.create(
@@ -75,7 +77,7 @@ export const register = async (req, res, next) => {
           createdWith: "email",
         },
       ],
-      { session },
+      { session }
     );
 
     await session.commitTransaction();
@@ -125,7 +127,7 @@ export const login = async (req, res) => {
     `@userId:{${user.id}}`,
     {
       RETURN: [],
-    },
+    }
   );
 
   if (allSessions.documents.length >= 2) {
@@ -193,7 +195,7 @@ export const logoutFromAllDevices = async (req, res) => {
     `@userId:{${session.userId}}`,
     {
       RETURN: [],
-    },
+    }
   );
   for (const session of allSession.documents) {
     await redisClient.del(session.id);
@@ -243,90 +245,81 @@ export const loginWithGoogle = async (req, res, next) => {
   if (!success) {
     return res.status(400).json({ error: error.flatten().fieldErrors });
   }
+
   const { code } = data;
   const userData = await verifyGoogleToken(code);
   const { email, name, picture } = userData;
 
-  const existingUser = await User.findOne({ email }).select("-__v");
-
-  if (existingUser) {
-    if (existingUser.IsDeleted) {
-      return res.status(403).json({
-        error: "Your account has been deleted. Contact App Owner to recover",
-      });
-    }
-
-    const allSessions = await redisClient.ft.search(
-      "userIdIdx",
-      `@userId:{${existingUser._id}}`,
-      {
-        RETURN: [],
-      },
-    );
-
-    if (allSessions.documents.length >= 2) {
-      await redisClient.del(allSessions.documents[0].id);
-    }
-
-    if (!existingUser.picture.includes("googleusercontent")) {
-      existingUser.picture = picture;
-      await existingUser.save();
-    }
-
-    const sessionId = crypto.randomUUID();
-    const redisKey = `session:${sessionId}`;
-    await redisClient.json.set(redisKey, "$", {
-      userId: existingUser._id,
-      rootDirId: existingUser.rootDirId,
-      role: existingUser.role,
-    });
-    redisClient.expire(redisKey, 60 * 60 * 24 * 7);
-
-    res.cookie("sid", sessionId, {
-      httpOnly: true,
-      signed: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-      sameSite: "lax",
-    });
-
-    return res.status(200).json({ message: "Logged In", userData });
-  }
-
-  const mongooseSession = await mongoose.startSession();
+  let mongooseSession;
 
   try {
+    mongooseSession = await mongoose.startSession();
     mongooseSession.startTransaction();
 
-    const rootDirId = new Types.ObjectId();
-    const userId = new Types.ObjectId();
+    let user = await User.findOne({ email }).session(mongooseSession).select("-__v");
 
-    const directory = new Directory({
-      _id: rootDirId,
-      name: `root-${email}`,
-      parentDirId: null,
-      userId,
-    });
+    if (user) {
+      if (user.IsDeleted) {
+        await mongooseSession.abortTransaction();
+        return res.status(403).json({
+          error: "Your account has been deleted. Contact App Owner to recover",
+        });
+      }
 
-    const user = new User({
-      _id: userId,
-      name,
-      email,
-      picture,
-      rootDirId,
-      createdWith: "google",
-    });
+      // Limit sessions to max 2
+      const allSessions = await redisClient.ft.search(
+        "userIdIdx",
+        `@userId:{${user._id}}`,
+        { RETURN: [] }
+      );
 
-    await directory.save({ session: mongooseSession });
-    await user.save({ session: mongooseSession });
+      if (allSessions.documents.length >= 2) {
+        await redisClient.del(allSessions.documents[0].id);
+      }
 
+      // Update avatar if changed
+      if (!user.picture.includes("googleusercontent")) {
+        user.picture = picture;
+        await user.save({ session: mongooseSession });
+      }
+    } else {
+      // New user registration
+      const rootDirId = new Types.ObjectId();
+      const userId = new Types.ObjectId();
+
+      const directory = new Directory({
+        _id: rootDirId,
+        name: `root-${email}`,
+        parentDirId: null,
+        userId,
+      });
+
+      user = new User({
+        _id: userId,
+        name,
+        email,
+        picture,
+        rootDirId,
+        createdWith: "google",
+      });
+
+      await directory.save({ session: mongooseSession });
+      await user.save({ session: mongooseSession });
+    }
+
+    await mongooseSession.commitTransaction();
+
+    // Create session in Redis
     const sessionId = crypto.randomUUID();
     const redisKey = `session:${sessionId}`;
+
     await redisClient.json.set(redisKey, "$", {
       userId: user._id,
       rootDirId: user.rootDirId,
       role: user.role,
     });
-    redisClient.expire(redisKey, 60 * 60 * 24 * 7);
+
+    await redisClient.expire(redisKey, 60 * 60 * 24 * 7); // 7 days
 
     res.cookie("sid", sessionId, {
       httpOnly: true,
@@ -335,19 +328,148 @@ export const loginWithGoogle = async (req, res, next) => {
       sameSite: "lax",
     });
 
-    await mongooseSession.commitTransaction();
-
-    return res
-      .status(201)
-      .json({ message: "Account created and logged In", user });
+    return res.status(user.isNew ? 201 : 200).json({
+      message: user.isNew ? "Account created and logged In" : "Logged In",
+      user,
+    });
   } catch (err) {
-    await mongooseSession.abortTransaction();
-    console.error("Registration Error:", err);
+    if (mongooseSession) {
+      await mongooseSession.abortTransaction();
+    }
+    console.error("Google Login Error:", err);
     return next(err);
   } finally {
-    mongooseSession.endSession();
+    if (mongooseSession) {
+      mongooseSession.endSession();
+    }
   }
 };
+
+
+export const loginWithGithub = async (req, res, next) => {
+  const state = arctic.generateState();
+  const scopes = ["user:email"];
+  const url = github.createAuthorizationURL(state, scopes);
+  console.log("url",url)
+  const cookieConfig = {
+    httpOnly: true,
+    sameSite: "lax",
+  };
+  res.cookie("github_oauth", state, cookieConfig);
+  res.redirect(url.href);
+};
+
+export const githubLoginCallback = async (req, res, next) => {
+  const { code, state } = req.query;
+  const storedState = req.cookies.github_oauth;
+
+  if (!code || !state || state !== storedState) {
+    return res.status(400).json({ error: "Invalid state or missing code" });
+  }
+
+  let mongooseSession;
+
+  try {
+    // Exchange code for access token
+    const tokens = await github.validateAuthorizationCode(code);
+
+    // Fetch GitHub user
+    const githubUserResponse = await fetch("https://api.github.com/user", {
+      headers: { Authorization: `Bearer ${tokens.accessToken()}` },
+    });
+
+    if (!githubUserResponse.ok) {
+      return res
+        .status(401)
+        .json({ error: "Failed to fetch user data from GitHub" });
+    }
+
+    const { name, email, avatar_url } = await githubUserResponse.json();
+
+    if (!email) {
+      return res.status(400).json({ error: "GitHub did not return an email" });
+    }
+
+    // Start transaction early so both existing and new user flows are covered
+    mongooseSession = await mongoose.startSession();
+    mongooseSession.startTransaction();
+
+    let user = await User.findOne({ email }).session(mongooseSession).select("-__v");
+
+    if (user) {
+      if (user.IsDeleted) {
+        await mongooseSession.abortTransaction();
+        return res.status(403).json({
+          error:
+            "Your account has been deleted. Contact support to recover it.",
+        });
+      }
+
+      // Update avatar if changed
+      if (user.picture !== avatar_url) {
+        user.picture = avatar_url;
+        await user.save({ session: mongooseSession });
+      }
+    } else {
+      // Create new user
+      const rootDirId = new Types.ObjectId();
+      const userId = new Types.ObjectId();
+
+      const directory = new Directory({
+        _id: rootDirId,
+        name: `root-${email}`,
+        parentDirId: null,
+        userId,
+      });
+
+      user = new User({
+        _id: userId,
+        name,
+        email,
+        picture: avatar_url,
+        rootDirId,
+        createdWith: "github",
+      });
+
+      await directory.save({ session: mongooseSession });
+      await user.save({ session: mongooseSession });
+    }
+
+    // Commit the DB changes
+    await mongooseSession.commitTransaction();
+
+    // Create session in Redis
+    const sessionId = crypto.randomUUID();
+    const redisKey = `session:${sessionId}`;
+
+    await redisClient.json.set(redisKey, "$", {
+      userId: user._id,
+      rootDirId: user.rootDirId,
+      role: user.role,
+    });
+
+    await redisClient.expire(redisKey, 60 * 60 * 24 * 7); // 7 days
+
+    res.cookie("sid", sessionId, {
+      httpOnly: true,
+      signed: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+      sameSite: "lax",
+    });
+    res.redirect("http://localhost:5173");
+  } catch (error) {
+    if (mongooseSession) {
+      await mongooseSession.abortTransaction();
+    }
+    console.error("GitHub Login Error:", error);
+    return next(error);
+  } finally {
+    if (mongooseSession) {
+      mongooseSession.endSession();
+    }
+  }
+};
+
 
 export const setPasswordForGoogleUser = async (req, res, next) => {
   const result = passwordForGoogleSchema.safeParse(req.body);
@@ -442,7 +564,7 @@ export const logoutUsingRole = async (req, res, next) => {
       `@userId:{${userId}}`,
       {
         RETURN: [],
-      },
+      }
     );
 
     for (const session of allSessions.documents) {
@@ -510,7 +632,7 @@ export const deleteUsingRoleByHardDelete = async (req, res, next) => {
     const allSessions = await redisClient.ft.search(
       "userIdIdx",
       `@userId:{${userId}}`,
-      { RETURN: [] },
+      { RETURN: [] }
     );
 
     for (const redisSession of allSessions.documents) {
