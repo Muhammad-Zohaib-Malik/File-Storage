@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { fetchUser, logoutUser, logoutAllSessions } from "../api/userApi";
 import {
   FaFolderPlus,
@@ -107,7 +107,9 @@ function DirectoryHeader({
 
   return (
     <header className="flex items-center justify-between border-b border-gray-300 py-2 mb-4">
-      <h1 className="text-xl font-semibold">{directoryName}</h1>
+      <h1 className="text-xl font-semibold flex items-center gap-2">
+        {directoryName}
+      </h1>
       <div className="flex gap-4 items-end">
         <button
           className="text-blue-500 hover:text-blue-700 text-xl -mb-0.5 mr-0.5 disabled:text-blue-300 disabled:cursor-not-allowed"
@@ -170,6 +172,11 @@ function DirectoryHeader({
                     </div>
                   </div>
                   <div className="border-t border-gray-200" />
+
+                  <div className="flex items-center gap-2 text-gray-700 cursor-pointer hover:bg-gray-200 px-4 py-2">
+                    <FaUser className="text-blue-600" />
+                    <Link to="/profile">Profile</Link>
+                  </div>
                   <div
                     className="flex items-center gap-2 text-gray-700 cursor-pointer hover:bg-gray-200 px-4 py-2"
                     onClick={handleLogout}
