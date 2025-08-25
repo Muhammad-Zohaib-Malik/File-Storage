@@ -49,7 +49,7 @@ const userSchema = new Schema(
     maxStorageInBytes: {
       type: Number,
       required: true,
-      default: 1 * 1024 ** 3,
+      default: 2 * 1024 ** 3,
     },
   },
   {
