@@ -4,6 +4,7 @@ import { loginWithGoogle, sendOtp, verifyOtp } from "./api/authApi";
 import { registerUser } from "./api/userApi";
 import { useGoogleLogin } from "@react-oauth/google";
 import { FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -120,6 +121,11 @@ const Register = () => {
       toast.error(error.response.data.error);
     },
   });
+
+  const loginWithGithub = () => {
+    window.location.href = "http://localhost:4000/user/github";
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden">
@@ -361,6 +367,30 @@ const Register = () => {
                   />
                 </svg>
                 Sign up with Google
+              </button>
+            </div>
+
+            <div className="mt-6">
+              <button
+                type="button"
+                onClick={loginWithGithub}
+                aria-label="Sign in with GitHub"
+                className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm 
+               bg-black text-white text-sm font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 
+               focus:ring-offset-2 focus:ring-black/30 transition-colors duration-200"
+              >
+                {/* GitHub SVG */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5 mr-2"
+                  aria-hidden="true"
+                >
+                  <path d="M12 .297a12 12 0 00-3.794 23.394c.6.111.82-.26.82-.577v-2.234c-3.338.726-4.033-1.61-4.033-1.61-.546-1.387-1.333-1.758-1.333-1.758-1.089-.745.083-.73.083-.73 1.205.084 1.84 1.238 1.84 1.238 1.07 1.834 2.809 1.305 3.495.998.108-.776.418-1.305.76-1.605-2.665-.305-5.466-1.333-5.466-5.93 0-1.31.468-2.382 1.235-3.222-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.3 1.23a11.52 11.52 0 013.003-.403c1.019.005 2.046.138 3.003.404 2.29-1.553 3.296-1.23 3.296-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.912 1.235 3.222 0 4.61-2.803 5.624-5.475 5.921.43.37.815 1.102.815 2.222v3.293c0 .32.218.694.825.576A12.003 12.003 0 0012 .297z" />
+                </svg>
+
+                <span>Sign in with GitHub</span>
               </button>
             </div>
           </div>
