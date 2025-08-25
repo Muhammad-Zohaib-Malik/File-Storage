@@ -115,6 +115,7 @@ const UserProfile = () => {
 
   if (!user) return null;
   const isGoogleUser = user.createdWith === "google";
+  const isGithubUser = user.createdWith === "github";
 
   return (
     <div className="min-h-screen bg-white p-0 m-0 w-full">
@@ -297,6 +298,74 @@ const UserProfile = () => {
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                           <svg
+                            className="h-6 w-6"
+                            viewBox="0 0 533.5 544.3"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              fill="#4285F4"
+                              d="M533.5 278.4c0-17.6-1.5-34.5-4.3-50.9H272v95.7h146.9c-6.3 33.6-25.2 62-53.9 81.1v67.1h87.1c50.9-46.9 80.4-115.9 80.4-193z"
+                            />
+                            <path
+                              fill="#34A853"
+                              d="M272 544.3c72.9 0 134-24.1 178.7-65.3l-87.1-67.1c-24.2 16.2-55.1 25.8-91.6 25.8-70.5 0-130.3-47.5-151.6-111.5H32.9v69.8C77.4 482.8 168.5 544.3 272 544.3z"
+                            />
+                            <path
+                              fill="#FBBC05"
+                              d="M120.4 323.5c-10.4-31.5-10.4-65.8 0-97.3V156.4H32.9c-39.7 77.5-39.7 168.1 0 245.6l87.5-69.8z"
+                            />
+                            <path
+                              fill="#EA4335"
+                              d="M272 107.6c38.7-.6 75.9 13.3 104.1 38.6l78-78C405.1 24.5 343.9 0 272 0 168.5 0 77.4 61.5 32.9 156.4l87.5 69.8c21.3-64 81.1-111.5 151.6-118.6z"
+                            />
+                          </svg>
+                        </div>
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-gray-900">
+                            Google
+                          </p>
+                          <p className="text-sm text-gray-500">{user.email}</p>
+                        </div>
+                      </div>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <svg
+                          className="-ml-0.5 mr-1.5 h-2 w-2 text-green-400"
+                          fill="currentColor"
+                          viewBox="0 0 8 8"
+                        >
+                          <circle cx={4} cy={4} r={3} />
+                        </svg>
+                        Connected
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {isGithubUser && (
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
+                    <svg
+                      className="inline-block w-5 h-5 mr-2 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                      />
+                    </svg>
+                    Connected Accounts
+                  </h3>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                          <svg
                             className="h-6 w-6 text-gray-800"
                             fill="currentColor"
                             viewBox="0 0 24 24"
@@ -311,7 +380,7 @@ const UserProfile = () => {
                         </div>
                         <div className="ml-4">
                           <p className="text-sm font-medium text-gray-900">
-                            Google
+                            Github
                           </p>
                           <p className="text-sm text-gray-500">{user.email}</p>
                         </div>
