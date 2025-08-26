@@ -1,10 +1,11 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DirectoryHeader from "./components/DirectoryHeader";
 import CreateDirectoryModal from "./components/CreateDirectoryModal";
 import RenameModal from "./components/RenameModal";
 import DirectoryList from "./components/DirectoryList";
 import { DirectoryContext } from "./context/DirectoryContext";
+import { toast } from "react-hot-toast";
 
 import {
   getDirectoryItems,
@@ -16,11 +17,13 @@ import {
 import {
   deleteFile,
   renameFile,
+  shareFileByEmail,
   uploadComplete,
   uploadInitiate,
 } from "./api/fileApi";
 import DetailsPopup from "./components/DetailsPopup";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModel";
+import ShareFileModal from "./components/shareFileModal";
 
 function DirectoryView() {
   const { dirId } = useParams();
@@ -36,6 +39,23 @@ function DirectoryView() {
   const [renameType, setRenameType] = useState(null);
   const [renameId, setRenameId] = useState(null);
   const [renameValue, setRenameValue] = useState("");
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [selectedFileId, setSelectedFileId] = useState(null);
+
+  const handleOpenShareModal = (fileId) => {
+    setSelectedFileId(fileId);
+    setShowShareModal(true);
+  };
+
+  const handleShareFile = async (email) => {
+    try {
+      await shareFileByEmail(selectedFileId, email);
+      setShowShareModal(false);
+      toast.success("File shared successfully!");
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Failed to share file");
+    }
+  };
 
   const fileInputRef = useRef(null);
 
@@ -50,7 +70,7 @@ function DirectoryView() {
   const openDetailsPopup = (item) => setDetailsItem(item);
   const closeDetailsPopup = () => setDetailsItem(null);
 
-  const loadDirectory = async () => {
+  const loadDirectory = useCallback(async () => {
     try {
       const data = await getDirectoryItems(dirId);
       setDirectoryName(dirId ? data.name : "My Drive");
@@ -60,12 +80,12 @@ function DirectoryView() {
       if (err.response?.status === 401) navigate("/login");
       else setErrorMessage(err.response?.data?.error || err.message);
     }
-  };
+  }, [dirId, navigate]);
 
   useEffect(() => {
     loadDirectory();
     setActiveContextMenu(null);
-  }, [dirId]);
+  }, [dirId, loadDirectory]);
 
   function getFileIcon(filename) {
     const ext = filename.split(".").pop().toLowerCase();
@@ -150,39 +170,6 @@ function DirectoryView() {
     }
   }
 
-  //  function startUpload({item, uploadUrl, fileId}) {
-  //   const xhr = new XMLHttpRequest();
-  //   xhrRef.current = xhr;
-
-  //   xhr.open("PUT", uploadUrl);
-  //   xhr.withCredentials = true;
-  //   xhr.setRequestHeader("filename", item.name);
-  //   xhr.setRequestHeader("filesize", item.size);
-
-  //   xhr.upload.addEventListener("progress", (evt) => {
-  //     if (evt.lengthComputable) {
-  //       const progress = (evt.loaded / evt.total) * 100;
-  //       setUploadItem((prev) => (prev ? { ...prev, progress } : prev));
-  //     }
-  //   });
-
-  //   xhr.onload = () => {
-  //     // Clear upload state and refresh directory
-  //     setUploadItem(null);
-  //     loadDirectory();
-  //   };
-
-  //   xhr.onerror = () => {
-  //     setErrorMessage("This file is larger than the available space!");
-  //     // Remove temp item from the list
-  //     setFilesList((prev) => prev.filter((f) => f.id !== item.id));
-  //     setUploadItem(null);
-  //     setTimeout(() => setErrorMessage(""), 3000);
-  //   };
-
-  //   xhr.send(item.file);
-  // }
-
   function startUpload({ item, uploadUrl, fileId }) {
     const xhr = new XMLHttpRequest();
     xhrRef.current = xhr;
@@ -199,7 +186,7 @@ function DirectoryView() {
 
     xhr.onload = async () => {
       if (xhr.status == 200) {
-        const fileUploadResponse = await uploadComplete(fileId);
+        await uploadComplete(fileId);
       } else {
         setErrorMessage("File not uploaded successfully!");
         setTimeout(() => setErrorMessage(""), 3000);
@@ -300,9 +287,9 @@ function DirectoryView() {
         handleRowClick,
         activeContextMenu,
         handleContextMenu: (e, id) => {
-          e.stopPropagation();
           e.preventDefault();
-          setActiveContextMenu((prev) => (prev === id ? null : id));
+          e.stopPropagation();
+          setActiveContextMenu(id);
         },
         getFileIcon,
         isUploading,
@@ -311,16 +298,15 @@ function DirectoryView() {
         setDeleteItem,
         openRenameModal,
         openDetailsPopup,
+        handleOpenShareModal,
       }}
     >
-      <div className="mx-2 md:mx-4">
-        {errorMessage &&
-          errorMessage !==
-            "Directory not found or you do not have access to it!" && (
-            <div className="error-message text-red-500 text-xs text-center mt-1">
-              {errorMessage}
-            </div>
-          )}
+      <div className="container mx-auto p-4 max-w-4xl">
+        {errorMessage && (
+          <div className="error-message text-red-500 text-xs text-center mt-1 mb-4">
+            {errorMessage}
+          </div>
+        )}
 
         <DirectoryHeader
           directoryName={directoryName}
@@ -336,10 +322,18 @@ function DirectoryView() {
 
         {showCreateDirModal && (
           <CreateDirectoryModal
-            newDirname={newDirname}
-            setNewDirname={setNewDirname}
+            dirname={newDirname}
+            setDirname={setNewDirname}
             onClose={() => setShowCreateDirModal(false)}
-            onCreateDirectory={handleCreateDirectory}
+            onSubmit={handleCreateDirectory}
+          />
+        )}
+
+        {showShareModal && (
+          <ShareFileModal
+            isOpen={showShareModal}
+            onClose={() => setShowShareModal(false)}
+            onSend={handleShareFile}
           />
         )}
 
