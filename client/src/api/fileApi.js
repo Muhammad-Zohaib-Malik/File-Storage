@@ -39,3 +39,11 @@ export const uploadComplete=async(fileId)=>{
   })
   return data
 }
+
+export const shareFileByEmail = async (fileId, email) => {
+  const { data } = await axiosWithCreds.post("/file/share", {
+    fileId,
+    email,
+  });
+  return data;
+};
