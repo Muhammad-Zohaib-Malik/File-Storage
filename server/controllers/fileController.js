@@ -10,6 +10,7 @@ import {
   getS3FileMetaData,
 } from "../services/s3.js";
 import { createCloudGetFrontSignedurl } from "../services/cloudfront.js";
+import { sendFileLink } from "../utils/sendOTP.js";
 
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
@@ -179,5 +180,29 @@ export const deleteFileFromAws = async (req, res, next) => {
     return res.status(200).json({ message: "File Deleted Successfully" });
   } catch (err) {
     next(err);
+  }
+};
+
+export const shareFileViaEmail = async (req, res, next) => {
+  const { fileId, email } = req.body;
+  const fileData = await File.findOne({
+    _id: fileId,
+    userId: req.user._id,
+  }).lean();
+
+  if (!fileData) {
+    return res.status(404).json({ error: "File not found!" });
+  }
+
+  const key = `${fileId}${fileData.extension}`;
+  const fileUrl = createCloudGetFrontSignedurl({
+    key,
+    filename: fileData.name,
+  });
+  try {
+    await sendFileLink(email, fileUrl, fileData.name);
+    res.json({ success: true, message: "File shared via email!" });
+  } catch (error) {
+    next(error);
   }
 };
