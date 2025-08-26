@@ -2,6 +2,16 @@
 
 A secure and scalable file storage application with AWS S3 and CloudFront integration, built with modern web technologies. This application allows users to upload, manage, and share files with robust security features and rate limiting.
 
+## 📑 Table of Contents
+- [✨ Features](#-features-1)
+- [🛠️ Tech Stack](#-tech-stack-1)
+  - [Backend](#backend)
+  - [Frontend](#frontend-1)
+- [🚀 Getting Started](#-getting-started-1)
+  - [Prerequisites](#prerequisites-1)
+  - [Installation](#installation-1)
+  - [Environment Setup](#environment-setup-1)
+
 ## ✨ Features
 
 - **User Authentication**
@@ -12,7 +22,7 @@ A secure and scalable file storage application with AWS S3 and CloudFront integr
 - **File Management**
   - Upload and download files
   - File organization with folders
-  - File sharing capabilities
+  - File sharing capabilities (using email)
   - AWS S3 storage with CloudFront CDN
 
 - **Security**
@@ -74,7 +84,7 @@ A secure and scalable file storage application with AWS S3 and CloudFront integr
    ```env
    # Server
    PORT=4000
-   
+
    # MongoDB
    MONGODB_URI=your_mongodb_connection_string
    
@@ -97,12 +107,14 @@ A secure and scalable file storage application with AWS S3 and CloudFront integr
    AWS_REGION=your_aws_region
    AWS_S3_BUCKET_NAME=your_s3_bucket_name
    CLOUDFRONT_DOMAIN=your_cloudfront_domain
+   CLOUDFRONT_PRIVATE_KEY=
    ```
    
    #### Client (.env)
    Create a `.env` file in the client directory:
+   VITE_GOOGLE_CLIENT_ID=
    ```env
-   # No Google OAuth needed
+  
    ```
    
    > **Note**: Replace all placeholder values with your actual configuration. Never commit the `.env` file to version control.
