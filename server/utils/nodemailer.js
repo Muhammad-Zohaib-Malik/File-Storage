@@ -13,7 +13,7 @@ export async function sendOtp(email) {
   await Otp.findOneAndUpdate(
     { email },
     { otp, createdAt: new Date() },
-    { upsert: true, new: true },
+    { upsert: true, new: true }
   );
 
   // Beautiful HTML Email content
@@ -54,6 +54,53 @@ export async function sendOtp(email) {
   return {
     success: true,
     message: "OTP sent successfully",
+    messageId: info.messageId,
+  };
+}
+
+export async function sendFileLink(email, fileUrl, fileName) {
+  const html = `
+    <div style="font-family: Arial, sans-serif; background-color: #f4f7fc; padding: 20px; border-radius: 8px; width: 100%; max-width: 600px; margin: 0 auto;">
+      <div style="background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+        <h2 style="color: #333; font-size: 24px; text-align: center;">A File Has Been Shared with You</h2>
+        <p style="font-size: 16px; color: #555; text-align: center; margin-bottom: 20px;">
+          The file <strong>${fileName}</strong> has been shared with you.
+        </p>
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="${fileUrl}" style="background-color: #4CAF50; color: white; padding: 15px 30px; text-decoration: none; font-size: 18px; border-radius: 5px;">
+            View File
+          </a>
+        </div>
+        <p style="font-size: 14px; color: #555; text-align: center;">
+          This link will expire in 1 hour. If you didn't expect this, please ignore this email.
+        </p>
+        <div style="margin-top: 30px; text-align: center;">
+          <p style="font-size: 14px; color: #aaa;">Best regards,</p>
+          <p style="font-size: 14px; color: #aaa;">The Storage App Team</p>
+        </div>
+      </div>
+    </div>
+  `;
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+
+  // Send the email
+  const info = await transporter.sendMail({
+    from: `"Storage App" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject: `File Shared ${fileName}`,
+    html,
+  });
+
+  return {
+    success: true,
+    message: "File link sent successfully",
     messageId: info.messageId,
   };
 }
