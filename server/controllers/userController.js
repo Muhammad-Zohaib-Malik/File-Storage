@@ -3,7 +3,7 @@ import File from "../models/fileModel.js";
 import Otp from "../models/otp.model.js";
 import User from "../models/userModel.js";
 import { verifyGoogleToken } from "../utils/googleAuth.js";
-import { sendOtp } from "../utils/sendOTP.js";
+import { sendOtp } from "../utils/nodemailer.js";
 import mongoose, { Types } from "mongoose";
 import redisClient from "../config/redis.js";
 import { rm } from "fs/promises";
