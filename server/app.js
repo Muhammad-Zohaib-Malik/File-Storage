@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import directoryRoutes from "./routes/directoryRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import loginActivityRoutes from "./routes/loginActivityRoutes.js"
 import { checkAuth } from "./middlewares/authMiddleware.js";
 import { connectDB } from "./config/db.js";
 import logger from "./utils/logger.js";
@@ -17,7 +18,7 @@ const app = express();
 app.use(cookieParser(mySecretKey));
 app.use(express.json());
 app.use(helmet());
-// app.use(rateLimit);
+app.use(rateLimit);
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -29,6 +30,7 @@ const PORT = process.env.PORT || 4000;
 app.use("/directory", checkAuth, directoryRoutes);
 app.use("/file", checkAuth, fileRoutes);
 app.use("/user", userRoutes);
+app.use("/latest-login", checkAuth, loginActivityRoutes);
 app.use((err, req, res, next) => {
   logger.error("Error occurred:", err);
   res.status(err.status || 500).json({ error: "Something went wrong!" });
