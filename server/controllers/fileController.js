@@ -10,7 +10,7 @@ import {
   getS3FileMetaData,
 } from "../services/s3.js";
 import { createCloudGetFrontSignedurl } from "../services/cloudfront.js";
-import { sendFileLink } from "../utils/sendOTP.js";
+import { sendFileLink } from "../utils/nodemailer.js";
 
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
