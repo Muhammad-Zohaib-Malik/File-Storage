@@ -4,6 +4,7 @@ import {
   deleteFileFromAws,
   getFileFromAws,
   renameFile,
+  shareFileViaEmail,
   uploadToAws,
   uploadToAwsComplete,
 } from "../controllers/fileController.js";
@@ -20,5 +21,6 @@ router.patch("/:id", renameFile);
 router.post("/uploads/initiate", uploadToAws);
 router.post("/uploads/complete", uploadToAwsComplete);
 router.delete("/:id", deleteFileFromAws);
+router.post("/share", shareFileViaEmail);
 
 export default router;
