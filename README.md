@@ -112,8 +112,8 @@ A secure and scalable file storage application with AWS S3 and CloudFront integr
    
    #### Client (.env)
    Create a `.env` file in the client directory:
-   VITE_GOOGLE_CLIENT_ID=
    ```env
+    VITE_GOOGLE_CLIENT_ID=
   
    ```
    
