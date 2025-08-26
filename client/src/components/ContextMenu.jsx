@@ -6,6 +6,7 @@ function ContextMenu({ item, isUploadingItem }) {
     setDeleteItem,
     openRenameModal,
     openDetailsPopup,
+    handleOpenShareModal,
   } = useDirectoryContext();
 
   const menuClass =
@@ -63,6 +64,9 @@ function ContextMenu({ item, isUploadingItem }) {
       </div>
       <div className={itemClass} onClick={() => openDetailsPopup(item)}>
         Details
+      </div>
+      <div className={itemClass} onClick={() => handleOpenShareModal(item.id)}>
+        Share
       </div>
     </div>
   );
