@@ -18,7 +18,7 @@ const s3Client = new S3Client({
 
 export const createUploadSignedUrl = async ({ key, ContentType }) => {
   const command = new PutObjectCommand({
-    Bucket: process.env.AWS_BUCKET_NAME,
+    Bucket: process.env.AWS_BUCKET_NAME,  
     Key: key,
     ContentType: ContentType,
   });
