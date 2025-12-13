@@ -29,8 +29,7 @@ export const handleStripeWebhook = async (req, res) => {
       if (subscription) {
         subscription.stripeSubscriptionId = session.subscription;
         subscription.stripeCustomerId = session.customer;
-        subscription.status =
-          session.payment_status === "paid" ? "active" : "unpaid";
+        subscription.status = "active";
 
         await subscription.save();
         console.log(`Subscription ${subscription._id} updated to ACTIVE`);
