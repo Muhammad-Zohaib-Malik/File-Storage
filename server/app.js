@@ -36,6 +36,12 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: "Something went wrong!" });
 });
 
+
+app.get("/health", (req, res) => {
+  logger.info("Health check successful");
+  res.status(200).json({ message: "Health check successful" });
+});
+
 app.listen(PORT, () => {
   logger.info(`Server is running on port ${PORT}`);
 });
