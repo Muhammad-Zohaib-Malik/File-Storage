@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import Subscription from "../models/subscriptionModel.js";
 const stripe = new Stripe(process.env.STRIPE_API_KEY);
-const endpointSecret = "whsec_4DFdIQ9JKzgnM893SwcjBCxxBhQJYJQr";
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 export const handleStripeWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
