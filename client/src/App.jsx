@@ -6,6 +6,7 @@ import Login from "./Login";
 import UsersPage from "./UsersPage";
 import UserProfile from "./UserProfile";
 import SessionManagement from "./SessionManagement";
+import Plans from "./Plans";
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
   {
     path: "/users",
     element: <UsersPage />,
+  },
+  {
+    path: "/plans",
+    element: <Plans />,
   },
   {
     path: "/directory/:dirId",
