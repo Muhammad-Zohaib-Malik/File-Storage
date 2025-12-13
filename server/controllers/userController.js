@@ -225,7 +225,9 @@ export const logoutFromAllDevices = async (req, res) => {
 export const sendOTP = async (req, res) => {
   const { success, data } = sendOtpSchema.safeParse(req.body);
   if (!success) {
-    return res.status(400).json({ error: z.flattenError(error).fieldErrors });
+    return res.status(400).json({
+      error: error.flatten().fieldErrors, 
+    });
   }
 
   let { email } = data;

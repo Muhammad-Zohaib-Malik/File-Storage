@@ -113,6 +113,10 @@ const UserProfile = () => {
     );
   }
 
+  const handleImageChange=()=>{
+    
+  }
+
   if (!user) return null;
   const isGoogleUser = user.createdWith === "google";
   const isGithubUser = user.createdWith === "github";
@@ -138,6 +142,12 @@ const UserProfile = () => {
                   src={user.picture}
                   alt="Profile"
                   className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  onChange={handleImageChange}
                 />
                 <button className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md text-gray-600 hover:bg-gray-100 transition-colors duration-200">
                   <svg
