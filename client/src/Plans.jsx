@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { createSubscription } from "./api/subscriptionApi";
 
 const PLAN_CATALOG = {
   monthly: [
@@ -169,8 +170,9 @@ export default function Plans() {
   const [mode, setMode] = useState("monthly");
   const plans = PLAN_CATALOG[mode];
 
-  function handleSelect(plan) {
-    console.log(plan.id);
+  async function handleSelect(plan) {
+    const data = await createSubscription(plan.id);
+    window.location.href = data;
   }
 
   return (
