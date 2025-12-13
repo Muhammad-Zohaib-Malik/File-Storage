@@ -46,5 +46,5 @@ export const handleStripeWebhook = async (req, res) => {
     }
   }
 
-  res.json({ received: true });
+  res.end("OK");
 };
