@@ -20,7 +20,7 @@ const PLAN_CATALOG = {
       popular: false,
     },
     {
-      id: "price_1SdlXM3cVYZiLez6rmv4CnrA",
+      id: "price_1SdlVw3cVYZiLez66kQLuZR4",
       name: "Pro",
       tagline: "For creators & devs",
       storage: "5 TB",
