@@ -31,6 +31,15 @@ app.use(
 );
 const PORT = process.env.PORT || 4000;
 
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Hello World" });
+});
+
+app.get("/health", (req, res) => {
+  logger.info("Health check successful");
+  res.status(200).json({ message: "Health check successful" });
+});
+
 app.use("/directory", checkAuth, directoryRoutes);
 app.use("/file", checkAuth, fileRoutes);
 app.use("/user", userRoutes);
@@ -42,10 +51,7 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: "Something went wrong!" });
 });
 
-app.get("/health", (req, res) => {
-  logger.info("Health check successful");
-  res.status(200).json({ message: "Health check successful" });
-});
+
 
 app.listen(PORT, () => {
   logger.info(`Server is running on port ${PORT}`);
