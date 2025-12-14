@@ -7,6 +7,9 @@ const subscriptionSchema = new Schema(
       ref: "User",
       required: true,
     },
+    priceId: {
+      type: String,
+    },
     checkoutSessionId: {
       type: String,
       required: true,
@@ -16,7 +19,6 @@ const subscriptionSchema = new Schema(
       type: String,
       unique: true,
     },
-
     stripeCustomerId: {
       type: String,
       index: true,
@@ -24,16 +26,18 @@ const subscriptionSchema = new Schema(
 
     status: {
       type: String,
-      enum: [
-        "pending",
-        "active",
-        "trialing",
-        "past_due",
-        "canceled",
-        "unpaid",
-        "incomplete",
-      ],
       default: "pending",
+    },
+    billingInterval: {
+      type: String,
+      default: "month",
+    },
+    storageBytes: {
+      type: Number,
+    },
+
+    storageLabel: {
+      type: String,
     },
   },
   {
