@@ -1,7 +1,4 @@
-app.get("/health", (req, res) => {
-  logger.info("Health check successful");
-  res.status(200).json({ message: "Health check successful" });
-});import express from "express";
+import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import directoryRoutes from "./routes/directoryRoutes.js";
@@ -43,10 +40,6 @@ app.use("/subscriptions", checkAuth, subscriptionRoutes);
 app.use((err, req, res, next) => {
   logger.error("Error occurred:", err);
   res.status(err.status || 500).json({ error: "Something went wrong!" });
-});
-
-app.get("/", (req, res) => {
-  res.status(200).json({ message: "Hello world" });
 });
 
 app.get("/health", (req, res) => {
