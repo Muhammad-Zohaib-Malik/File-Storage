@@ -12,17 +12,18 @@ import { checkAuth } from "./middlewares/authMiddleware.js";
 import { connectDB } from "./config/db.js";
 import logger from "./utils/logger.js";
 import helmet from "helmet";
-import rateLimit from "./utils/rateLimiter.js";
+import createRateLimiter from "./utils/rateLimiter.js";
 
 const mySecretKey = process.env.COOKIE_PARSER_SECRET;
 await connectDB();
 
 const app = express();
+app.set("trust proxy", 1);
 app.use("/webhooks", webbhooksRoutes);
 app.use(cookieParser(mySecretKey));
 app.use(express.json());
 app.use(helmet());
-app.use(rateLimit);
+app.use(createRateLimiter());
 app.use(
   cors({
     origin: "http://localhost:5173",
