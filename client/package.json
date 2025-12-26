@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "format": "prettier . --write"
+    "format": "prettier . --write",
+    "test":"node  dummyTest.js"
   },
   "dependencies": {
     "@react-oauth/google": "^0.12.2",
