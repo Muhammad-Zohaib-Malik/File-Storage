@@ -73,7 +73,7 @@ function DirectoryView() {
   const loadDirectory = useCallback(async () => {
     try {
       const data = await getDirectoryItems(dirId);
-      setDirectoryName(dirId ? data.name : "My Drive");
+      setDirectoryName(dirId ? data.name : "Home");
       setDirectoriesList([...data.directories].reverse());
       setFilesList([...data.files].reverse());
     } catch (err) {
