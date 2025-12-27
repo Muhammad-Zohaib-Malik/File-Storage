@@ -477,7 +477,7 @@ export const githubLoginCallback = async (req, res, next) => {
       maxAge: 1000 * 60 * 60 * 24 * 7,
       sameSite: "lax",
     });
-    res.redirect("http://localhost:5173");
+    res.redirect(process.env.CLIENT_URL1 || process.env.CLIENT_URL2);
   } catch (error) {
     if (mongooseSession) {
       await mongooseSession.abortTransaction();
