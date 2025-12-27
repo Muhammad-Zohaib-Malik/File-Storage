@@ -21,7 +21,6 @@ import {
   recoverUserById,
   register,
   sendOTP,
-  setPasswordForGoogleUser,
   verifyOTP,
 } from "../controllers/userController.js";
 
@@ -36,7 +35,6 @@ router.post("/send-otp", sendOTP);
 router.post("/verify-otp", verifyOTP);
 router.post("/google", loginWithGoogle);
 router.get("/all", checkAuth, checkForRole, getAllUsers);
-router.post("/set-password-for-google", checkAuth, setPasswordForGoogleUser);
 router.get("/github",loginWithGithub)
 router.get("/github/callback",githubLoginCallback)
 

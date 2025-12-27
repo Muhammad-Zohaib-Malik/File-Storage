@@ -12,7 +12,6 @@ import {
   loginSchema,
   loginWithGoogleSchema,
   otpSchema,
-  passwordForGoogleSchema,
   registerSchema,
   sendOtpSchema,
 } from "../validators/userSchema.js";
@@ -226,7 +225,7 @@ export const sendOTP = async (req, res) => {
   const { success, data } = sendOtpSchema.safeParse(req.body);
   if (!success) {
     return res.status(400).json({
-      error: error.flatten().fieldErrors, 
+      error: error.flatten().fieldErrors,
     });
   }
 
@@ -488,42 +487,6 @@ export const githubLoginCallback = async (req, res, next) => {
     if (mongooseSession) {
       mongooseSession.endSession();
     }
-  }
-};
-
-export const setPasswordForGoogleUser = async (req, res, next) => {
-  const result = passwordForGoogleSchema.safeParse(req.body);
-
-  if (!result.success) {
-    return res.status(400).json({
-      error: result.error.flatten().fieldErrors,
-    });
-  }
-
-  let { password } = result.data;
-  password = purify.sanitize(password);
-
-  try {
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    if (user.password) {
-      return res.status(400).json({ error: "Password already set" });
-    }
-
-    const hash = await bcrypt.hash(password, 10);
-    user.password = hash;
-    await user.save();
-
-    return res.status(200).json({
-      message:
-        "Password set successfully. You can now log in with email/password.",
-    });
-  } catch (err) {
-    console.error("Set Password Error:", err);
-    next(err);
   }
 };
 

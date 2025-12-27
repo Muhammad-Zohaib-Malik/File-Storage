@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import Subscription from "../models/subscriptionModel.js";
 
 const stripe = new Stripe(process.env.STRIPE_API_KEY);
-const BASE_URL = process.env.BASE_URL
+const BASE_URL = process.env.BASE_URL;
 
 export const createSubscription = async (req, res, next) => {
   try {
