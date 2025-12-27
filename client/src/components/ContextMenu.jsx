@@ -12,7 +12,7 @@ function ContextMenu({ item, isUploadingItem }) {
   const menuClass =
     "absolute bg-white border border-blue-400 shadow-md rounded text-sm z-50 right-2 top-4/5 overflow-hidden";
   const itemClass = "px-4 py-2 hover:bg-blue-100 cursor-pointer";
-  const BASE_URL = "http://localhost:4000";
+  const BASE_URL = import.meta.env.VITE_SERVER_URL;
 
   if (item.isDirectory) {
     return (

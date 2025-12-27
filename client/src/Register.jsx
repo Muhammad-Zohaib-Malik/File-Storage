@@ -5,6 +5,7 @@ import { registerUser } from "./api/userApi";
 import { useGoogleLogin } from "@react-oauth/google";
 import { FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
+const BASE_URL = import.meta.env.VITE_SERVER_URL;
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -123,7 +124,7 @@ const Register = () => {
   });
 
   const loginWithGithub = () => {
-    window.location.href = "http://localhost:4000/user/github";
+    window.location.href = `${BASE_URL}/user/github`;
   };
 
   return (

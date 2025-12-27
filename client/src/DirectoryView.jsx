@@ -25,6 +25,8 @@ import DetailsPopup from "./components/DetailsPopup";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModel";
 import ShareFileModal from "./components/shareFileModal";
 
+const BASE_URL =import.meta.env.VITE_SERVER_URL;
+
 function DirectoryView() {
   const { dirId } = useParams();
   const navigate = useNavigate();
@@ -122,7 +124,7 @@ function DirectoryView() {
 
   function handleRowClick(type, id) {
     if (type === "directory") navigate(`/directory/${id}`);
-    else window.location.href = `http://localhost:4000/file/${id}`;
+    else window.location.href = `${BASE_URL}/file/${id}`;
   }
 
   async function handleFileSelect(e) {
