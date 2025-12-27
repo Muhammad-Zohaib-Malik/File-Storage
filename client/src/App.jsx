@@ -13,6 +13,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <DirectoryView />,
   },
+
   {
     path: "/register",
     element: <Register />,

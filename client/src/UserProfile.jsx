@@ -1,13 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import {
-  fetchUser,
-  logoutUser,
-  logoutAllSessions,
-  // updateUser, disableUserAccount, deleteUserAccount (optional)
-} from "./api/userApi";
-import { changePasswordForGoogleUser } from "./api/authApi";
+import { fetchUser, logoutUser, logoutAllSessions } from "./api/userApi";
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
@@ -54,54 +48,9 @@ const UserProfile = () => {
 
   const handleUpdateProfile = async () => {
     try {
-      // Assume updateUser({ name: fullName }) exists in userApi
-      // await updateUser({ name: fullName });
       toast.success("Profile updated successfully!");
     } catch (err) {
       console.error("Update failed", err);
-    }
-  };
-
-  const handlePasswordForGoogleUser = async () => {
-    try {
-      if (newPassword.length < 6) {
-        toast.error("Password must be at least 6 characters");
-        return;
-      }
-
-      const response = await changePasswordForGoogleUser(newPassword);
-
-      if (response.error) {
-        toast.error(response.error);
-      } else {
-        toast.success(response.message || "Password changed successfully!");
-        setNewPassword(""); // Clear the password field on success
-      }
-    } catch (err) {
-      console.error("Password change failed:", err);
-      const errorMessage =
-        err.response?.data?.error ||
-        "Password change failed. Please try again.";
-      toast.error(errorMessage);
-    }
-  };
-
-  const handleDisableAccount = async () => {
-    try {
-      // await disableUserAccount();
-      toast.success("Account disabled. Contact support to reactivate.");
-    } catch (err) {
-      console.error("Disable failed", err);
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    try {
-      // await deleteUserAccount();
-      toast.success("Account deleted permanently.");
-      navigate("/register");
-    } catch (err) {
-      console.error("Delete failed", err);
     }
   };
 
@@ -113,9 +62,7 @@ const UserProfile = () => {
     );
   }
 
-  const handleImageChange=()=>{
-    
-  }
+  const handleImageChange = () => {};
 
   if (!user) return null;
   const isGoogleUser = user.createdWith === "google";
@@ -463,28 +410,6 @@ const UserProfile = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-10 flex justify-end">
-                    <button
-                      onClick={handlePasswordForGoogleUser}
-                      className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200"
-                    >
-                      <svg
-                        className="-ml-1 mr-2 h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                        />
-                      </svg>
-                      Change Password
-                    </button>
-                  </div>
                 </div>
               )}
 
@@ -610,152 +535,8 @@ const UserProfile = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Danger Zone */}
-              <div className="mt-16">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">
-                  <svg
-                    className="inline-block w-5 h-5 mr-2 text-red-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                    />
-                  </svg>
-                  Danger Zone
-                </h3>
-                <div className="space-y-6">
-                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r">
-                    <div className="flex">
-                      <div className="flex-shrink-0">
-                        <svg
-                          className="h-5 w-5 text-yellow-400"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                      <div className="ml-3">
-                        <h4 className="text-sm font-medium text-yellow-800">
-                          Temporarily Disable Account
-                        </h4>
-                        <p className="mt-1 text-sm text-yellow-700">
-                          Your account will be deactivated but your data will be
-                          saved. You can reactivate your account by logging in
-                          again.
-                        </p>
-                        <div className="mt-3">
-                          <button
-                            onClick={handleDisableAccount}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-yellow-700 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors duration-200"
-                          >
-                            <svg
-                              className="-ml-1 mr-2 h-4 w-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            Disable My Account
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-r">
-                    <div className="flex">
-                      <div className="flex-shrink-0">
-                        <svg
-                          className="h-5 w-5 text-red-400"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                      <div className="ml-3">
-                        <h4 className="text-sm font-medium text-red-800">
-                          Delete Account Permanently
-                        </h4>
-                        <p className="mt-1 text-sm text-red-700">
-                          This will permanently delete your account and all
-                          associated data. This action cannot be undone.
-                        </p>
-                        <div className="mt-3">
-                          <button
-                            onClick={handleDeleteAccount}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
-                          >
-                            <svg
-                              className="-ml-1 mr-2 h-4 w-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                            Delete My Account
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
-        </div>
-
-        {/* Delete Account */}
-        <div className="bg-red-50 border border-red-200 rounded-lg shadow p-6">
-          <h2 className="font-semibold text-lg mb-2 text-red-800">
-            ❌ Delete My Account
-          </h2>
-          <p className="text-sm text-red-700 mb-4">
-            ⚠️ This action cannot be undone
-          </p>
-          <p className="text-xs text-red-800 mb-4">
-            Deleting your account will permanently remove all your data, files,
-            and settings. You will lose access to all connected services and
-            this action cannot be reversed.
-          </p>
-          <button
-            onClick={handleDeleteAccount}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-          >
-            Delete Account Permanently
-          </button>
         </div>
       </div>
     </div>
