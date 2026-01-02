@@ -76,8 +76,8 @@ app.get("/", (req, res) => {
 });
 
 app.get("/health", (req, res) => {
-  logger.info("Health check successful");
-  res.status(200).json({ message: "Health check successful" });
+  logger.info("Health check successfully");
+  res.status(200).json({ message: "Health check successfully" });
 });
 
 app.use("/directory", checkAuth, directoryRoutes);
