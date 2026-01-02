@@ -7,7 +7,7 @@ import userRoutes from "./routes/userRoutes.js";
 import loginActivityRoutes from "./routes/loginActivityRoutes.js";
 import subscriptionRoutes from "./routes/subcriptionRoutes.js";
 import webbhooksRoutes from "./routes/webhookRoutes.js";
-
+import { spawn } from "child_process";
 import { checkAuth } from "./middlewares/authMiddleware.js";
 import { connectDB } from "./config/db.js";
 import logger from "./utils/logger.js";
@@ -45,6 +45,31 @@ app.use(
   })
 );
 const PORT = process.env.PORT || 4000;
+
+app.post("/github-webhook",(req,res)=>{
+const bashChildProcess = spawn("bash", ["/home/ubuntu/deploy-frontend.sh"]);
+bashChildProcess.stdout.on("data", (data) => {
+  process.stdout.write(data);
+});
+
+bashChildProcess.stderr.on("data", (data) => {
+  process.stderr.write(data);
+});
+
+bashChildProcess.on("close", (code) => {
+res.json({message:"Ok"})
+  if (code == 0) {
+    console.log("Script execution completed.");
+  } else {
+    console.log(`Script execution failed with code ${code}`);
+  }
+});
+
+bashChildProcess.on("error", (err) => {
+res.json({message:"Ok"})
+  console.error("Error in spawning the process!", err);
+});
+});
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Hello World" });
