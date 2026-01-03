@@ -105,27 +105,23 @@ export async function sendFileLink(email, fileUrl, fileName) {
   };
 }
 
-function escapeHtml(text = "") {
+function escapeHtml(text) {
+  if (!text) return "";
   return text
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
-export async function sendDeploymentNotification(
+export async function sendDeploymentNotification({
   email,
   repoName,
   branchName,
-  status,
-  commit
-) {
-  const normalizedStatus = (status ?? "").toString().toLowerCase();
-  const isSuccess = normalizedStatus === "success";
-
-  const statusColor = isSuccess ? "#16a34a" : "#dc2626";
-  const statusBg = isSuccess ? "#dcfce7" : "#fee2e2";
-  const statusText = isSuccess ? "Deployment Successful" : "Deployment Failed";
-
+  isSuccess,
+  commit,
+}) {
   const safeCommit = escapeHtml(commit);
 
   const html = `
@@ -151,20 +147,6 @@ export async function sendDeploymentNotification(
 
       <!-- Body -->
       <div style="padding: 24px;">
-
-        <!-- Status Badge -->
-        <div style="text-align: center; margin-bottom: 20px;">
-          <span style="
-            display: inline-block;
-            padding: 8px 16px;
-            font-size: 14px;
-            font-weight: 600;
-            color: ${statusColor};
-            background-color: ${statusBg};
-            border-radius: 999px;">
-            ${statusText}
-          </span>
-        </div>
 
         <!-- Info Card -->
         <div style="background-color: #f9fafb;
@@ -226,12 +208,9 @@ ${safeCommit}
   const info = await transporter.sendMail({
     from: `"Storage App 🚀" <${process.env.SMTP_USER}>`,
     to: email,
-    subject: `${isSuccess ? "✅" : "❌"} Deployment ${status} — ${repoName}`,
+    subject: `Deployment ${isSuccess ? "success" : "failed"} — ${repoName}`,
     html,
   });
 
-  return {
-    success: true,
-    messageId: info.messageId,
-  };
+  return { success: true, messageId: info.messageId };
 }

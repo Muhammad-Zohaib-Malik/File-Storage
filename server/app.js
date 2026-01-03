@@ -64,36 +64,46 @@ app.post("/github-webhook", verifyGithubSignature, (req, res) => {
 
   bashChildProcess.on("close", async (code) => {
     const notifyEmail =
-      req.body.repository.owner?.email || process.env.DEPLOY_NOTIFY_EMAIL;
+      req.body.repository?.owner?.email || process.env.DEPLOY_NOTIFY_EMAIL;
+    const isSuccess = code === 0;
+
+    const commitMessage = req.body.head_commit?.message || "No commit message";
+    const messageBody = isSuccess
+      ? commitMessage
+      : commitMessage + "\n\n--- ERROR LOG ---\n" + errorOutput;
 
     try {
-      if (code === 0) {
-        await sendDeploymentNotification({
-          email: notifyEmail,
-          repoName: req.body.repository.name,
-          branchName: req.body.ref.replace("refs/heads/", ""),
-          status: "Success",
-          commit: req.body.head_commit.message,
-        });
+      await sendDeploymentNotification({
+        email: notifyEmail,
+        repoName: req.body.repository.name,
+        branchName: req.body.ref.replace("refs/heads/", ""),
+        isSuccess,
+        commit: messageBody,
+      });
 
-        console.log("✅ Script execution completed.");
-      } else {
-        await sendDeploymentNotification({
-          email: notifyEmail,
-          repoName: req.body.repository.name,
-          branchName: req.body.ref.replace("refs/heads/", ""),
-          status: "Failed",
-          commit:
-            req.body.head_commit.message +
-            "\n\n--- ERROR LOG ---\n" +
-            errorOutput,
-        });
-
-        console.error(`❌ Script execution failed with code ${code}`);
-      }
+      console.log(
+        isSuccess
+          ? "✅ Deployment succeeded"
+          : `❌ Deployment failed with code ${code}`
+      );
     } catch (err) {
       console.error("❌ Error sending deployment email", err);
     }
+  });
+
+  bashChildProcess.on("error", (err) => {
+    console.error("❌ Error spawning deployment script", err);
+
+    // Send email even if spawning fails
+    const notifyEmail =
+      req.body.repository?.owner?.email || process.env.DEPLOY_NOTIFY_EMAIL;
+    sendDeploymentNotification({
+      email: notifyEmail,
+      repoName: req.body.repository.name,
+      branchName: req.body.ref.replace("refs/heads/", ""),
+      isSuccess: false,
+      commit: "Deployment script failed to start:\n" + err.message,
+    }).catch(console.error);
   });
 
   bashChildProcess.on("error", (err) => {
