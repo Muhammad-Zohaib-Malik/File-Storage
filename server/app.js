@@ -45,20 +45,7 @@ const PORT = process.env.PORT || 4000;
 app.post("/github-webhook", verifyGithubSignature, (req, res) => {
   console.log("req headers", req.headers);
   console.log("req body", req.body);
-  const givenSignature = req.headers["x-hub-signature-256"];
-  if (!givenSignature) {
-    return res.status(401).json({ message: "No signature provided" });
-  }
-
-  const signature = `sha256=${crypto
-    .createHmac("sha256", process.env.GITHUB_WEBHOOK_SECRET)
-    .update(JSON.stringify(req.body))
-    .digest("hex")}`;
-
-  if (givenSignature !== signature) {
-    return res.status(401).json({ message: "Invalid signature" });
-  }
-
+  
   res.json({ message: "Ok" });
 
   const bashChildProcess = spawn("bash", ["/home/ubuntu/deploy-frontend.sh"]);
