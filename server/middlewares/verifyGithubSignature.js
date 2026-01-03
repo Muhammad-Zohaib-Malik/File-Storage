@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-const GITHUB_SECRET = process.env.GITHUB_SECRET;
+const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET;
 
 export const verifyGithubSignature = (req, res, next) => {
   const originalSignature = req.headers["x-hub-signature-256"];
@@ -8,7 +8,7 @@ export const verifyGithubSignature = (req, res, next) => {
   const generatedSignature =
     "sha256=" +
     crypto
-      .createHmac("sha256", GITHUB_SECRET)
+      .createHmac("sha256", GITHUB_WEBHOOK_SECRET)
       .update(JSON.stringify(req.body))
       .digest("hex");
   const buf1 = Buffer.from(generatedSignature);
