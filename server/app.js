@@ -66,34 +66,34 @@ app.post("/github-webhook", verifyGithubSignature, (req, res) => {
     // const notifyEmail =
     //   req.body.repository.owner?.email || process.env.DEPLOY_NOTIFY_EMAIL;
 
-    try {
-      if (code === 0) {
-        // await sendDeploymentNotification({
-        //   email: notifyEmail,
-        //   repoName: req.body.repository.name,
-        //   branchName: req.body.ref.replace("refs/heads/", ""),
-        //   status: "success",
-        //   commit: req.body.head_commit.message,
-        // });
+    // try {
+    if (code == 0) {
+      // await sendDeploymentNotification({
+      //   email: notifyEmail,
+      //   repoName: req.body.repository.name,
+      //   branchName: req.body.ref.replace("refs/heads/", ""),
+      //   status: "success",
+      //   commit: req.body.head_commit.message,
+      // });
 
-        console.log("✅ Script execution completed.");
-      } else {
-        // await sendDeploymentNotification({
-        //   email: notifyEmail,
-        //   repoName: req.body.repository.name,
-        //   branchName: req.body.ref.replace("refs/heads/", ""),
-        //   status: "failed",
-        //   commit:
-        //     req.body.head_commit.message +
-        //     "\n\n--- ERROR LOG ---\n" +
-        //     errorOutput,
-        // });
+      console.log("✅ Script execution completed.");
+    } else {
+      // await sendDeploymentNotification({
+      //   email: notifyEmail,
+      //   repoName: req.body.repository.name,
+      //   branchName: req.body.ref.replace("refs/heads/", ""),
+      //   status: "failed",
+      //   commit:
+      //     req.body.head_commit.message +
+      //     "\n\n--- ERROR LOG ---\n" +
+      //     errorOutput,
+      // });
 
-        console.error(`❌ Script execution failed with code ${code}`);
-      }
-    } catch (err) {
-      console.error("❌ Error sending deployment email", err);
+      console.error(`❌ Script execution failed with code ${code}`);
     }
+    // } catch (err) {
+    //   console.error("❌ Error sending deployment email", err);
+    // }
   });
 
   bashChildProcess.on("error", (err) => {
