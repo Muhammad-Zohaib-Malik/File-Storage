@@ -12,6 +12,8 @@ import { checkAuth } from "./middlewares/authMiddleware.js";
 import { connectDB } from "./config/db.js";
 import logger from "./utils/logger.js";
 import helmet from "helmet";
+import crypto from "crypto";
+import { verifyGithubSignature } from "./middlewares/verifyGithubSignature.js";
 // import createRateLimiter from "./utils/rateLimiter.js";
 
 const mySecretKey = process.env.COOKIE_PARSER_SECRET;
@@ -38,39 +40,47 @@ app.use(
   })
 );
 
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-  })
-);
 const PORT = process.env.PORT || 4000;
 
-app.post("/github-webhook",(req,res)=>{
-  console.log(req.headers)
-  console.log(req.body)
-const bashChildProcess = spawn("bash", ["/home/ubuntu/deploy-frontend.sh"]);
-bashChildProcess.stdout.on("data", (data) => {
-  process.stdout.write(data);
-});
-
-bashChildProcess.stderr.on("data", (data) => {
-  process.stderr.write(data);
-});
-
-bashChildProcess.on("close", (code) => {
-res.json({message:"Ok"})
-  if (code == 0) {
-    console.log("Script execution completed.");
-  } else {
-    console.log(`Script execution failed with code ${code}`);
+app.post("/github-webhook", verifyGithubSignature, (req, res) => {
+  console.log("req headers", req.headers);
+  console.log("req body", req.body);
+  const givenSignature = req.headers["x-hub-signature-256"];
+  if (!givenSignature) {
+    return res.status(401).json({ message: "No signature provided" });
   }
-});
 
-bashChildProcess.on("error", (err) => {
-res.json({message:"Ok"})
-  console.error("Error in spawning the process!", err);
-});
+  const signature = `sha256=${crypto
+    .createHmac("sha256", process.env.GITHUB_WEBHOOK_SECRET)
+    .update(JSON.stringify(req.body))
+    .digest("hex")}`;
+
+  if (givenSignature !== signature) {
+    return res.status(401).json({ message: "Invalid signature" });
+  }
+
+  res.json({ message: "Ok" });
+
+  const bashChildProcess = spawn("bash", ["/home/ubuntu/deploy-frontend.sh"]);
+  bashChildProcess.stdout.on("data", (data) => {
+    process.stdout.write(data);
+  });
+
+  bashChildProcess.stderr.on("data", (data) => {
+    process.stderr.write(data);
+  });
+
+  bashChildProcess.on("close", (code) => {
+    if (code == 0) {
+      console.log("Script execution completed.");
+    } else {
+      console.log(`Script execution failed with code ${code}`);
+    }
+  });
+
+  bashChildProcess.on("error", (err) => {
+    console.error("Error in spawning the process!", err);
+  });
 });
 
 app.get("/", (req, res) => {
