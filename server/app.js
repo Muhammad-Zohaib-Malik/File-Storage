@@ -43,9 +43,8 @@ app.use(
 const PORT = process.env.PORT || 4000;
 
 app.post("/github-webhook", verifyGithubSignature, (req, res) => {
-  console.log("req headers", req.headers);
   console.log("req body", req.body);
-  
+
   res.json({ message: "Ok" });
 
   const bashChildProcess = spawn("bash", ["/home/ubuntu/deploy-frontend.sh"]);
