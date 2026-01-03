@@ -104,3 +104,133 @@ export async function sendFileLink(email, fileUrl, fileName) {
     messageId: info.messageId,
   };
 }
+
+function escapeHtml(text = "") {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+export async function sendDeploymentNotification(
+  email,
+  repoName,
+  branchName,
+  status,
+  commit
+) {
+  const isSuccess = status.toLowerCase() === "success";
+
+  const statusColor = isSuccess ? "#16a34a" : "#dc2626";
+  const statusBg = isSuccess ? "#dcfce7" : "#fee2e2";
+  const statusText = isSuccess ? "Deployment Successful" : "Deployment Failed";
+
+  const safeCommit = escapeHtml(commit);
+
+  const html = `
+  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+              background-color: #f4f7fc;
+              padding: 30px;">
+    
+    <div style="max-width: 600px;
+                margin: 0 auto;
+                background-color: #ffffff;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+                overflow: hidden;">
+
+      <!-- Header -->
+      <div style="background: linear-gradient(135deg, #6366f1, #4f46e5);
+                  padding: 20px 24px;
+                  text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 22px;">
+          🚀 Deployment Notification
+        </h1>
+      </div>
+
+      <!-- Body -->
+      <div style="padding: 24px;">
+
+        <!-- Status Badge -->
+        <div style="text-align: center; margin-bottom: 20px;">
+          <span style="
+            display: inline-block;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: ${statusColor};
+            background-color: ${statusBg};
+            border-radius: 999px;">
+            ${statusText}
+          </span>
+        </div>
+
+        <!-- Info Card -->
+        <div style="background-color: #f9fafb;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 10px;
+                    padding: 16px;">
+
+          <p style="margin: 8px 0; font-size: 15px; color: #374151;">
+            <strong>Repository:</strong> ${repoName}
+          </p>
+
+          <p style="margin: 8px 0; font-size: 15px; color: #374151;">
+            <strong>Branch:</strong> ${branchName}
+          </p>
+
+          <p style="margin: 12px 0 6px; font-size: 15px; color: #374151;">
+            <strong>${isSuccess ? "Commit Message:" : "Error / Commit Details:"}</strong>
+          </p>
+
+          <pre style="
+            margin: 0;
+            padding: 14px;
+            background-color: ${isSuccess ? "#ffffff" : "#fff1f2"};
+            border-left: 4px solid ${isSuccess ? "#6366f1" : "#dc2626"};
+            font-size: 13px;
+            color: #374151;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;">
+${safeCommit}
+          </pre>
+        </div>
+
+        <!-- Footer -->
+        <div style="margin-top: 30px; text-align: center;">
+          <p style="font-size: 13px; color: #9ca3af; margin: 4px 0;">
+            This is an automated message from
+          </p>
+          <p style="font-size: 13px; color: #6b7280; margin: 0;">
+            <strong>Storage App Deployment System</strong>
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  `;
+
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+
+  const info = await transporter.sendMail({
+    from: `"Storage App 🚀" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject: `${isSuccess ? "✅" : "❌"} Deployment ${status} — ${repoName}`,
+    html,
+  });
+
+  return {
+    success: true,
+    messageId: info.messageId,
+  };
+}

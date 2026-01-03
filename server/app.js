@@ -14,6 +14,8 @@ import logger from "./utils/logger.js";
 import helmet from "helmet";
 import crypto from "crypto";
 import { verifyGithubSignature } from "./middlewares/verifyGithubSignature.js";
+import SendmailTransport from "nodemailer/lib/sendmail-transport/index.js";
+import { sendDeploymentNotification } from "./utils/nodemailer.js";
 // import createRateLimiter from "./utils/rateLimiter.js";
 
 const mySecretKey = process.env.COOKIE_PARSER_SECRET;
@@ -43,24 +45,54 @@ app.use(
 const PORT = process.env.PORT || 4000;
 
 app.post("/github-webhook", verifyGithubSignature, (req, res) => {
-  console.log("req body", req.body);
-
   res.json({ message: "Ok" });
 
   const bashChildProcess = spawn("bash", ["/home/ubuntu/deploy-frontend.sh"]);
+
+  let output = "";
+  let errorOutput = "";
+
   bashChildProcess.stdout.on("data", (data) => {
+    output += data.toString();
     process.stdout.write(data);
   });
 
   bashChildProcess.stderr.on("data", (data) => {
+    errorOutput += data.toString();
     process.stderr.write(data);
   });
 
-  bashChildProcess.on("close", (code) => {
-    if (code == 0) {
-      console.log("Script execution completed.");
-    } else {
-      console.log(`Script execution failed with code ${code}`);
+  bashChildProcess.on("close", async (code) => {
+    const notifyEmail =
+      req.body.repository.owner?.email || process.env.DEPLOY_NOTIFY_EMAIL;
+
+    try {
+      if (code === 0) {
+        await sendDeploymentNotification({
+          email: notifyEmail,
+          repoName: req.body.repository.name,
+          branchName: req.body.ref.replace("refs/heads/", ""),
+          status: "Success",
+          commit: req.body.head_commit.message,
+        });
+
+        console.log("✅ Script execution completed.");
+      } else {
+        await sendDeploymentNotification({
+          email: notifyEmail,
+          repoName: req.body.repository.name,
+          branchName: req.body.ref.replace("refs/heads/", ""),
+          status: "Failed",
+          commit:
+            req.body.head_commit.message +
+            "\n\n--- ERROR LOG ---\n" +
+            errorOutput,
+        });
+
+        console.error(`❌ Script execution failed with code ${code}`);
+      }
+    } catch (err) {
+      console.error("❌ Error sending deployment email", err);
     }
   });
 
