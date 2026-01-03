@@ -119,7 +119,7 @@ export async function sendDeploymentNotification(
   status,
   commit
 ) {
-  const isSuccess = status.toLowerCase() === "success";
+  const isSuccess = String(status).toLowerCase() === "success";
 
   const statusColor = isSuccess ? "#16a34a" : "#dc2626";
   const statusBg = isSuccess ? "#dcfce7" : "#fee2e2";
