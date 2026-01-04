@@ -12,6 +12,7 @@ import { connectDB } from "./config/db.js";
 import logger from "./utils/logger.js";
 import helmet from "helmet";
 import { executeBashScript } from "./helper/executeBashScript.js";
+import { verifyGithubSignature } from "./middlewares/verifyGithubSignature.js";
 
 // import createRateLimiter from "./utils/rateLimiter.js";
 
@@ -41,7 +42,7 @@ app.use(
 
 const PORT = process.env.PORT || 4000;
 
-app.post("/github-webhook", verifySignature, (req, res) => {
+app.post("/github-webhook", verifyGithubSignature, (req, res) => {
   res.status(200).send("OK");
 
   const commits = req.body.commits || [];
