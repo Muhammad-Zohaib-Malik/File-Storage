@@ -7,15 +7,12 @@ import userRoutes from "./routes/userRoutes.js";
 import loginActivityRoutes from "./routes/loginActivityRoutes.js";
 import subscriptionRoutes from "./routes/subcriptionRoutes.js";
 import webbhooksRoutes from "./routes/webhookRoutes.js";
-import { spawn } from "child_process";
 import { checkAuth } from "./middlewares/authMiddleware.js";
 import { connectDB } from "./config/db.js";
 import logger from "./utils/logger.js";
 import helmet from "helmet";
-import crypto from "crypto";
-import { verifyGithubSignature } from "./middlewares/verifyGithubSignature.js";
-import SendmailTransport from "nodemailer/lib/sendmail-transport/index.js";
-import { sendDeploymentNotification } from "./utils/nodemailer.js";
+import { executeBashScript } from "./helper/executeBashScript.js";
+
 // import createRateLimiter from "./utils/rateLimiter.js";
 
 const mySecretKey = process.env.COOKIE_PARSER_SECRET;
@@ -44,61 +41,44 @@ app.use(
 
 const PORT = process.env.PORT || 4000;
 
-app.post("/github-webhook", verifyGithubSignature, (req, res) => {
-  res.json({ message: "Ok" });
+app.post("/github-webhook", verifySignature, (req, res) => {
+  res.status(200).send("OK");
 
-  const bashChildProcess = spawn("bash", ["/home/ubuntu/deploy-frontend.sh"]);
+  const commits = req.body.commits || [];
 
-  let output = "";
-  let errorOutput = "";
+  let clientChanged = false;
+  let serverChanged = false;
 
-  bashChildProcess.stdout.on("data", (data) => {
-    output += data.toString();
-    process.stdout.write(data);
-  });
+  for (const commit of commits) {
+    const files = [
+      ...(commit.added || []),
+      ...(commit.modified || []),
+      ...(commit.removed || []),
+    ];
 
-  bashChildProcess.stderr.on("data", (data) => {
-    errorOutput += data.toString();
-    process.stderr.write(data);
-  });
+    for (const file of files) {
+      if (file.startsWith("client/")) clientChanged = true;
+      if (file.startsWith("server/")) serverChanged = true;
 
-  bashChildProcess.on("close", async (code) => {
-    // const notifyEmail =
-    //   req.body.repository.owner?.email || process.env.DEPLOY_NOTIFY_EMAIL;
-
-    // try {
-    if (code == 0) {
-      // await sendDeploymentNotification({
-      //   email: notifyEmail,
-      //   repoName: req.body.repository.name,
-      //   branchName: req.body.ref.replace("refs/heads/", ""),
-      //   status: "success",
-      //   commit: req.body.head_commit.message,
-      // });
-
-      console.log("✅ Script execution completed.");
-    } else {
-      // await sendDeploymentNotification({
-      //   email: notifyEmail,
-      //   repoName: req.body.repository.name,
-      //   branchName: req.body.ref.replace("refs/heads/", ""),
-      //   status: "failed",
-      //   commit:
-      //     req.body.head_commit.message +
-      //     "\n\n--- ERROR LOG ---\n" +
-      //     errorOutput,
-      // });
-
-      console.error(`❌ Script execution failed with code ${code}`);
+      if (clientChanged && serverChanged) break;
     }
-    // } catch (err) {
-    //   console.error("❌ Error sending deployment email", err);
-    // }
-  });
+    if (clientChanged && serverChanged) break;
+  }
 
-  bashChildProcess.on("error", (err) => {
-    console.error("Error in spawning the process!", err);
-  });
+  if (!clientChanged && !serverChanged) {
+    console.log("ℹ️ No deployable changes detected");
+    return;
+  }
+
+  if (clientChanged) {
+    console.log("📦 Client changed → Deploying frontend");
+    executeBashScript("/home/ubuntu/deploy-client.sh", "CLIENT");
+  }
+
+  if (serverChanged) {
+    console.log("⚙️ Server changed → Deploying backend");
+    executeBashScript("/home/ubuntu/deploy-server.sh", "SERVER");
+  }
 });
 
 app.get("/", (req, res) => {
