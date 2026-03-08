@@ -20,27 +20,24 @@ jobs:
           host: 54.236.246.83
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          
+          # This 'script' block replaces your 'run' block
           script: |
             set -e
-
-            # 1. Manually add the NVM bin directory to the PATH
-            export PATH=$PATH:/home/ubuntu/.nvm/versions/node/v24.12.0/bin
-
-            # 2. Navigate to the project
+            
+            # 1. Navigate to the project
             cd /home/ubuntu/File-Storage/
-
-            # 3. Pull the latest code
-            echo "Pulling latest code from master..."
+            
+            # 2. Pull the latest code
             git pull origin master
 
+            # 3. Navigate into the SERVER folder to run Node commands
+            cd server
+            
             # 4. Install production dependencies
-            echo "Installing dependencies..."
             npm ci --production --no-audit --no-fund
-
+            
             # 5. Smart Restart (Reload if running, start if not)
             echo "Reloading StorageApp with PM2..."
-            pm2 reload storageapp 
+            pm2 reload storageApp 
             
-
-            echo "✅ StorageApp Backend Deployed Successfully!"
+            echo "StorageApp Backend Deployed Successfully!"
