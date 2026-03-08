@@ -24,20 +24,25 @@ jobs:
           script: |
             set -e
             
-            # 1. Navigate to the project
-            cd /home/ubuntu/File-Storage/
+            # 1. ADD THIS LINE: Tells the server where to find node, npm, and pm2
+            export PATH=$PATH:/home/ubuntu/.nvm/versions/node/v24.12.0/bin
             
-            # 2. Pull the latest code
+            # 2. Navigate to the project root and pull
+            cd /home/ubuntu/File-Storage/
+            echo "Pulling latest code..."
             git pull origin master
 
-            # 3. Navigate into the SERVER folder to run Node commands
+            # 3. Navigate into the SERVER folder
             cd server
             
             # 4. Install production dependencies
+            echo "Installing dependencies..."
             npm ci --production --no-audit --no-fund
             
-            # 5. Smart Restart (Reload if running, start if not)
+            # 5. Smart Restart
             echo "Reloading StorageApp with PM2..."
-            pm2 reload storageApp 
+            # Using '||' ensures it starts if it isn't already running
+            pm2 reload storageApp || pm2 start index.js --name storageApp
             
-            echo "StorageApp Backend Deployed Successfully!"
+            pm2 save
+            echo "✅ StorageApp Backend Deployed Successfully!"
