@@ -24,8 +24,8 @@ jobs:
           script: |
             set -e
             
-            # 1. Navigate to the project (ensure the typo 'stroage' matches your server)
-            cd /home/ubuntu/File-Storage/server
+            # 1. Navigate to the project
+            cd /home/ubuntu/File-Storage/
             
             # 2. Pull the latest code
             git pull origin master
