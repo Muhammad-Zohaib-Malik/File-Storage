@@ -28,7 +28,7 @@ jobs:
             cd /home/ubuntu/File-Storage/server
             
             # 2. Pull the latest code
-            git pull origin main
+            git pull origin master
             
             # 3. Install production dependencies
             npm ci --production --no-audit --no-fund
