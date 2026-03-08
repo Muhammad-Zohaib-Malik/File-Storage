@@ -20,27 +20,27 @@ jobs:
           host: 54.236.246.83
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # This 'script' block replaces your 'run' block
+          
           script: |
-            # 1. Force load the user profile to find 'npm' and 'pm2'
-            # This is the most common fix for 'command not found' in SSH actions
-            [ -f ~/.profile ] && . ~/.profile
-            [ -f ~/.bashrc ] && . ~/.bashrc
-            
             set -e
-            
-            # 2. Navigate to project
+
+            # 1. Manually add the NVM bin directory to the PATH
+            export PATH=$PATH:/home/ubuntu/.nvm/versions/node/v24.12.0/bin
+
+            # 2. Navigate to the project
             cd /home/ubuntu/File-Storage/
-            
-            # 3. Pull code
+
+            # 3. Pull the latest code
+            echo "Pulling latest code from master..."
             git pull origin master
-            
-            # 4. Install dependencies
-            # We use 'npm' now that the path is loaded
+
+            # 4. Install production dependencies
+            echo "Installing dependencies..."
             npm ci --production --no-audit --no-fund
-            
-            # 5. Smart Restart
+
+            # 5. Smart Restart (Reload if running, start if not)
             echo "Reloading StorageApp with PM2..."
-            pm2 reload storageApp || pm2 start index.js --name storageApp
+            pm2 reload storageapp 
             
-            echo "StorageApp Backend Deployed Successfully!"
+
+            echo "✅ StorageApp Backend Deployed Successfully!"
