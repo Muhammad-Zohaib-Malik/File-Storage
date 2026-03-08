@@ -1,0 +1,40 @@
+name: Deploy StorageApp Backend
+
+on:
+  push:
+    branches:
+      - main        # Trigger workflow on push to main branch
+    paths:
+      - 'server/**' # Only run if changes are in client/ folder
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Execute Remote SSH Commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 54.236.246.83
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # This 'script' block replaces your 'run' block
+          script: |
+            set -e
+            
+            # 1. Navigate to the project (ensure the typo 'stroage' matches your server)
+            cd /home/ubuntu/File-Storage/server
+            
+            # 2. Pull the latest code
+            git pull origin main
+            
+            # 3. Install production dependencies
+            npm ci --production --no-audit --no-fund
+            
+            # 4. Smart Restart (Reload if running, start if not)
+            echo "Reloading StorageApp with PM2..."
+            pm2 reload storageApp 
+            
+            echo "StorageApp Backend Deployed Successfully!"
