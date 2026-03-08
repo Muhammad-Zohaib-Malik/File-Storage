@@ -40,47 +40,7 @@ app.use(
   })
 );
 
-const PORT = process.env.PORT || 4000;
-
-app.post("/github-webhook", verifyGithubSignature, (req, res) => {
-  res.status(200).send("OK");
-
-  const commits = req.body.commits || [];
-
-  let clientChanged = false;
-  let serverChanged = false;
-
-  for (const commit of commits) {
-    const files = [
-      ...(commit.added || []),
-      ...(commit.modified || []),
-      ...(commit.removed || []),
-    ];
-
-    for (const file of files) {
-      if (file.startsWith("client/")) clientChanged = true;
-      if (file.startsWith("server/")) serverChanged = true;
-
-      if (clientChanged && serverChanged) break;
-    }
-    if (clientChanged && serverChanged) break;
-  }
-
-  if (!clientChanged && !serverChanged) {
-    console.log("ℹ️ No deployable changes detected");
-    return;
-  }
-
-  if (clientChanged) {
-    console.log("📦 Client changed → Deploying frontend");
-    executeBashScript("/home/ubuntu/deploy-client.sh", "CLIENT");
-  }
-
-  if (serverChanged) {
-    console.log("⚙️ Server changed → Deploying backend");
-    executeBashScript("/home/ubuntu/deploy-server.sh", "SERVER");
-  }
-});
+const PORT = process.env.PORT || 40000    
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Hello World" });
