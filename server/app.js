@@ -40,7 +40,7 @@ app.use(
   })
 );
 
-const PORT = process.env.PORT || 40000    
+const PORT = process.env.PORT || 4000 
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Hello World from storage-app backend" });
