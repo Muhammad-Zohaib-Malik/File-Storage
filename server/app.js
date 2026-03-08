@@ -43,7 +43,7 @@ app.use(
 const PORT = process.env.PORT || 40000    
 
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "Hello World" });
+  res.status(200).json({ message: "Hello World from storage-app backend" });
 });
 
 app.get("/health", (req, res) => {
