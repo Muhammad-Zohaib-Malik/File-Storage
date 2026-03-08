@@ -22,19 +22,25 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           # This 'script' block replaces your 'run' block
           script: |
+            # 1. Force load the user profile to find 'npm' and 'pm2'
+            # This is the most common fix for 'command not found' in SSH actions
+            [ -f ~/.profile ] && . ~/.profile
+            [ -f ~/.bashrc ] && . ~/.bashrc
+            
             set -e
             
-            # 1. Navigate to the project
+            # 2. Navigate to project
             cd /home/ubuntu/File-Storage/
             
-            # 2. Pull the latest code
+            # 3. Pull code
             git pull origin master
             
-            # 3. Install production dependencies
+            # 4. Install dependencies
+            # We use 'npm' now that the path is loaded
             npm ci --production --no-audit --no-fund
             
-            # 4. Smart Restart (Reload if running, start if not)
+            # 5. Smart Restart
             echo "Reloading StorageApp with PM2..."
-            pm2 reload storageApp 
+            pm2 reload storageApp || pm2 start index.js --name storageApp
             
             echo "StorageApp Backend Deployed Successfully!"
