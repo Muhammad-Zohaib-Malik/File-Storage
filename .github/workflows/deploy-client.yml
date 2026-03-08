@@ -20,7 +20,7 @@ jobs:
       S3_BUCKET_NAME: mystorageapp-frontend                # Your S3 bucket name
       CLOUDFRONT_DISTRIBUTION_ID: EMY1D6Y5I0J3S         # CloudFront distribution ID
       VITE_GOOGLE_CLIENT_ID: 344318278446-cajt3djqf9ob9s8cg42vcb09q5k8ql65.apps.googleusercontent.com  # Vite env
-      VITE_BACKEND_BASE_URL: https://api.storemyfiles.store  # Backend API URL
+      VITE_SERVER_URL: https://api.storemyfiles.store
 
     steps:
       # 1️⃣ Checkout repo
