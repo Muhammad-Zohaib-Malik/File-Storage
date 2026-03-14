@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { fetchUser, logoutUser, logoutAllSessions } from "./api/userApi";
+import { Camera, User, Mail, Shield, LogOut, Key } from "lucide-react";
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
@@ -54,487 +55,228 @@ const UserProfile = () => {
     }
   };
 
+  const handleImageChange = () => {};
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-[#facc15] border-t-black animate-spin shadow-[4px_4px_0px_0px_#facc15]"></div>
       </div>
     );
   }
-
-  const handleImageChange = () => {};
 
   if (!user) return null;
   const isGoogleUser = user.createdWith === "google";
   const isGithubUser = user.createdWith === "github";
 
   return (
-    <div className="min-h-screen bg-white p-0 m-0 w-full">
-      <div className="w-full max-w-full mx-0 space-y-8">
-        {/* Profile Card */}
-        <div className="bg-white overflow-hidden transition-all duration-300">
-          <div className="bg-white border-b border-gray-200 p-6">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Profile Settings
-            </h1>
-            <p className="text-gray-600">
-              Manage your account information and security
-            </p>
-          </div>
-
-          <div className="px-8 py-10">
-            <div className="flex flex-col md:flex-row items-center gap-8 mb-12 px-6">
-              <div className="relative group">
-                <img
-                  src={user.picture}
-                  alt="Profile"
-                  className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  onChange={handleImageChange}
-                />
-                <button className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md text-gray-600 hover:bg-gray-100 transition-colors duration-200">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                </button>
+    <div className="min-h-screen bg-[#0a0a0a] text-white p-4 md:p-8 relative overflow-hidden pb-20">
+      {/* Grid bg */}
+      <div
+        className="fixed inset-0 -z-10 opacity-[0.03]"
+        style={{
+          backgroundImage: `linear-gradient(#facc15 1px, transparent 1px), linear-gradient(90deg, #facc15 1px, transparent 1px)`,
+          backgroundSize: "64px 64px",
+        }}
+      />
+      
+      <div className="max-w-5xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="bg-[#111] border-2 border-[#facc15] shadow-[8px_8px_0px_0px_#facc15] p-6 md:p-10">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <div className="relative group shrink-0">
+              <img
+                src={user.picture || `https://ui-avatars.com/api/?name=${user.name || "User"}&background=facc15&color=000&size=200`}
+                alt="Profile"
+                className="w-32 h-32 md:w-40 md:h-40 object-cover border-4 border-black bg-[#222] shadow-[6px_6px_0px_0px_#facc15]"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                onChange={handleImageChange}
+              />
+              <button className="absolute -bottom-4 -right-4 bg-[#facc15] text-black p-3 border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[6px_6px_0px_0px_#000] transition-all z-0">
+                <Camera size={20} strokeWidth={2.5} />
+              </button>
+            </div>
+            
+            <div className="text-center md:text-left flex-1">
+              <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tight text-white mb-3 break-words">
+                {user.name || "User"}
+              </h1>
+              <div className="inline-flex items-center gap-2 px-3 py-2 bg-black border-2 border-white/20 text-white/70 text-sm font-bold tracking-widest break-all">
+                <Mail size={16} className="shrink-0" />
+                <span className="truncate max-w-[200px] md:max-w-full">{user.email}</span>
               </div>
-              <div className="text-center md:text-left">
-                <h2 className="text-3xl font-bold text-gray-900">
-                  {user.name || "User"}
-                </h2>
-                <p className="text-lg text-gray-600 mt-2">{user.email}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Left Column */}
+          <div className="space-y-8">
+            {/* Personal Info */}
+            <div className="bg-[#111] border-2 border-white/20 shadow-[6px_6px_0px_0px_rgba(255,255,255,0.05)] p-6">
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-white/10">
+                <div className="p-2 bg-[#facc15] border-2 border-black shadow-[2px_2px_0px_0px_#000]">
+                  <User size={20} className="text-black" strokeWidth={2.5} />
+                </div>
+                <h2 className="text-xl font-black uppercase tracking-wide">Personal Details</h2>
+              </div>
+
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-xs font-black text-white/50 mb-2 uppercase tracking-widest">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border-2 border-white/20 text-white focus:outline-none focus:border-[#facc15] focus:shadow-[4px_4px_0px_0px_#facc15] transition-all font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-white/50 mb-2 uppercase tracking-widest">
+                    Email Address <span className="text-[#facc15] ml-1">(Read Only)</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={user.email}
+                    disabled
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border-2 border-white/10 text-white/40 cursor-not-allowed font-medium"
+                  />
+                </div>
+                <button
+                  onClick={handleUpdateProfile}
+                  className="w-full mt-2 py-3 px-4 bg-white text-black text-sm font-black uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#facc15] transition-all"
+                >
+                  Save Changes
+                </button>
               </div>
             </div>
 
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
-                  <svg
-                    className="inline-block w-5 h-5 mr-2 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                  Personal Information
-                </h3>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Full Name
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg
-                          className="h-5 w-5 text-gray-400"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                          />
-                        </svg>
-                      </div>
-                      <input
-                        type="text"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Enter your full name"
-                      />
-                    </div>
+            {/* Change Password */}
+            {!isGoogleUser && !isGithubUser && (
+              <div className="bg-[#111] border-2 border-white/20 shadow-[6px_6px_0px_0px_rgba(255,255,255,0.05)] p-6">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-white/10">
+                  <div className="p-2 bg-[#9333ea] border-2 border-black shadow-[2px_2px_0px_0px_#000]">
+                    <Key size={20} className="text-white" strokeWidth={2.5} />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg
-                          className="h-5 w-5 text-gray-400"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </div>
-                      <input
-                        type="email"
-                        value={user.email}
-                        disabled
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
-                      />
-                    </div>
-                  </div>
+                  <h2 className="text-xl font-black uppercase tracking-wide">Change Password</h2>
                 </div>
-                <div className="mt-10 flex justify-end">
-                  <button
-                    onClick={handleUpdateProfile}
-                    className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-                  >
-                    <svg
-                      className="-ml-1 mr-2 h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    Save Changes
+
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-xs font-black text-white/50 mb-2 uppercase tracking-widest">
+                      New Password
+                    </label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full px-4 py-3 bg-[#0a0a0a] border-2 border-white/20 text-white focus:outline-none focus:border-[#9333ea] focus:shadow-[4px_4px_0px_0px_#9333ea] transition-all font-medium"
+                    />
+                  </div>
+                  <button className="w-full mt-2 py-3 px-4 bg-[#9333ea] text-white text-sm font-black uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000] transition-all">
+                    Update Password
                   </button>
                 </div>
               </div>
+            )}
+          </div>
 
-              {/* Connected Accounts */}
-              {isGoogleUser && (
-                <div className="mt-8">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
-                    <svg
-                      className="inline-block w-5 h-5 mr-2 text-green-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                      />
-                    </svg>
-                    Connected Accounts
-                  </h3>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                          <svg
-                            className="h-6 w-6"
-                            viewBox="0 0 533.5 544.3"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              fill="#4285F4"
-                              d="M533.5 278.4c0-17.6-1.5-34.5-4.3-50.9H272v95.7h146.9c-6.3 33.6-25.2 62-53.9 81.1v67.1h87.1c50.9-46.9 80.4-115.9 80.4-193z"
-                            />
-                            <path
-                              fill="#34A853"
-                              d="M272 544.3c72.9 0 134-24.1 178.7-65.3l-87.1-67.1c-24.2 16.2-55.1 25.8-91.6 25.8-70.5 0-130.3-47.5-151.6-111.5H32.9v69.8C77.4 482.8 168.5 544.3 272 544.3z"
-                            />
-                            <path
-                              fill="#FBBC05"
-                              d="M120.4 323.5c-10.4-31.5-10.4-65.8 0-97.3V156.4H32.9c-39.7 77.5-39.7 168.1 0 245.6l87.5-69.8z"
-                            />
-                            <path
-                              fill="#EA4335"
-                              d="M272 107.6c38.7-.6 75.9 13.3 104.1 38.6l78-78C405.1 24.5 343.9 0 272 0 168.5 0 77.4 61.5 32.9 156.4l87.5 69.8c21.3-64 81.1-111.5 151.6-118.6z"
-                            />
-                          </svg>
+          {/* Right Column */}
+          <div className="space-y-8">
+            {/* Connected Accounts */}
+            {(isGoogleUser || isGithubUser) && (
+              <div className="bg-[#111] border-2 border-white/20 shadow-[6px_6px_0px_0px_rgba(255,255,255,0.05)] p-6">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-white/10">
+                  <div className="p-2 bg-green-500 border-2 border-black shadow-[2px_2px_0px_0px_#000]">
+                    <Shield size={20} className="text-black" strokeWidth={2.5} />
+                  </div>
+                  <h2 className="text-xl font-black uppercase tracking-wide">Connected Accounts</h2>
+                </div>
+
+                <div className="space-y-4">
+                  {isGoogleUser && (
+                     <div className="flex items-center justify-between p-4 bg-[#0a0a0a] border-2 border-white/10 hover:border-white/30 transition-colors">
+                      <div className="flex items-center gap-4 min-w-0 pr-2">
+                        <div className="w-10 h-10 bg-white border-2 border-black flex items-center justify-center shrink-0">
+                          <svg className="h-5 w-5" viewBox="0 0 533.5 544.3">
+                             <path fill="#4285F4" d="M533.5 278.4c0-17.6-1.5-34.5-4.3-50.9H272v95.7h146.9c-6.3 33.6-25.2 62-53.9 81.1v67.1h87.1c50.9-46.9 80.4-115.9 80.4-193z" />
+                             <path fill="#34A853" d="M272 544.3c72.9 0 134-24.1 178.7-65.3l-87.1-67.1c-24.2 16.2-55.1 25.8-91.6 25.8-70.5 0-130.3-47.5-151.6-111.5H32.9v69.8C77.4 482.8 168.5 544.3 272 544.3z" />
+                             <path fill="#FBBC05" d="M120.4 323.5c-10.4-31.5-10.4-65.8 0-97.3V156.4H32.9c-39.7 77.5-39.7 168.1 0 245.6l87.5-69.8z" />
+                             <path fill="#EA4335" d="M272 107.6c38.7-.6 75.9 13.3 104.1 38.6l78-78C405.1 24.5 343.9 0 272 0 168.5 0 77.4 61.5 32.9 156.4l87.5 69.8c21.3-64 81.1-111.5 151.6-118.6z" />
+                           </svg>
                         </div>
-                        <div className="ml-4">
-                          <p className="text-sm font-medium text-gray-900">
-                            Google
-                          </p>
-                          <p className="text-sm text-gray-500">{user.email}</p>
+                        <div className="truncate">
+                          <p className="font-black uppercase tracking-wide">Google</p>
+                          <p className="text-xs text-white/50 truncate max-w-[120px] sm:max-w-[200px]">{user.email}</p>
                         </div>
                       </div>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        <svg
-                          className="-ml-0.5 mr-1.5 h-2 w-2 text-green-400"
-                          fill="currentColor"
-                          viewBox="0 0 8 8"
-                        >
-                          <circle cx={4} cy={4} r={3} />
-                        </svg>
+                      <span className="px-3 py-1 bg-green-500/10 text-green-400 border border-green-500/20 text-[10px] font-black uppercase tracking-widest shrink-0">
                         Connected
                       </span>
                     </div>
-                  </div>
-                </div>
-              )}
+                  )}
 
-              {isGithubUser && (
-                <div className="mt-8">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
-                    <svg
-                      className="inline-block w-5 h-5 mr-2 text-green-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                      />
-                    </svg>
-                    Connected Accounts
-                  </h3>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                          <svg
-                            className="h-6 w-6 text-gray-800"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                              clipRule="evenodd"
-                            />
+                  {isGithubUser && (
+                     <div className="flex items-center justify-between p-4 bg-[#0a0a0a] border-2 border-white/10 hover:border-white/30 transition-colors">
+                      <div className="flex items-center gap-4 min-w-0 pr-2">
+                        <div className="w-10 h-10 bg-white border-2 border-black flex items-center justify-center shrink-0">
+                          <svg className="h-6 w-6 text-black" fill="currentColor" viewBox="0 0 24 24">
+                              <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
                           </svg>
                         </div>
-                        <div className="ml-4">
-                          <p className="text-sm font-medium text-gray-900">
-                            Github
-                          </p>
-                          <p className="text-sm text-gray-500">{user.email}</p>
+                        <div className="truncate">
+                          <p className="font-black uppercase tracking-wide">GitHub</p>
+                          <p className="text-xs text-white/50 truncate max-w-[120px] sm:max-w-[200px]">{user.email}</p>
                         </div>
                       </div>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        <svg
-                          className="-ml-0.5 mr-1.5 h-2 w-2 text-green-400"
-                          fill="currentColor"
-                          viewBox="0 0 8 8"
-                        >
-                          <circle cx={4} cy={4} r={3} />
-                        </svg>
+                      <span className="px-3 py-1 bg-green-500/10 text-green-400 border border-green-500/20 text-[10px] font-black uppercase tracking-widest shrink-0">
                         Connected
                       </span>
                     </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Change Password */}
-              {isGoogleUser && (
-                <div className="mt-8">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
-                    <svg
-                      className="inline-block w-5 h-5 mr-2 text-purple-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                      />
-                    </svg>
-                    Change Password
-                  </h3>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="md:col-span-2 grid md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          New Password
-                        </label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg
-                              className="h-5 w-5 text-gray-400"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={1.5}
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                              />
-                            </svg>
-                          </div>
-                          <input
-                            type="password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                            placeholder="••••••••"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Session Management */}
-              <div className="mt-16">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
-                  <svg
-                    className="inline-block w-5 h-5 mr-2 text-blue-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                    />
-                  </svg>
-                  Session Management
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r">
-                    <div className="flex">
-                      <div className="flex-shrink-0">
-                        <svg
-                          className="h-5 w-5 text-blue-400"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                          />
-                        </svg>
-                      </div>
-                      <div className="ml-3">
-                        <h4 className="text-sm font-medium text-blue-800">
-                          Logout from this device
-                        </h4>
-                        <p className="mt-1 text-sm text-blue-700">
-                          End your current session on this browser/device.
-                        </p>
-                        <div className="mt-3">
-                          <button
-                            onClick={handleLogout}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-                          >
-                            <svg
-                              className="-ml-1 mr-2 h-4 w-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                              />
-                            </svg>
-                            Logout Now
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r">
-                    <div className="flex">
-                      <div className="flex-shrink-0">
-                        <svg
-                          className="h-5 w-5 text-orange-400"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                          />
-                        </svg>
-                      </div>
-                      <div className="ml-3">
-                        <h4 className="text-sm font-medium text-orange-800">
-                          Logout from all devices
-                        </h4>
-                        <p className="mt-1 text-sm text-orange-700">
-                          Sign out of all active sessions across all your
-                          devices.
-                        </p>
-                        <div className="mt-3">
-                          <button
-                            onClick={handleLogoutAll}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-200"
-                          >
-                            <svg
-                              className="-ml-1 mr-2 h-4 w-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                            Logout Everywhere
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
+            )}
+
+            {/* Session Management */}
+            <div className="bg-[#111] border-2 border-red-500/50 shadow-[6px_6px_0px_0px_rgba(239,68,68,0.3)] p-6">
+               <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-red-500/20">
+                  <div className="p-2 bg-red-500 border-2 border-black shadow-[2px_2px_0px_0px_#000]">
+                    <LogOut size={20} className="text-black" strokeWidth={2.5} />
+                  </div>
+                  <h2 className="text-xl font-black uppercase tracking-wide text-red-100">Danger Zone</h2>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="p-5 bg-red-950/20 border-2 border-red-500/30">
+                    <h3 className="font-black text-red-400 uppercase tracking-widest text-sm mb-1">Current Session</h3>
+                    <p className="text-xs text-white/50 mb-5 font-medium">Log out from your current browser session only.</p>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full py-3 px-4 bg-[#1a0f0f] text-red-400 text-sm font-black uppercase tracking-wider border-2 border-red-500/50 hover:bg-red-500 hover:text-black hover:border-black hover:shadow-[4px_4px_0px_0px_#000] hover:-translate-y-0.5 transition-all"
+                    >
+                      Log Out Now
+                    </button>
+                  </div>
+
+                  <div className="p-5 bg-red-950/40 border-2 border-red-500">
+                    <h3 className="font-black text-red-500 uppercase tracking-widest text-sm mb-1">All Devices</h3>
+                    <p className="text-xs text-red-200/50 mb-5 font-medium">Log out from everywhere including mobile and other browsers.</p>
+                    <button
+                      onClick={handleLogoutAll}
+                      className="w-full py-3 px-4 bg-red-500 text-black text-sm font-black uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000] transition-all"
+                    >
+                      Log Out Everywhere
+                    </button>
+                  </div>
+                </div>
             </div>
           </div>
         </div>
