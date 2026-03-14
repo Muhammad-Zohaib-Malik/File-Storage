@@ -42,7 +42,7 @@ function DirectoryItem({ item, uploadProgress, viewMode = "list" }) {
     <div
       className={`relative cursor-pointer bg-[#111] border-2 border-white/10 border-t-4 border-t-[#facc15] card-hover group ${
         gridCard ? "flex flex-col gap-3 p-4 min-h-[130px]" : "flex flex-row items-center gap-3 px-4 py-3"
-      }`}
+      } ${activeContextMenu === item.id ? "z-50" : "z-10"}`}
       onClick={() =>
         !(activeContextMenu || isUploading) &&
         handleRowClick(item.isDirectory ? "directory" : "file", item.id)
