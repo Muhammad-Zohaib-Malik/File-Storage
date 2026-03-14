@@ -29,7 +29,7 @@ export const PLAN_CATALOG = {
       period: "/mo",
       cta: "Choose 5 TB",
       features: ["Everything in Starter", "Priority uploads", "Email support"],
-      popular: true,
+      popular: false,
     },
     {
       id: "price_1SdlYs3cVYZiLez6gCY2kxdw",
@@ -68,7 +68,7 @@ export const PLAN_CATALOG = {
       period: "/yr",
       cta: "Choose 5 TB",
       features: ["Everything in Starter", "Priority uploads", "Email support"],
-      popular: true,
+      popular: false,
     },
     {
       id: "price_1SdlZM3cVYZiLez6gO6iXkKd",
