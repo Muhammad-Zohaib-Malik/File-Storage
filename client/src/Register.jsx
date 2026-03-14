@@ -34,14 +34,15 @@ const Register = () => {
       .catch(() => setIsCheckingAuth(false));
   }, []);
 
-  if (isCheckingAuth) return <AuthLoader />;
-
   useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
     }
   }, [countdown]);
+
+  // All hooks above — safe to render conditionally now
+  if (isCheckingAuth) return <AuthLoader />;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
