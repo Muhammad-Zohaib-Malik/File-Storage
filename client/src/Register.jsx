@@ -41,6 +41,23 @@ const Register = () => {
     }
   }, [countdown]);
 
+  // useGoogleLogin is a hook — must be above any early return
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (res) => {
+      try {
+        await loginWithGoogle(res.code);
+        navigate("/");
+      } catch (err) {
+        toast.error(err.response?.data?.error || "Google login failed");
+      }
+    },
+    flow: "auth-code",
+    ux_mode: "popup",
+    onError: (error) => {
+      toast.error(error?.response?.data?.error || "Google auth failed");
+    },
+  });
+
   // All hooks above — safe to render conditionally now
   if (isCheckingAuth) return <AuthLoader />;
 
@@ -116,21 +133,6 @@ const Register = () => {
     }
   };
 
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (res) => {
-      try {
-        await loginWithGoogle(res.code);
-        navigate("/");
-      } catch (err) {
-        toast.error(err.response?.data?.error || "Google login failed");
-      }
-    },
-    flow: "auth-code",
-    ux_mode: "popup",
-    onError: (error) => {
-      toast.error(error?.response?.data?.error || "Google auth failed");
-    },
-  });
 
   const loginWithGithub = () => {
     window.location.href = `${BASE_URL}/user/github`;

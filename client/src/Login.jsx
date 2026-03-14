@@ -24,6 +24,8 @@ const Login = () => {
       .catch(() => setIsCheckingAuth(false));
   }, []);
 
+  // useGoogleLogin is a hook — must be above any early return
+
   if (isCheckingAuth) return <AuthLoader />;
 
   const handleChange = (e) => {
@@ -59,22 +61,6 @@ const Login = () => {
       setIsLoading(false);
     }
   };
-
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (res) => {
-      try {
-        await loginWithGoogle(res.code);
-        navigate("/");
-      } catch (err) {
-        toast.error(err.response?.data?.error || "Google login failed");
-      }
-    },
-    flow: "auth-code",
-    ux_mode: "popup",
-    onError: (error) => {
-      toast.error(error?.response?.data?.error || "Google auth failed");
-    },
-  });
 
   const loginWithGithub = () => {
     window.location.href = `${BASE_URL}/user/github`;
