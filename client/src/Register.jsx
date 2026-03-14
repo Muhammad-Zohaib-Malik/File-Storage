@@ -22,6 +22,7 @@ const Register = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const navigate = useNavigate();
 
@@ -29,8 +30,10 @@ const Register = () => {
   useEffect(() => {
     fetchUser()
       .then(() => navigate("/directory", { replace: true }))
-      .catch(() => {});
+      .catch(() => setIsCheckingAuth(false));
   }, []);
+
+  if (isCheckingAuth) return null;
 
   useEffect(() => {
     if (countdown > 0) {

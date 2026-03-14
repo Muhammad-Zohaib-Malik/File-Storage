@@ -13,12 +13,15 @@ import {
 
 const Home = () => {
   const navigate = useNavigate();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
     fetchUser()
       .then(() => navigate("/directory", { replace: true }))
-      .catch(() => {}); // not logged in — stay on home
+      .catch(() => setIsCheckingAuth(false)); // not logged in — show page
   }, []);
+
+  if (isCheckingAuth) return null;
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white overflow-hidden">
       {/* Subtle grid background */}

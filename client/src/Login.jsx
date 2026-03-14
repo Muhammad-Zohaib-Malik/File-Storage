@@ -13,14 +13,17 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
 
   // Redirect already-logged-in users
   useEffect(() => {
     fetchUser()
       .then(() => navigate("/directory", { replace: true }))
-      .catch(() => {});
+      .catch(() => setIsCheckingAuth(false));
   }, []);
+
+  if (isCheckingAuth) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
