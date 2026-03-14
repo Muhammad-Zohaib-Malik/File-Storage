@@ -6,6 +6,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { HardDrive } from "lucide-react";
+import AuthLoader from "./components/AuthLoader";
 const BASE_URL = import.meta.env.VITE_SERVER_URL;
 
 const Register = () => {
@@ -33,7 +34,7 @@ const Register = () => {
       .catch(() => setIsCheckingAuth(false));
   }, []);
 
-  if (isCheckingAuth) return null;
+  if (isCheckingAuth) return <AuthLoader />;
 
   useEffect(() => {
     if (countdown > 0) {

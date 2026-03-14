@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { fetchUser } from "./api/userApi";
+import AuthLoader from "./components/AuthLoader";
 import {
   FolderOpen,
   Shield,
@@ -21,7 +22,7 @@ const Home = () => {
       .catch(() => setIsCheckingAuth(false)); // not logged in — show page
   }, []);
 
-  if (isCheckingAuth) return null;
+  if (isCheckingAuth) return <AuthLoader />;
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white overflow-hidden">
       {/* Subtle grid background */}

@@ -6,6 +6,7 @@ import { loginUser, fetchUser } from "./api/userApi";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { HardDrive } from "lucide-react";
+import AuthLoader from "./components/AuthLoader";
 const BASE_URL = import.meta.env.VITE_SERVER_URL;
 
 const Login = () => {
@@ -23,7 +24,7 @@ const Login = () => {
       .catch(() => setIsCheckingAuth(false));
   }, []);
 
-  if (isCheckingAuth) return null;
+  if (isCheckingAuth) return <AuthLoader />;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
