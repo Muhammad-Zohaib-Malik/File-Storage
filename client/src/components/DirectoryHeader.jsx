@@ -76,6 +76,7 @@ function DirectoryHeader({
   disabled = false,
 }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isUserLoading, setIsUserLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
@@ -118,6 +119,8 @@ function DirectoryHeader({
         setLoggedIn(true);
       } catch {
         setLoggedIn(false);
+      } finally {
+        setIsUserLoading(false);
       }
     }
     loadUser();
@@ -226,10 +229,35 @@ function DirectoryHeader({
                 : "border-white/20 hover:border-[#facc15] hover:bg-white/5"
             }`}
           >
-            <Avatar picture={userPicture} name={userName} size="sm" />
-            <span className="hidden md:block text-xs font-black text-white/80 max-w-[100px] truncate">
-              {userName || "Account"}
-            </span>
+            {isUserLoading ? (
+              /* Spinner while loading user */
+              <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                <svg
+                  className="animate-spin w-5 h-5 text-[#facc15]"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-20"
+                    cx="12" cy="12" r="10"
+                    stroke="currentColor" strokeWidth="3"
+                  />
+                  <path
+                    className="opacity-90"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+              </div>
+            ) : (
+              <Avatar picture={userPicture} name={userName} size="sm" />
+            )}
+            {!isUserLoading && (
+              <span className="hidden md:block text-xs font-black text-white/80 max-w-[100px] truncate">
+                {userName || "Account"}
+              </span>
+            )}
             <ChevronRight
               className={`w-3.5 h-3.5 text-white/30 shrink-0 transition-transform duration-200 ${
                 showUserMenu ? "rotate-90" : ""

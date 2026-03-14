@@ -91,6 +91,7 @@ function DirectoryView() {
   const [viewMode, setViewMode] = useState("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [isDragActive, setIsDragActive] = useState(false);
+  const [isLoadingFiles, setIsLoadingFiles] = useState(true);
 
   const openDetailsPopup = (item) => setDetailsItem(item);
   const closeDetailsPopup = () => setDetailsItem(null);
@@ -105,10 +106,13 @@ function DirectoryView() {
       const status = err.response?.status;
       if (status === 401 || status === 403) navigate("/login");
       else setErrorMessage(err.response?.data?.error || err.message);
+    } finally {
+      setIsLoadingFiles(false);
     }
   }, [dirId, navigate]);
 
   useEffect(() => {
+    setIsLoadingFiles(true);
     loadDirectory();
     setActiveContextMenu(null);
   }, [dirId, loadDirectory]);
@@ -443,7 +447,7 @@ function DirectoryView() {
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.15 }}
                 >
-                  {filteredItems.length === 0 ? (
+                  {filteredItems.length === 0 && !isLoadingFiles ? (
                     errorMessage === "Directory not found or you do not have access to it!" ? (
                       <p className="text-center text-white/40 mt-12 text-sm font-bold">
                         Directory not found or you do not have access to it.
@@ -462,6 +466,30 @@ function DirectoryView() {
                         </p>
                       </div>
                     )
+                  ) : isLoadingFiles ? (
+                    /* Loading spinner */
+                    <div className="mt-16 flex flex-col items-center justify-center gap-4">
+                      <svg
+                        className="animate-spin w-10 h-10 text-[#facc15]"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-20"
+                          cx="12" cy="12" r="10"
+                          stroke="currentColor" strokeWidth="3"
+                        />
+                        <path
+                          className="opacity-90"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        />
+                      </svg>
+                      <p className="text-xs font-black uppercase tracking-widest text-white/30">
+                        Loading files...
+                      </p>
+                    </div>
                   ) : (
                     <DirectoryList items={filteredItems} viewMode={viewMode} />
                   )}
