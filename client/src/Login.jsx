@@ -25,6 +25,21 @@ const Login = () => {
   }, []);
 
   // useGoogleLogin is a hook — must be above any early return
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (res) => {
+      try {
+        await loginWithGoogle(res.code);
+        navigate("/");
+      } catch (err) {
+        toast.error(err.response?.data?.error || "Google login failed");
+      }
+    },
+    flow: "auth-code",
+    ux_mode: "popup",
+    onError: (error) => {
+      toast.error(error?.response?.data?.error || "Google auth failed");
+    },
+  });
 
   if (isCheckingAuth) return <AuthLoader />;
 
@@ -167,9 +182,8 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full flex justify-center items-center gap-2 py-3 px-4 bg-[#facc15] text-black text-sm font-black uppercase tracking-wide border-2 border-black shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000] transition-all duration-150 ${
-                  isLoading ? "opacity-70 cursor-not-allowed" : ""
-                }`}
+                className={`w-full flex justify-center items-center gap-2 py-3 px-4 bg-[#facc15] text-black text-sm font-black uppercase tracking-wide border-2 border-black shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000] transition-all duration-150 ${isLoading ? "opacity-70 cursor-not-allowed" : ""
+                  }`}
               >
                 {isLoading ? (
                   <>
