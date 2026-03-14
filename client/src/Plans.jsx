@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { createSubscription } from "./api/subscriptionApi";
+import { Check, ArrowLeft } from "lucide-react";
 
-const PLAN_CATALOG = {
+export const PLAN_CATALOG = {
   monthly: [
     {
       id: "price_1SdlVw3cVYZiLez66kQLuZR4",
@@ -83,70 +84,60 @@ const PLAN_CATALOG = {
   ],
 };
 
-function classNames(...cls) {
+export function classNames(...cls) {
   return cls.filter(Boolean).join(" ");
 }
 
-function Price({ value }) {
+export function Price({ value }) {
   return (
-    <div className="flex items-baseline gap-1">
-      <span className="text-lg font-semibold text-slate-700">RS </span>
-      <span className="text-4xl font-bold tracking-tight text-slate-900">
+    <div className="flex items-baseline gap-1 my-4">
+      <span className="text-xl font-bold text-[#facc15]">RS</span>
+      <span className="text-5xl font-black tracking-tight text-white uppercase">
         {value}
       </span>
     </div>
   );
 }
 
-function PlanCard({ plan, onSelect }) {
+export function PlanCard({ plan, onSelect }) {
   return (
     <div
       className={classNames(
-        "relative flex flex-col rounded-2xl border bg-white p-5 shadow-sm transition",
-        "hover:shadow-md",
+        "relative flex flex-col p-6 sm:p-8 bg-[#111] border-2 transition-all duration-150",
         plan.popular
-          ? "border-blue-500/60 ring-1 ring-blue-500/20"
-          : "border-slate-200"
+          ? "border-[#facc15] shadow-[8px_8px_0px_0px_#facc15] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0px_0px_#facc15] z-10"
+          : "border-white/20 shadow-[6px_6px_0px_0px_transparent] hover:-translate-x-1 hover:-translate-y-1 hover:border-[#facc15] hover:shadow-[8px_8px_0px_0px_#facc15]"
       )}
     >
       {plan.popular && (
-        <div className="absolute -top-2 right-4 select-none rounded-full bg-blue-600 px-2 py-0.5 text-xs font-medium text-white shadow">
+        <div className="absolute -top-3 right-4 bg-[#facc15] px-3 py-1 text-xs font-black text-black uppercase tracking-wider border-2 border-black inline-flex shadow-brutal-sm">
           Most Popular
         </div>
       )}
 
-      <div className="mb-3 flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-slate-900">{plan.name}</h3>
-          <p className="text-sm text-slate-500">{plan.tagline}</p>
-        </div>
-        <span className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600">
+      <div className="mb-2">
+        <h3 className="text-3xl font-black text-white uppercase tracking-tight">{plan.name}</h3>
+        <p className="mt-2 text-sm font-bold text-white/50 uppercase tracking-widest">{plan.tagline}</p>
+      </div>
+
+      <div className="inline-block mt-4 mb-2">
+        <span className="border-2 border-[#facc15] bg-[#facc15]/10 text-[#facc15] px-3 py-1.5 text-xs font-black uppercase tracking-widest">
           {plan.storage}
         </span>
       </div>
 
-      <div className="mb-4 flex items-end gap-2">
-        <Price value={plan.price} />
-        <span className="mb-[6px] text-sm text-slate-500">{plan.period}</span>
-      </div>
+      <Price value={plan.price} />
+      <span className="mb-6 text-sm font-bold text-white/50 uppercase tracking-widest border-b-2 border-white/10 pb-6 block">
+        {plan.period}
+      </span>
 
-      <ul className="mb-5 space-y-2 text-sm text-slate-600">
+      <ul className="mb-8 space-y-4 flex-1">
         {plan.features.map((f, i) => (
-          <li key={i} className="flex items-start gap-2">
-            <svg
-              className="mt-0.5 h-4 w-4 flex-none"
-              viewBox="0 0 24 24"
-              fill="none"
-              strokeWidth="2"
-              stroke="currentColor"
-            >
-              <path
-                d="M5 13l4 4L19 7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span>{f}</span>
+          <li key={i} className="flex items-start gap-3 text-white font-medium">
+            <div className="mt-0.5 w-5 h-5 bg-[#facc15] border-2 border-black flex items-center justify-center shrink-0">
+              <Check className="h-3 w-3 text-black" strokeWidth={4} />
+            </div>
+            <span className="text-sm uppercase tracking-wide">{f}</span>
           </li>
         ))}
       </ul>
@@ -154,10 +145,10 @@ function PlanCard({ plan, onSelect }) {
       <button
         onClick={() => onSelect?.(plan)}
         className={classNames(
-          "mt-auto cursor-pointer inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2",
+          "mt-auto cursor-pointer inline-flex w-full items-center justify-center px-6 py-4 text-sm font-black transition-all duration-150 uppercase tracking-widest border-2",
           plan.popular
-            ? "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-600"
-            : "bg-slate-900 text-white hover:bg-slate-800 focus:ring-slate-900"
+            ? "bg-[#facc15] text-black border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000]"
+            : "bg-transparent text-white border-white/40 hover:border-white hover:bg-white/10"
         )}
       >
         {plan.cta}
@@ -176,55 +167,83 @@ export default function Plans() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <header className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-900">
-          Choose your plan
-        </h1>
-        <Link to="/">Home</Link>
-      </header>
+    <div className="min-h-screen bg-[#0a0a0a] text-white relative overflow-hidden font-sans pb-24">
+      {/* Subtle grid background */}
+      <div
+        className="fixed inset-0 z-0 opacity-[0.04]"
+        style={{
+          backgroundImage: `linear-gradient(#facc15 1px, transparent 1px),
+                            linear-gradient(90deg, #facc15 1px, transparent 1px)`,
+          backgroundSize: "64px 64px",
+        }}
+      />
 
-      {/* Tabs */}
-      <div className="mb-6 inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1 shadow-sm">
-        <button
-          onClick={() => setMode("monthly")}
-          className={classNames(
-            "rounded-lg px-4 py-2 text-sm font-medium border-2 cursor-pointer",
-            mode === "monthly" ? "border-blue-500" : "border-white"
-          )}
-        >
-          Monthly
-        </button>
-        <button
-          onClick={() => setMode("yearly")}
-          className={classNames(
-            "rounded-lg px-4 py-2 text-sm font-medium border-2 cursor-pointer",
-            mode === "yearly" ? "border-blue-500" : "border-white"
-          )}
-        >
-          Yearly{" "}
-          <span className="ml-1 hidden text-xs text-blue-600 sm:inline">
-            (2 months off)
-          </span>
-        </button>
+      <div className="relative z-10 px-6 sm:px-10 pt-12 sm:pt-20 max-w-7xl mx-auto">
+        <header className="mb-16 flex flex-col items-start gap-8">
+          <Link
+            to="/"
+            className="group inline-flex items-center gap-2 text-sm font-black text-white hover:text-[#facc15] transition-colors uppercase tracking-widest border-2 border-white/20 px-4 py-2 hover:border-[#facc15]"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Back to Home
+          </Link>
+          <div className="max-w-3xl">
+            <h1 className="text-5xl sm:text-7xl font-black tracking-tight leading-[1.0] mb-6 uppercase">
+              Choose your <span className="text-[#facc15]">plan</span>
+            </h1>
+            <p className="text-white/60 text-lg sm:text-xl font-medium max-w-2xl leading-relaxed">
+              Get the storage you need with the security you expect. Upgrade, downgrade, or cancel anytime.
+            </p>
+          </div>
+        </header>
+
+        {/* Tabs */}
+        <div className="mb-16 flex">
+          <div className="inline-flex bg-[#111] border-2 border-white/20 shadow-brutal-sm p-1">
+            <button
+              onClick={() => setMode("monthly")}
+              className={classNames(
+                "px-8 py-3 text-sm font-black transition-all duration-150 uppercase tracking-widest cursor-pointer border-2",
+                mode === "monthly"
+                  ? "bg-[#facc15] text-black border-black shadow-[4px_4px_0px_0px_#000]"
+                  : "bg-transparent text-white/60 border-transparent hover:text-white"
+              )}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setMode("yearly")}
+              className={classNames(
+                "px-8 py-3 text-sm font-black transition-all duration-150 uppercase tracking-widest cursor-pointer border-2 flex items-center gap-3",
+                mode === "yearly"
+                  ? "bg-[#facc15] text-black border-black shadow-[4px_4px_0px_0px_#000]"
+                  : "bg-transparent text-white/60 border-transparent hover:text-white"
+              )}
+            >
+              Yearly
+              <span
+                className={classNames(
+                  "text-[10px] px-2 py-0.5 border-2 uppercase font-black tracking-widest leading-none flex items-center",
+                  mode === "yearly" ? "border-black bg-black text-[#facc15]" : "border-white/20 text-[#facc15]"
+                )}
+              >
+                Save 16%
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Cards grid */}
+        <div className="grid gap-10 lg:gap-10 sm:grid-cols-2 lg:grid-cols-3 items-stretch max-w-6xl mx-auto md:mx-0">
+          {plans.map((plan, index) => (
+            <PlanCard
+              key={`${mode}-${plan.name}-${index}`}
+              plan={plan}
+              onSelect={handleSelect}
+            />
+          ))}
+        </div>
       </div>
-
-      {/* Cards grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {plans.map((plan) => (
-          <PlanCard
-            key={`${mode}-${plan.id}`}
-            plan={plan}
-            onSelect={handleSelect}
-          />
-        ))}
-      </div>
-
-      {/* Small helper text */}
-      <p className="mt-6 text-xs text-slate-500">
-        Prices are indicative for demo. Integrate with Razorpay Subscriptions to
-        start billing. You can prefill the plan IDs inside a static config.
-      </p>
     </div>
   );
 }
