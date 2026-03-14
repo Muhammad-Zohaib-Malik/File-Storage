@@ -1,4 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { fetchUser } from "./api/userApi";
 import {
   FolderOpen,
   Shield,
@@ -10,6 +12,13 @@ import {
 } from "lucide-react";
 
 const Home = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchUser()
+      .then(() => navigate("/directory", { replace: true }))
+      .catch(() => {}); // not logged in — stay on home
+  }, []);
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white overflow-hidden">
       {/* Subtle grid background */}

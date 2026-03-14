@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginWithGoogle } from "./api/authApi";
 import { useGoogleLogin } from "@react-oauth/google";
-import { loginUser } from "./api/userApi";
+import { loginUser, fetchUser } from "./api/userApi";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { HardDrive } from "lucide-react";
@@ -14,6 +14,13 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState("");
   const navigate = useNavigate();
+
+  // Redirect already-logged-in users
+  useEffect(() => {
+    fetchUser()
+      .then(() => navigate("/directory", { replace: true }))
+      .catch(() => {});
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

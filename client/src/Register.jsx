@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginWithGoogle, sendOtp, verifyOtp } from "./api/authApi";
-import { registerUser } from "./api/userApi";
+import { registerUser, fetchUser } from "./api/userApi";
 import { useGoogleLogin } from "@react-oauth/google";
 import { FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
@@ -24,6 +24,13 @@ const Register = () => {
   const [countdown, setCountdown] = useState(0);
 
   const navigate = useNavigate();
+
+  // Redirect already-logged-in users
+  useEffect(() => {
+    fetchUser()
+      .then(() => navigate("/directory", { replace: true }))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (countdown > 0) {
