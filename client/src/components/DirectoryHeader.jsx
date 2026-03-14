@@ -1,13 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchUser, logoutUser, logoutAllSessions } from "../api/userApi";
-import {
-  FaFolderPlus,
-  FaUpload,
-  FaUser,
-  FaSignOutAlt,
-  FaSignInAlt,
-} from "react-icons/fa";
+import { FaFolderPlus, FaUpload, FaUser, FaSignOutAlt, FaSignInAlt } from "react-icons/fa";
+import { HardDrive, ChevronRight } from "lucide-react";
 
 function DirectoryHeader({
   directoryName,
@@ -28,24 +23,15 @@ function DirectoryHeader({
   const userMenuRef = useRef(null);
   const navigate = useNavigate();
 
-  // --- Helper to format storage nicely ---
- const formatStorage = (bytes) => {
-  if (bytes >= 1024 ** 4) {
-    return (bytes / 1024 ** 4).toFixed(2) + " TB";
-  } else if (bytes >= 1024 ** 3) {
-    return (bytes / 1024 ** 3).toFixed(2) + " GB";
-  } else if (bytes >= 1024 ** 2) {
-    return (bytes / 1024 ** 2).toFixed(2) + " MB";
-  } else if (bytes >= 1024) {
-    return (bytes / 1024).toFixed(2) + " KB";
-  }
-  return bytes + " B";
-};
+  const formatStorage = (bytes) => {
+    if (bytes >= 1024 ** 4) return (bytes / 1024 ** 4).toFixed(2) + " TB";
+    if (bytes >= 1024 ** 3) return (bytes / 1024 ** 3).toFixed(2) + " GB";
+    if (bytes >= 1024 ** 2) return (bytes / 1024 ** 2).toFixed(2) + " MB";
+    if (bytes >= 1024) return (bytes / 1024).toFixed(2) + " KB";
+    return bytes + " B";
+  };
 
-  const usedPercent = Math.min(
-    100,
-    (usedStorageInBytes / maxStorageInBytes) * 100
-  );
+  const usedPercent = Math.min(100, (usedStorageInBytes / maxStorageInBytes) * 100) || 0;
 
   useEffect(() => {
     async function loadUser() {
@@ -56,25 +42,17 @@ function DirectoryHeader({
         setMaxStorageInBytes(Number(user.maxStorageInBytes));
         setUsedStorageInBytes(Number(user.usedStorageInBytes));
         setLoggedIn(true);
-      } catch (err) {
+      } catch {
         setLoggedIn(false);
-        setUserName("Guest User");
-        setUserEmail("guest@example.com");
       }
     }
     loadUser();
   }, []);
 
-  const handleUserIconClick = () => {
-    setShowUserMenu((prev) => !prev);
-  };
-
   const handleLogout = async () => {
     try {
       await logoutUser();
       setLoggedIn(false);
-      setUserName("Guest User");
-      setUserEmail("guest@example.com");
       navigate("/login");
     } catch (err) {
       console.error("Logout error:", err);
@@ -87,8 +65,6 @@ function DirectoryHeader({
     try {
       await logoutAllSessions();
       setLoggedIn(false);
-      setUserName("Guest User");
-      setUserEmail("guest@example.com");
       navigate("/login");
     } catch (err) {
       console.error("Logout all error:", err);
@@ -108,100 +84,121 @@ function DirectoryHeader({
   }, []);
 
   return (
-    <header className="flex items-center justify-between border-b border-gray-300 py-2 mb-4">
-      <h1 className="text-xl font-semibold flex items-center gap-2">
-        {directoryName}
-      </h1>
-      <div className="flex gap-4 items-end">
+    <header className="flex items-center justify-between px-4 md:px-6 py-3.5 bg-black border-b-2 border-[#facc15]/30 gap-4">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 min-w-0">
+        <HardDrive className="w-4 h-4 text-[#facc15] shrink-0" strokeWidth={2.5} />
+        <ChevronRight className="w-3.5 h-3.5 text-white/20 shrink-0" />
+        <h1 className="text-sm font-black uppercase tracking-wide text-white truncate">
+          {directoryName}
+        </h1>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-2 shrink-0">
         <button
-          className="text-blue-500 hover:text-blue-700 text-xl -mb-0.5 mr-0.5 disabled:text-blue-300 disabled:cursor-not-allowed"
+          className={`flex items-center gap-2 px-3 py-2 text-xs font-black uppercase tracking-wide border-2 transition-all duration-150 ${
+            disabled
+              ? "border-white/10 text-white/20 cursor-not-allowed"
+              : "border-[#facc15]/50 text-[#facc15] hover:bg-[#facc15] hover:text-black hover:border-[#facc15] hover:shadow-brutal-sm hover:-translate-x-px hover:-translate-y-px"
+          }`}
           title="Create Folder"
           onClick={onCreateFolderClick}
           disabled={disabled}
         >
-          <FaFolderPlus />
+          <FaFolderPlus className="text-sm" />
+          <span className="hidden sm:inline">New Folder</span>
         </button>
+
         <button
-          className="text-blue-500 hover:text-blue-700 text-xl disabled:text-blue-300 disabled:cursor-not-allowed"
+          className={`flex items-center gap-2 px-3 py-2 text-xs font-black uppercase tracking-wide border-2 transition-all duration-150 ${
+            disabled
+              ? "border-white/10 text-white/20 cursor-not-allowed"
+              : "border-[#facc15] bg-[#facc15] text-black shadow-brutal-sm hover:-translate-x-px hover:-translate-y-px hover:shadow-brutal"
+          }`}
           title="Upload Files"
           onClick={onUploadFilesClick}
           disabled={disabled}
         >
-          <FaUpload />
+          <FaUpload className="text-sm" />
+          <span className="hidden sm:inline">Upload</span>
         </button>
+
         <input
           ref={fileInputRef}
           id="file-upload"
           type="file"
           className="hidden"
-          multiple
           onChange={handleFileSelect}
         />
-        <div className="relative flex" ref={userMenuRef}>
+
+        {/* User menu */}
+        <div className="relative" ref={userMenuRef}>
           <button
-            className="text-blue-500 hover:text-blue-700 text-xl"
+            className="flex items-center justify-center w-9 h-9 border-2 border-white/20 hover:border-[#facc15] bg-[#111] hover:bg-[#facc15]/10 transition-colors"
             title="User Menu"
-            onClick={handleUserIconClick}
+            onClick={() => setShowUserMenu((prev) => !prev)}
           >
             {userPicture ? (
-              <img
-                className="w-8 h-8 rounded-full object-cover"
-                src={userPicture}
-                alt={userName}
-              />
+              <img className="w-full h-full object-cover" src={userPicture} alt={userName} />
             ) : (
-              <FaUser />
+              <FaUser className="text-[#facc15] text-sm" />
             )}
           </button>
+
           {showUserMenu && (
-            <div className="absolute right-0 top-4 mt-2 w-48 bg-white rounded-md shadow-md z-10 border border-gray-300 overflow-hidden">
+            <div className="absolute right-0 top-full mt-1 w-56 bg-[#0a0a0a] border-2 border-[#facc15] z-50 shadow-[4px_4px_0px_0px_#facc15]">
               {loggedIn ? (
                 <>
-                  <div className="px-3 py-2 text-sm text-gray-800">
-                    <div className="font-semibold">{userName}</div>
-                    <div className="text-xs text-gray-500">{userEmail}</div>
-                    <div className="flex flex-col text-xs mr-2 mt-2">
-                      <div className="w-40 h-1 bg-gray-300 rounded-full overflow-hidden mb-1">
-                        <div
-                          className="bg-blue-500 rounded-full h-full"
-                          style={{ width: `${usedPercent}%` }}
-                        ></div>
+                  <div className="px-4 py-3 border-b-2 border-[#facc15]/20">
+                    <p className="text-sm font-black text-white truncate">{userName}</p>
+                    <p className="text-[11px] text-white/40 truncate">{userEmail}</p>
+                    {maxStorageInBytes > 0 && (
+                      <div className="mt-2">
+                        <div className="w-full h-1.5 bg-[#222] border border-white/10">
+                          <div
+                            className="h-full bg-[#facc15]"
+                            style={{ width: `${usedPercent}%` }}
+                          />
+                        </div>
+                        <p className="text-[10px] text-white/40 mt-1 font-bold">
+                          {formatStorage(usedStorageInBytes)} of {formatStorage(maxStorageInBytes)} used
+                        </p>
                       </div>
-                      <div className="text-xs">
-                        {formatStorage(usedStorageInBytes)} of{" "}
-                        {formatStorage(maxStorageInBytes)} used
-                      </div>
-                    </div>
+                    )}
                   </div>
-                  <div className="border-t border-gray-200" />
 
-                  <div className="flex items-center gap-2 text-gray-700 cursor-pointer hover:bg-gray-200 px-4 py-2">
-                    <FaUser className="text-blue-600" />
-                    <Link to="/profile">Profile</Link>
-                  </div>
-                  <div
-                    className="flex items-center gap-2 text-gray-700 cursor-pointer hover:bg-gray-200 px-4 py-2"
+                  <Link
+                    to="/profile"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-white/80 hover:bg-[#facc15] hover:text-black transition-colors"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    <FaUser className="text-[#facc15] hover:text-black text-xs" />
+                    Profile
+                  </Link>
+                  <button
                     onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-white/80 hover:bg-[#facc15] hover:text-black transition-colors"
                   >
-                    <FaSignOutAlt className="text-blue-600" /> Logout
-                  </div>
-                  <div
-                    className="flex items-center gap-2 text-gray-700 cursor-pointer hover:bg-gray-200 px-4 py-2"
+                    <FaSignOutAlt className="text-[#facc15] text-xs" />
+                    Logout
+                  </button>
+                  <button
                     onClick={handleLogoutAll}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-600 hover:text-white transition-colors border-t-2 border-white/10"
                   >
-                    <FaSignOutAlt className="text-blue-600" /> Logout All
-                  </div>
+                    <FaSignOutAlt className="text-xs" />
+                    Logout All Devices
+                  </button>
                 </>
               ) : (
-                <div
-                  className="flex items-center gap-2 text-gray-700 cursor-pointer hover:bg-gray-200 px-4 py-2"
-                  onClick={() => {
-                    navigate("/login");
-                    setShowUserMenu(false);
-                  }}
+                <button
+                  onClick={() => { navigate("/login"); setShowUserMenu(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-white/80 hover:bg-[#facc15] hover:text-black transition-colors"
                 >
-                  <FaSignInAlt className="text-blue-600" /> Login
-                </div>
+                  <FaSignInAlt className="text-[#facc15] text-xs" />
+                  Login
+                </button>
               )}
             </div>
           )}

@@ -9,65 +9,88 @@ function ContextMenu({ item, isUploadingItem }) {
     handleOpenShareModal,
   } = useDirectoryContext();
 
-  const menuClass =
-    "absolute bg-white border border-blue-400 shadow-md rounded text-sm z-50 right-2 top-4/5 overflow-hidden";
-  const itemClass = "px-4 py-2 hover:bg-blue-100 cursor-pointer";
   const BASE_URL = import.meta.env.VITE_SERVER_URL;
 
-  if (item.isDirectory) {
+  const menuCls =
+    "absolute right-2 top-[calc(100%+4px)] z-50 min-w-[160px] bg-[#0a0a0a] border-2 border-[#facc15] shadow-[4px_4px_0px_0px_#facc15] overflow-hidden";
+  const itemCls =
+    "block w-full text-left px-4 py-2.5 text-sm font-black uppercase tracking-wide text-white hover:bg-[#facc15] hover:text-black transition-colors duration-100 cursor-pointer";
+  const dangerCls =
+    "block w-full text-left px-4 py-2.5 text-sm font-black uppercase tracking-wide text-red-400 hover:bg-red-600 hover:text-white transition-colors duration-100 cursor-pointer border-t-2 border-white/10";
+
+  if (isUploadingItem && item.isUploading) {
     return (
-      <div className={menuClass}>
-        <div
-          className={itemClass}
-          onClick={() => openRenameModal("directory", item.id, item.name)}
+      <div className={menuCls}>
+        <button
+          className={dangerCls}
+          onClick={(e) => { e.stopPropagation(); handleCancelUpload(item.id); }}
         >
-          Rename
-        </div>
-        <div className={itemClass} onClick={() => setDeleteItem(item)}>
-          Delete
-        </div>
-        <div className={itemClass} onClick={() => openDetailsPopup(item)}>
-          Details
-        </div>
+          ✕ Cancel Upload
+        </button>
       </div>
     );
   }
 
-  if (isUploadingItem && item.isUploading) {
+  if (item.isDirectory) {
     return (
-      <div className={menuClass}>
-        <div className={itemClass} onClick={() => handleCancelUpload(item.id)}>
-          Cancel
-        </div>
+      <div className={menuCls}>
+        <button
+          className={itemCls}
+          onClick={(e) => { e.stopPropagation(); openRenameModal("directory", item.id, item.name); }}
+        >
+          ✎ Rename
+        </button>
+        <button
+          className={itemCls}
+          onClick={(e) => { e.stopPropagation(); openDetailsPopup(item); }}
+        >
+          ℹ Details
+        </button>
+        <button
+          className={dangerCls}
+          onClick={(e) => { e.stopPropagation(); setDeleteItem(item); }}
+        >
+          ✕ Delete
+        </button>
       </div>
     );
   }
 
   return (
-    <div className={menuClass}>
-      <div
-        className={itemClass}
-        onClick={() =>
-          (window.location.href = `${BASE_URL}/file/${item.id}?action=download`)
-        }
+    <div className={menuCls}>
+      <button
+        className={itemCls}
+        onClick={(e) => {
+          e.stopPropagation();
+          window.location.href = `${BASE_URL}/file/${item.id}?action=download`;
+        }}
       >
-        Download
-      </div>
-      <div
-        className={itemClass}
-        onClick={() => openRenameModal("file", item.id, item.name)}
+        ↓ Download
+      </button>
+      <button
+        className={itemCls}
+        onClick={(e) => { e.stopPropagation(); openRenameModal("file", item.id, item.name); }}
       >
-        Rename
-      </div>
-      <div className={itemClass} onClick={() => setDeleteItem(item)}>
-        Delete
-      </div>
-      <div className={itemClass} onClick={() => openDetailsPopup(item)}>
-        Details
-      </div>
-      <div className={itemClass} onClick={() => handleOpenShareModal(item.id)}>
-        Share
-      </div>
+        ✎ Rename
+      </button>
+      <button
+        className={itemCls}
+        onClick={(e) => { e.stopPropagation(); openDetailsPopup(item); }}
+      >
+        ℹ Details
+      </button>
+      <button
+        className={itemCls}
+        onClick={(e) => { e.stopPropagation(); handleOpenShareModal(item.id); }}
+      >
+        ↗ Share
+      </button>
+      <button
+        className={dangerCls}
+        onClick={(e) => { e.stopPropagation(); setDeleteItem(item); }}
+      >
+        ✕ Delete
+      </button>
     </div>
   );
 }

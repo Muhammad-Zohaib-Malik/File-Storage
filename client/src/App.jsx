@@ -7,10 +7,15 @@ import UsersPage from "./UsersPage";
 import UserProfile from "./UserProfile";
 import SessionManagement from "./SessionManagement";
 import Plans from "./Plans";
+import Home from "./Home";
 
 const router = createBrowserRouter([
   {
     path: "/",
+    element: <Home />,
+  },
+  {
+    path: "/directory",
     element: <DirectoryView />,
   },
 
