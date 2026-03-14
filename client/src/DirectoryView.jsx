@@ -8,7 +8,6 @@ import {
   Clock,
   Share2,
   Trash2,
-  PieChart,
   UploadCloud,
   Plus,
   FolderOpen,
@@ -357,22 +356,12 @@ function DirectoryView() {
               })}
             </nav>
 
-            {/* Storage widget */}
-            <div className="mx-3 mb-4 p-4 bg-[#111] border-2 border-[#facc15]/30">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">
-                  S3 Sync
-                </p>
-                <PieChart className="w-3.5 h-3.5 text-[#facc15]" strokeWidth={2.5} />
-              </div>
-              <div className="h-1.5 w-full bg-[#222] border border-white/10">
-                <div className="h-full bg-[#facc15]" style={{ width: "75%" }} />
-              </div>
-              <p className="mt-2 text-[10px] text-white/40 font-bold">75% indexed</p>
+            {/* Upgrade */}
+            <div className="mx-3 mb-4">
               <button
                 type="button"
                 onClick={() => navigate("/plans")}
-                className="mt-3 w-full py-2 bg-[#facc15] text-black text-xs font-black uppercase tracking-wide border-2 border-black shadow-brutal-sm hover:-translate-x-px hover:-translate-y-px hover:shadow-brutal transition-all duration-150"
+                className="w-full py-2 bg-[#facc15] text-black text-xs font-black uppercase tracking-wide border-2 border-black shadow-brutal-sm hover:-translate-x-px hover:-translate-y-px hover:shadow-brutal transition-all duration-150"
               >
                 Upgrade Plan
               </button>
@@ -396,13 +385,8 @@ function DirectoryView() {
             <div className="flex-1 p-4 md:p-6">
               {/* Toolbar row */}
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
-                <div className="flex items-center gap-3">
-                  <div className="px-3 py-1.5 bg-[#facc15] text-black text-xs font-black uppercase tracking-wide border-2 border-black shadow-brutal-sm">
-                    {totalItems} items
-                  </div>
-                  <span className="hidden sm:inline text-xs text-white/40 font-bold uppercase tracking-widest">
-                    S3-backed storage
-                  </span>
+                <div className="px-3 py-1.5 bg-[#facc15] text-black text-xs font-black uppercase tracking-wide border-2 border-black shadow-brutal-sm self-start">
+                  {totalItems} items
                 </div>
                 <div className="flex items-center gap-2">
                   {/* Search */}

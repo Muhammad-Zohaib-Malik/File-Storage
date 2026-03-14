@@ -8,7 +8,6 @@ import {
   FaFileAlt,
 } from "react-icons/fa";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { UploadCloud, CheckCircle2, Loader2 } from "lucide-react";
 import ContextMenu from "./ContextMenu";
 import { useDirectoryContext } from "../context/DirectoryContext";
 import { formatSize } from "./DetailsPopup";
@@ -36,8 +35,6 @@ function DirectoryItem({ item, uploadProgress, viewMode = "list" }) {
 
   const isUploadingItem = item.id.startsWith("temp-");
   const isDirectory = item.isDirectory;
-  const s3Status = item.s3Status || (isDirectory ? "Virtual" : "Synced");
-  const isSynced = s3Status === "Synced";
 
   const gridCard = viewMode === "grid";
 
@@ -70,26 +67,11 @@ function DirectoryItem({ item, uploadProgress, viewMode = "list" }) {
         <p className="text-sm font-black text-white truncate leading-snug">
           {item.name}
         </p>
-        <div className="mt-1 flex flex-wrap items-center gap-2">
-          {!isDirectory && (
-            <span className="text-[10px] text-white/40 font-bold uppercase">
-              {formatSize(item.size)}
-            </span>
-          )}
-          {/* S3 sync status */}
-          <span
-            className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-wide ${
-              isSynced ? "text-[#facc15]" : s3Status === "Processing" ? "text-amber-400" : "text-white/30"
-            }`}
-          >
-            {isSynced ? (
-              <CheckCircle2 className="w-3 h-3" strokeWidth={2.5} />
-            ) : (
-              <Loader2 className="w-3 h-3 animate-spin" />
-            )}
-            {isSynced ? "Synced" : s3Status}
-          </span>
-        </div>
+        {!isDirectory && (
+          <p className="mt-0.5 text-[10px] text-white/40 font-bold uppercase">
+            {formatSize(item.size)}
+          </p>
+        )}
       </div>
 
       {/* Three-dot menu button */}
