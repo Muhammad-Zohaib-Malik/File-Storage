@@ -318,59 +318,6 @@ function DirectoryView() {
       <div className="min-h-screen bg-[#0a0a0a] text-white relative overflow-hidden">
         <div className="relative z-10 flex min-h-screen">
 
-          {/* ── Sidebar ── */}
-          <aside className="hidden md:flex w-64 flex-col bg-black border-r-2 border-[#facc15]/30 shrink-0">
-            {/* Brand */}
-            <div className="px-5 py-5 border-b-2 border-[#facc15]/30 flex items-center gap-3">
-              <div className="w-9 h-9 bg-[#facc15] flex items-center justify-center border-2 border-black shadow-brutal-sm shrink-0">
-                <HardDrive className="w-4 h-4 text-black" strokeWidth={2.5} />
-              </div>
-              <div>
-                <p className="text-sm font-black uppercase tracking-tight">
-                  Store<span className="text-[#facc15]">my</span>files
-                </p>
-                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">
-                  File Vault
-                </p>
-              </div>
-            </div>
-
-            {/* Nav */}
-            <nav className="flex-1 px-3 py-4 space-y-1">
-              {NAV_ITEMS.map(({ icon: Icon, label, key }) => {
-                const isActive = activeNav === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setActiveNav(key)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-black uppercase tracking-wide transition-all duration-100 border-2 ${
-                      isActive
-                        ? "bg-[#facc15] text-black border-black shadow-brutal-sm"
-                        : "bg-transparent text-white/60 border-transparent hover:text-white hover:bg-white/5 hover:border-white/10"
-                    }`}
-                  >
-                    <Icon
-                      className={`w-4 h-4 shrink-0 ${isActive ? "text-black" : "text-[#facc15]"}`}
-                      strokeWidth={2.5}
-                    />
-                    <span>{label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-
-            {/* Upgrade */}
-            <div className="mx-3 mb-4">
-              <button
-                type="button"
-                onClick={() => navigate("/plans")}
-                className="w-full py-2 bg-[#facc15] text-black text-xs font-black uppercase tracking-wide border-2 border-black shadow-brutal-sm hover:-translate-x-px hover:-translate-y-px hover:shadow-brutal transition-all duration-150"
-              >
-                Upgrade Plan
-              </button>
-            </div>
-          </aside>
 
           {/* ── Main content ── */}
           <main className="flex-1 flex flex-col min-w-0">
