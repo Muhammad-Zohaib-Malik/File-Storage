@@ -12,40 +12,33 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+ 
+
     steps:
+      # 1. Setup SSH key and known_hosts
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
-      - name: Execute Remote SSH Commands
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: 54.236.246.83
-          username: ubuntu
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # This 'script' block replaces your 'run' block
-          script: |
+          # Add server host key so SSH does not ask for confirmation
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      # 2. Deploy to remote server
+      - name: Deploy backend on EC2
+        run: |
+          ssh "${SSH_USER}@${SSH_HOST}" 'bash -s' << 'EOF'
             set -e
-            
-            # 1. ADD THIS LINE: Tells the server where to find node, npm, and pm2
-            export PATH=$PATH:/home/ubuntu/.nvm/versions/node/v24.12.0/bin
-            
-            # 2. Navigate to the project root and pull
+
             cd /home/ubuntu/File-Storage/
-            echo "Pulling latest code..."
-            git fetch origin 
+            git pull
 
-            echo "Resetting local changes..."
-            git reset --hard origin/master 
+            echo "Installing backend dependencies (npm ci)..."
+            npm ci --no-audit --no-fund
 
-            # 3. Navigate into the SERVER folder
-            cd server
-            
-            # 4. Install production dependencies
-            echo "Installing dependencies..."
-            npm ci --production --no-audit --no-fund
-            
-            # 5. Smart Restart
-            echo "Reloading StorageApp with PM2..."
-            # Using '||' ensures it starts if it isn't already running
-            pm2 reload storageApp || pm2 start index.js --name storageApp
-            
-            pm2 save
-            echo "✅ StorageApp Backend Deployed Successfully!"
+            echo "Reloading PM2 app..."
+            pm2 reload storageApp
+
+            echo "Backend Deployed Successfully..."
+          EOF
