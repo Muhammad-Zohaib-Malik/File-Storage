@@ -15,7 +15,6 @@ jobs:
     env:
       SSH_HOST: 54.236.246.83
       SSH_USER: ubuntu
- 
 
     steps:
       # 1. Setup SSH key and known_hosts
@@ -36,10 +35,12 @@ jobs:
 
             cd /home/ubuntu/File-Storage/
 
-            # 🔹 Added step to remove local changes
+            # Prevent git pull conflicts
             git reset --hard
-
             git pull
+
+            # Load Node / npm (required because GitHub SSH is non-interactive)
+            export PATH=$PATH:/home/ubuntu/.nvm/versions/node/v24.12.0/bin
 
             # 3. Navigate into the SERVER folder
             cd server
