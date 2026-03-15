@@ -30,7 +30,10 @@ jobs:
             # 2. Navigate to the project root and pull
             cd /home/ubuntu/File-Storage/
             echo "Pulling latest code..."
-            git pull origin master
+            git fetch origin 
+
+            echo "Resetting local changes..."
+            git reset --hard origin/master 
 
             # 3. Navigate into the SERVER folder
             cd server
