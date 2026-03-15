@@ -57,6 +57,13 @@ export const updatePassword = async (password) => {
   return data;
 };
 
+export const updateUsername = async (name) => {
+  const { data } = await axiosWithCreds.patch(`/user/name`, {
+    name,
+  });
+  return data;
+};
+
 export const changeUserRoleById = async (id, newRole) => {
   const res = await axiosWithCreds.patch(`/user/${id}/change-role`, {
     role: newRole,

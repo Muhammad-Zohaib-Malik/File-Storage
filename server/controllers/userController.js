@@ -737,3 +737,27 @@ export const updatePassword = async (req, res, next) => {
     next(error);
   }
 };
+
+export const updateUsername = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    let { name } = req.body;
+
+    if (!name || name.length < 3) {
+      return res.status(400).json({ error: "Name must be at least 3 characters long." });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    name = purify.sanitize(name);
+    user.name = name;
+    await user.save();
+
+    return res.status(200).json({ message: "Name updated successfully." });
+  } catch (error) {
+    next(error);
+  }
+}

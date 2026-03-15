@@ -22,6 +22,7 @@ import {
   register,
   sendOTP,
   updatePassword,
+  updateUsername,
   verifyOTP,
 } from "../controllers/userController.js";
 
@@ -69,5 +70,8 @@ router.patch("/:userId/change-role", checkAuth, checkForRole, changeRole);
 
 //update password
 router.patch("/password", checkAuth, updatePassword);
+
+//update username
+router.patch("/name", checkAuth, updateUsername);
 
 export default router;

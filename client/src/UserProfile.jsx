@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { fetchUser, logoutUser, logoutAllSessions, updatePassword } from "./api/userApi";
+import { fetchUser, logoutUser, logoutAllSessions, updatePassword, updateUsername } from "./api/userApi";
 import { Camera, User, Mail, Shield, LogOut, Key } from "lucide-react";
 
 const UserProfile = () => {
@@ -48,11 +48,17 @@ const UserProfile = () => {
     }
   };
 
-  const handleUpdateProfile = async () => {
+  const handleUpdateUsername = async () => {
     try {
-      toast.success("Profile updated successfully!");
+      if (!fullName || fullName.length < 3) {
+        toast.error("Name must be at least 3 characters long.");
+        return;
+      }
+      await updateUsername(fullName);
+      toast.success("Name updated successfully!");
     } catch (err) {
-      console.error("Update failed", err);
+      toast.error(err.response?.data?.error || "Failed to update name");
+      console.error("Name update failed", err);
     }
   };
 
@@ -166,7 +172,7 @@ const UserProfile = () => {
                   />
                 </div>
                 <button
-                  onClick={handleUpdateProfile}
+                  onClick={handleUpdateUsername}
                   className="w-full mt-2 py-3 px-4 bg-white text-black text-sm font-black uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#facc15] transition-all"
                 >
                   Save Changes
@@ -213,7 +219,7 @@ const UserProfile = () => {
                   />
                 </div>
                 <button
-                  onClick={handleUpdatePassword} 
+                  onClick={handleUpdatePassword}
                   className="w-full mt-2 py-3 px-4 bg-[#9333ea] text-white text-sm font-black uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000] transition-all"
                 >
                   {(isGoogleUser || isGithubUser) ? "Save Password" : "Update Password"}
