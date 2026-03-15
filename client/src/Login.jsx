@@ -39,7 +39,7 @@ const Login = () => {
     onSuccess: async (res) => {
       try {
         await loginWithGoogle(res.code);
-        navigate("/");
+        navigate("/directory");
       } catch (err) {
         toast.error(err.response?.data?.error || "Google login failed");
       }
@@ -72,7 +72,7 @@ const Login = () => {
             : data.error;
         setServerError(errorMessages);
       } else {
-        navigate("/");
+        navigate("/directory");
       }
     } catch (err) {
       const errorData = err.response?.data?.error;

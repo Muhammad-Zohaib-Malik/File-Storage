@@ -56,7 +56,7 @@ const Register = () => {
     onSuccess: async (res) => {
       try {
         await loginWithGoogle(res.code);
-        navigate("/");
+        navigate("/directory");
       } catch (err) {
         toast.error(err.response?.data?.error || "Google login failed");
       }
@@ -129,7 +129,7 @@ const Register = () => {
         setServerError(errorMessages);
       } else {
         setIsSuccess(true);
-        setTimeout(() => navigate("/"), 2000);
+        setTimeout(() => navigate("/directory"), 2000);
       }
     } catch (err) {
       const errorData = err.response?.data?.error;
@@ -195,22 +195,20 @@ const Register = () => {
               return (
                 <div key={s.id} className="flex items-center flex-1">
                   <div
-                    className={`flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wide ${
-                      isCompleted
+                    className={`flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wide ${isCompleted
                         ? "text-[#facc15]"
                         : isActive
-                        ? "text-white"
-                        : "text-white/30"
-                    }`}
+                          ? "text-white"
+                          : "text-white/30"
+                      }`}
                   >
                     <div
-                      className={`w-5 h-5 flex items-center justify-center text-[10px] font-black border-2 shrink-0 ${
-                        isCompleted
+                      className={`w-5 h-5 flex items-center justify-center text-[10px] font-black border-2 shrink-0 ${isCompleted
                           ? "bg-[#facc15] border-[#facc15] text-black"
                           : isActive
-                          ? "border-white text-white"
-                          : "border-white/20 text-white/30"
-                      }`}
+                            ? "border-white text-white"
+                            : "border-white/20 text-white/30"
+                        }`}
                     >
                       {isCompleted ? "✓" : s.id}
                     </div>
@@ -218,9 +216,8 @@ const Register = () => {
                   </div>
                   {i < 2 && (
                     <div
-                      className={`flex-1 h-px mx-2 ${
-                        step > s.id ? "bg-[#facc15]" : "bg-white/10"
-                      }`}
+                      className={`flex-1 h-px mx-2 ${step > s.id ? "bg-[#facc15]" : "bg-white/10"
+                        }`}
                     />
                   )}
                 </div>
@@ -273,19 +270,18 @@ const Register = () => {
                   type="button"
                   onClick={handleSendOtp}
                   disabled={isSending || countdown > 0 || otpSent}
-                  className={`px-4 py-3 text-xs font-black border-2 uppercase tracking-wide shrink-0 transition-all duration-150 ${
-                    isSending || countdown > 0 || otpSent
+                  className={`px-4 py-3 text-xs font-black border-2 uppercase tracking-wide shrink-0 transition-all duration-150 ${isSending || countdown > 0 || otpSent
                       ? "bg-[#222] border-white/10 text-white/30 cursor-not-allowed"
                       : "bg-[#facc15] border-black text-black shadow-brutal-sm hover:-translate-x-0.5 hover:-translate-y-0.5"
-                  }`}
+                    }`}
                 >
                   {isSending
                     ? "Sending..."
                     : countdown > 0
-                    ? `${countdown}s`
-                    : otpSent
-                    ? "✓ Sent"
-                    : "Send OTP"}
+                      ? `${countdown}s`
+                      : otpSent
+                        ? "✓ Sent"
+                        : "Send OTP"}
                 </button>
               </div>
             </div>
@@ -312,13 +308,12 @@ const Register = () => {
                     type="button"
                     onClick={handleVerifyOtp}
                     disabled={isVerifying || otpVerified}
-                    className={`px-4 py-3 text-xs font-black border-2 uppercase tracking-wide shrink-0 transition-all duration-150 ${
-                      otpVerified
+                    className={`px-4 py-3 text-xs font-black border-2 uppercase tracking-wide shrink-0 transition-all duration-150 ${otpVerified
                         ? "bg-green-900 border-green-500 text-green-300 cursor-not-allowed"
                         : isVerifying
-                        ? "bg-[#222] border-white/10 text-white/30 cursor-not-allowed"
-                        : "bg-[#facc15] border-black text-black shadow-brutal-sm hover:-translate-x-0.5 hover:-translate-y-0.5"
-                    }`}
+                          ? "bg-[#222] border-white/10 text-white/30 cursor-not-allowed"
+                          : "bg-[#facc15] border-black text-black shadow-brutal-sm hover:-translate-x-0.5 hover:-translate-y-0.5"
+                      }`}
                   >
                     {isVerifying ? "..." : otpVerified ? "✓ Verified" : "Verify"}
                   </button>
@@ -363,11 +358,10 @@ const Register = () => {
                 <button
                   type="submit"
                   disabled={!otpVerified || isSuccess || isSubmitting}
-                  className={`w-full flex justify-center items-center gap-2 py-3 px-4 bg-[#facc15] text-black text-sm font-black uppercase tracking-wide border-2 border-black shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000] transition-all duration-150 ${
-                    !otpVerified || isSuccess || isSubmitting
+                  className={`w-full flex justify-center items-center gap-2 py-3 px-4 bg-[#facc15] text-black text-sm font-black uppercase tracking-wide border-2 border-black shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000] transition-all duration-150 ${!otpVerified || isSuccess || isSubmitting
                       ? "opacity-70 cursor-not-allowed"
                       : ""
-                  }`}
+                    }`}
                 >
                   {isSubmitting ? (
                     <>
