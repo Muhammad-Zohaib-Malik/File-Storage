@@ -158,17 +158,19 @@ const UserProfile = () => {
               </div>
             </div>
 
-            {/* Change Password */}
-            {!isGoogleUser && !isGithubUser && (
-              <div className="bg-[#111] border-2 border-white/20 shadow-[6px_6px_0px_0px_rgba(255,255,255,0.05)] p-6">
-                <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-white/10">
-                  <div className="p-2 bg-[#9333ea] border-2 border-black shadow-[2px_2px_0px_0px_#000]">
-                    <Key size={20} className="text-white" strokeWidth={2.5} />
-                  </div>
-                  <h2 className="text-xl font-black uppercase tracking-wide">Change Password</h2>
+            {/* Change or Set Password */}
+            <div className="bg-[#111] border-2 border-white/20 shadow-[6px_6px_0px_0px_rgba(255,255,255,0.05)] p-6">
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-white/10">
+                <div className="p-2 bg-[#9333ea] border-2 border-black shadow-[2px_2px_0px_0px_#000]">
+                  <Key size={20} className="text-white" strokeWidth={2.5} />
                 </div>
+                <h2 className="text-xl font-black uppercase tracking-wide">
+                  {(isGoogleUser || isGithubUser) ? "Set Password" : "Change Password"}
+                </h2>
+              </div>
 
-                <div className="space-y-5">
+              <div className="space-y-5">
+                {(!isGoogleUser && !isGithubUser) && (
                   <div>
                     <label className="block text-xs font-black text-white/50 mb-2 uppercase tracking-widest">
                       Current Password
@@ -181,24 +183,24 @@ const UserProfile = () => {
                       className="w-full px-4 py-3 bg-[#0a0a0a] border-2 border-white/20 text-white focus:outline-none focus:border-[#9333ea] focus:shadow-[4px_4px_0px_0px_#9333ea] transition-all font-medium"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-black text-white/50 mb-2 uppercase tracking-widest">
-                      New Password
-                    </label>
-                    <input
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="8+ Characters"
-                      className="w-full px-4 py-3 bg-[#0a0a0a] border-2 border-white/20 text-white focus:outline-none focus:border-[#9333ea] focus:shadow-[4px_4px_0px_0px_#9333ea] transition-all font-medium"
-                    />
-                  </div>
-                  <button className="w-full mt-2 py-3 px-4 bg-[#9333ea] text-white text-sm font-black uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000] transition-all">
-                    Update Password
-                  </button>
+                )}
+                <div>
+                  <label className="block text-xs font-black text-white/50 mb-2 uppercase tracking-widest">
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="8+ Characters"
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border-2 border-white/20 text-white focus:outline-none focus:border-[#9333ea] focus:shadow-[4px_4px_0px_0px_#9333ea] transition-all font-medium"
+                  />
                 </div>
+                <button className="w-full mt-2 py-3 px-4 bg-[#9333ea] text-white text-sm font-black uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000] transition-all">
+                  {(isGoogleUser || isGithubUser) ? "Save Password" : "Update Password"}
+                </button>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Right Column */}
