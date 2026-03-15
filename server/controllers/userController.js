@@ -20,7 +20,6 @@ import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
-import bcrypt from "bcrypt";
 import { github } from "../utils/github.js";
 import * as arctic from "arctic";
 import { UAParser } from "ua-parser-js";
@@ -710,6 +709,30 @@ export const changeRole = async (req, res, next) => {
     return res
       .status(403)
       .json({ message: "You are not allowed to change roles." });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updatePassword = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    let { password } = req.body;
+
+    if (!password || password.length < 8) {
+      return res.status(400).json({ error: "Password must be at least 8 characters long." });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    password = purify.sanitize(password);
+    user.password = password;
+    await user.save();
+
+    return res.status(200).json({ message: "Password updated successfully." });
   } catch (error) {
     next(error);
   }

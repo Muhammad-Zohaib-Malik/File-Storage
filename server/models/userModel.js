@@ -22,7 +22,7 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      minLength: 4,
+      minLength: 8,
     },
     picture: {
       type: String,

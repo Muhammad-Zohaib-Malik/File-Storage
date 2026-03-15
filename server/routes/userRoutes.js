@@ -21,6 +21,7 @@ import {
   recoverUserById,
   register,
   sendOTP,
+  updatePassword,
   verifyOTP,
 } from "../controllers/userController.js";
 
@@ -35,8 +36,8 @@ router.post("/send-otp", sendOTP);
 router.post("/verify-otp", verifyOTP);
 router.post("/google", loginWithGoogle);
 router.get("/all", checkAuth, checkForRole, getAllUsers);
-router.get("/github",loginWithGithub)
-router.get("/github/callback",githubLoginCallback)
+router.get("/github", loginWithGithub)
+router.get("/github/callback", githubLoginCallback)
 
 //logout by admin and Manager
 router.post("/:userId/logout", checkAuth, checkForRole, logoutUsingRole);
@@ -65,5 +66,8 @@ router.patch(
 
 //change Role
 router.patch("/:userId/change-role", checkAuth, checkForRole, changeRole);
+
+//update password
+router.patch("/password", checkAuth, updatePassword);
 
 export default router;
