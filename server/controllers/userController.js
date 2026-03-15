@@ -278,6 +278,13 @@ export const loginWithGoogle = async (req, res, next) => {
       .session(mongooseSession)
       .select("-__v");
 
+    if (user && user.createdWith !== "google") {
+      await mongooseSession.abortTransaction();
+      return res.status(400).json({
+        error: "User already exists with different authentication method",
+      });
+    }
+
     if (user) {
       if (user.IsDeleted) {
         await mongooseSession.abortTransaction();
@@ -415,6 +422,13 @@ export const githubLoginCallback = async (req, res, next) => {
     let user = await User.findOne({ email })
       .session(mongooseSession)
       .select("-__v");
+
+    if (user && user.createdWith !== "github") {
+      await mongooseSession.abortTransaction();
+      return res.status(400).json({
+        error: "User already exists with different authentication method",
+      });
+    }
 
     if (user) {
       if (user.IsDeleted) {
