@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { fetchUser, logoutUser, logoutAllSessions } from "./api/userApi";
+import { fetchUser, logoutUser, logoutAllSessions, updatePassword } from "./api/userApi";
 import { Camera, User, Mail, Shield, LogOut, Key } from "lucide-react";
 
 const UserProfile = () => {
@@ -55,6 +55,22 @@ const UserProfile = () => {
       console.error("Update failed", err);
     }
   };
+
+  const handleUpdatePassword = async () => {
+    if (!newPassword || newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters long.");
+      return;
+    }
+    try {
+      await updatePassword(newPassword);
+      toast.success("Password updated successfully!");
+      setNewPassword("");
+      setCurrentPassword("");
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Failed to update password");
+      console.error("Password update failed", error);
+    }
+  }
 
   const handleImageChange = () => { };
 
@@ -196,7 +212,10 @@ const UserProfile = () => {
                     className="w-full px-4 py-3 bg-[#0a0a0a] border-2 border-white/20 text-white focus:outline-none focus:border-[#9333ea] focus:shadow-[4px_4px_0px_0px_#9333ea] transition-all font-medium"
                   />
                 </div>
-                <button className="w-full mt-2 py-3 px-4 bg-[#9333ea] text-white text-sm font-black uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000] transition-all">
+                <button
+                  onClick={handleUpdatePassword} 
+                  className="w-full mt-2 py-3 px-4 bg-[#9333ea] text-white text-sm font-black uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000] transition-all"
+                >
                   {(isGoogleUser || isGithubUser) ? "Save Password" : "Update Password"}
                 </button>
               </div>
