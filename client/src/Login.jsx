@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { loginWithGoogle } from "./api/authApi";
 import { useGoogleLogin } from "@react-oauth/google";
 import { loginUser, fetchUser } from "./api/userApi";
@@ -16,6 +16,16 @@ const Login = () => {
   const [serverError, setServerError] = useState("");
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    if (errorParam) {
+      toast.error(errorParam);
+      searchParams.delete("error");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Redirect already-logged-in users
   useEffect(() => {
@@ -79,6 +89,7 @@ const Login = () => {
 
   const loginWithGithub = () => {
     window.location.href = `${BASE_URL}/user/github`;
+
   };
 
   return (

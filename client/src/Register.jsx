@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { loginWithGoogle, sendOtp, verifyOtp } from "./api/authApi";
 import { registerUser, fetchUser } from "./api/userApi";
 import { useGoogleLogin } from "@react-oauth/google";
@@ -26,6 +26,16 @@ const Register = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    if (errorParam) {
+      toast.error(errorParam);
+      searchParams.delete("error");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Redirect already-logged-in users
   useEffect(() => {

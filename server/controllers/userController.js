@@ -387,9 +387,10 @@ export const loginWithGithub = async (req, res, next) => {
 export const githubLoginCallback = async (req, res, next) => {
   const { code, state } = req.query;
   const storedState = req.cookies.github_oauth;
+  const clientUrl = process.env.CLIENT_URL1 || process.env.CLIENT_URL2;
 
   if (!code || !state || state !== storedState) {
-    return res.status(400).json({ error: "Invalid state or missing code" });
+    return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("Invalid state or missing code")}`);
   }
 
   let mongooseSession;
@@ -404,15 +405,13 @@ export const githubLoginCallback = async (req, res, next) => {
     });
 
     if (!githubUserResponse.ok) {
-      return res
-        .status(401)
-        .json({ error: "Failed to fetch user data from GitHub" });
+      return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("Failed to fetch user data from GitHub")}`);
     }
 
     const { name, email, avatar_url } = await githubUserResponse.json();
 
     if (!email) {
-      return res.status(400).json({ error: "GitHub did not return an email" });
+      return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("GitHub did not return an email")}`);
     }
 
     // Start transaction early so both existing and new user flows are covered
@@ -425,18 +424,13 @@ export const githubLoginCallback = async (req, res, next) => {
 
     if (user && user.createdWith !== "github") {
       await mongooseSession.abortTransaction();
-      return res.status(400).json({
-        error: "User already exists with different authentication method",
-      });
+      return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("User already exists with different authentication method")}`);
     }
 
     if (user) {
       if (user.IsDeleted) {
         await mongooseSession.abortTransaction();
-        return res.status(403).json({
-          error:
-            "Your account has been deleted. Contact support to recover it.",
-        });
+        return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("Your account has been deleted. Contact support to recover it.")}`);
       }
 
       // Update avatar if changed
@@ -496,7 +490,7 @@ export const githubLoginCallback = async (req, res, next) => {
       await mongooseSession.abortTransaction();
     }
     console.error("GitHub Login Error:", error);
-    return next(error);
+    return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("An error occurred during GitHub login")}`);
   } finally {
     if (mongooseSession) {
       mongooseSession.endSession();
