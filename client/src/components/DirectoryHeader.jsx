@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-hot-toast";
 import { fetchUser, logoutUser, logoutAllSessions } from "../api/userApi";
 import { FaFolderPlus, FaUpload, FaSignOutAlt, FaSignInAlt } from "react-icons/fa";
 import {
@@ -309,17 +308,14 @@ function DirectoryHeader({
                       <span>View Profile</span>
                     </Link>
 
-                    <button
+                    <Link
+                      to="/sessions"
                       className={menuItem}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        toast.success("Sessions page is coming soon!");
-                        setShowUserMenu(false);
-                      }}
+                      onClick={() => setShowUserMenu(false)}
                     >
                       <Monitor className={menuItemIcon} />
                       <span>Active Sessions</span>
-                    </button>
+                    </Link>
 
                     <Link
                       to="/plans"
