@@ -78,7 +78,7 @@ const UserProfile = () => {
     }
   }
 
-  const handleImageChange = () => { };
+  // const handleImageChange = () => { };
 
   if (loading) {
     return (
@@ -113,12 +113,12 @@ const UserProfile = () => {
                 alt="Profile"
                 className="w-32 h-32 md:w-40 md:h-40 object-cover border-4 border-black bg-[#222] shadow-[6px_6px_0px_0px_#facc15]"
               />
-              <input
+              {/* <input
                 type="file"
                 accept="image/*"
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 onChange={handleImageChange}
-              />
+              /> */}
               <button className="absolute -bottom-4 -right-4 bg-[#facc15] text-black p-3 border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[6px_6px_0px_0px_#000] transition-all z-0">
                 <Camera size={20} strokeWidth={2.5} />
               </button>
