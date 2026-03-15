@@ -12,6 +12,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      SSH_HOST: 54.236.246.83
+      SSH_USER: ubuntu
  
 
     steps:
@@ -32,8 +35,15 @@ jobs:
             set -e
 
             cd /home/ubuntu/File-Storage/
+
+            # 🔹 Added step to remove local changes
+            git reset --hard
+
             git pull
 
+            # 3. Navigate into the SERVER folder
+            cd server
+            
             echo "Installing backend dependencies (npm ci)..."
             npm ci --no-audit --no-fund
 
