@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import { fetchUser, logoutUser, logoutAllSessions } from "../api/userApi";
 import { FaFolderPlus, FaUpload, FaSignOutAlt, FaSignInAlt } from "react-icons/fa";
 import {
@@ -31,11 +32,11 @@ function getAvatarColor(name = "") {
 function Avatar({ picture, name, size = "md" }) {
   const initials = name
     ? name
-        .split(" ")
-        .map((w) => w[0])
-        .slice(0, 2)
-        .join("")
-        .toUpperCase()
+      .split(" ")
+      .map((w) => w[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase()
     : "?";
 
   const bgColor = getAvatarColor(name);
@@ -104,8 +105,8 @@ function DirectoryHeader({
     usedPercent >= 90
       ? "#ef4444"
       : usedPercent >= 70
-      ? "#f97316"
-      : "#facc15";
+        ? "#f97316"
+        : "#facc15";
 
   useEffect(() => {
     async function loadUser() {
@@ -180,11 +181,10 @@ function DirectoryHeader({
       <div className="flex items-center gap-2 shrink-0">
         {/* New Folder */}
         <button
-          className={`flex items-center gap-2 px-3 py-2 text-xs font-black uppercase tracking-wide border-2 transition-all duration-150 ${
-            disabled
-              ? "border-white/10 text-white/20 cursor-not-allowed"
-              : "border-[#facc15]/50 text-[#facc15] hover:bg-[#facc15] hover:text-black hover:border-[#facc15] hover:shadow-brutal-sm hover:-translate-x-px hover:-translate-y-px"
-          }`}
+          className={`flex items-center gap-2 px-3 py-2 text-xs font-black uppercase tracking-wide border-2 transition-all duration-150 ${disabled
+            ? "border-white/10 text-white/20 cursor-not-allowed"
+            : "border-[#facc15]/50 text-[#facc15] hover:bg-[#facc15] hover:text-black hover:border-[#facc15] hover:shadow-brutal-sm hover:-translate-x-px hover:-translate-y-px"
+            }`}
           title="Create Folder"
           onClick={onCreateFolderClick}
           disabled={disabled}
@@ -195,11 +195,10 @@ function DirectoryHeader({
 
         {/* Upload */}
         <button
-          className={`flex items-center gap-2 px-3 py-2 text-xs font-black uppercase tracking-wide border-2 transition-all duration-150 ${
-            disabled
-              ? "border-white/10 text-white/20 cursor-not-allowed"
-              : "border-[#facc15] bg-[#facc15] text-black shadow-brutal-sm hover:-translate-x-px hover:-translate-y-px hover:shadow-brutal"
-          }`}
+          className={`flex items-center gap-2 px-3 py-2 text-xs font-black uppercase tracking-wide border-2 transition-all duration-150 ${disabled
+            ? "border-white/10 text-white/20 cursor-not-allowed"
+            : "border-[#facc15] bg-[#facc15] text-black shadow-brutal-sm hover:-translate-x-px hover:-translate-y-px hover:shadow-brutal"
+            }`}
           title="Upload Files"
           onClick={onUploadFilesClick}
           disabled={disabled}
@@ -223,11 +222,10 @@ function DirectoryHeader({
             id="user-menu-trigger"
             title="Account menu"
             onClick={() => setShowUserMenu((prev) => !prev)}
-            className={`flex items-center gap-2 pl-1 pr-2 py-1 border-2 transition-all duration-150 ${
-              showUserMenu
-                ? "border-[#facc15] bg-[#facc15]/10"
-                : "border-white/20 hover:border-[#facc15] hover:bg-white/5"
-            }`}
+            className={`flex items-center gap-2 pl-1 pr-2 py-1 border-2 transition-all duration-150 ${showUserMenu
+              ? "border-[#facc15] bg-[#facc15]/10"
+              : "border-white/20 hover:border-[#facc15] hover:bg-white/5"
+              }`}
           >
             {isUserLoading ? (
               /* Spinner while loading user */
@@ -259,9 +257,8 @@ function DirectoryHeader({
               </span>
             )}
             <ChevronRight
-              className={`w-3.5 h-3.5 text-white/30 shrink-0 transition-transform duration-200 ${
-                showUserMenu ? "rotate-90" : ""
-              }`}
+              className={`w-3.5 h-3.5 text-white/30 shrink-0 transition-transform duration-200 ${showUserMenu ? "rotate-90" : ""
+                }`}
             />
           </button>
 
@@ -312,14 +309,17 @@ function DirectoryHeader({
                       <span>View Profile</span>
                     </Link>
 
-                    <Link
-                      to="/sessions"
+                    <button
                       className={menuItem}
-                      onClick={() => setShowUserMenu(false)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toast.success("Sessions page is coming soon!");
+                        setShowUserMenu(false);
+                      }}
                     >
                       <Monitor className={menuItemIcon} />
                       <span>Active Sessions</span>
-                    </Link>
+                    </button>
 
                     <Link
                       to="/plans"
