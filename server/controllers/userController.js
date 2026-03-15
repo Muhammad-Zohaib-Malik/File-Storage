@@ -281,7 +281,7 @@ export const loginWithGoogle = async (req, res, next) => {
     if (user && user.createdWith !== "google") {
       await mongooseSession.abortTransaction();
       return res.status(400).json({
-        error: "User already exists with different authentication method",
+        error: `User already exists with ${user.createdWith} method. Try to login with ${user.createdWith}`,
       });
     }
 
@@ -424,7 +424,7 @@ export const githubLoginCallback = async (req, res, next) => {
 
     if (user && user.createdWith !== "github") {
       await mongooseSession.abortTransaction();
-      return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("User already exists with different authentication method")}`);
+      return res.redirect(`${clientUrl}/login?error=${encodeURIComponent(`User already exists with ${user.createdWith} method. Try to login with ${user.createdWith}`)}`);
     }
 
     if (user) {
