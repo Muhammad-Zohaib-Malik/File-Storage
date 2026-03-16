@@ -9,6 +9,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
 } from "react-icons/fa";
+import { HardDrive, Clock, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import { LatestLoginActivity } from "./api/loginActivity";
 
@@ -40,48 +41,62 @@ export default function SessionManagement() {
   --------------------------------------- */
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col justify-center items-center p-6 relative overflow-hidden">
-      {/* Decorative Background Elements */}
-      <div className="absolute top-10 left-10 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse"></div>
-      <div className="absolute top-40 right-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse" style={{ animationDelay: '2s' }}></div>
-      <div className="absolute -bottom-8 left-1/3 w-96 h-96 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse" style={{ animationDelay: '4s' }}></div>
+    <div className="min-h-screen bg-[#0a0a0a] text-white overflow-hidden">
+      {/* Subtle grid background */}
+      <div
+        className="fixed inset-0 -z-10 opacity-[0.04]"
+        style={{
+          backgroundImage: `linear-gradient(#facc15 1px, transparent 1px),
+                            linear-gradient(90deg, #facc15 1px, transparent 1px)`,
+          backgroundSize: "64px 64px",
+        }}
+      />
 
-      <div className="relative z-10 w-full max-w-lg bg-white/70 backdrop-blur-xl shadow-2xl rounded-3xl p-10 text-center border border-white/60 transition-all hover:shadow-indigo-500/10">
-        <div className="flex justify-center mb-8">
-          <div className="relative">
-            <div className="w-24 h-24 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-xl transform -rotate-6 transition-transform hover:rotate-3 duration-300">
-              <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-              </svg>
-            </div>
-            <div className="absolute -bottom-3 -right-3 w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center shadow-lg animate-bounce" style={{ animationDuration: '2s' }}>
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
+      {/* Nav */}
+      <nav className="relative z-10 flex items-center justify-between px-6 py-5 sm:px-10 max-w-7xl mx-auto border-b-2 border-[#facc15]/30">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-[#facc15] flex items-center justify-center border-2 border-black shadow-brutal-sm">
+            <HardDrive className="w-5 h-5 text-black" strokeWidth={2.5} />
           </div>
+          <span className="text-xl font-black tracking-tight text-white uppercase">
+            Store<span className="text-[#facc15]">my</span>files
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+           <button
+             onClick={() => navigate("/")}
+             className="text-sm font-bold text-white hover:text-[#facc15] transition-colors px-4 py-2 border-2 border-white/20 hover:border-[#facc15] uppercase tracking-wide flex items-center gap-2"
+           >
+             <ArrowLeft className="w-4 h-4" /> Back
+           </button>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <main className="relative z-10 px-6 sm:px-10 pt-20 sm:pt-32 pb-24 max-w-7xl mx-auto flex flex-col items-center text-center">
+        <div className="mb-8 w-20 h-20 bg-[#facc15] flex items-center justify-center border-4 border-black shadow-brutal">
+           <Clock className="w-10 h-10 text-black" strokeWidth={2.5} />
         </div>
 
-        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-4 tracking-tight">
-          Coming Soon
+        <h1 className="text-5xl sm:text-7xl font-black tracking-tight leading-[1.0] mb-8 uppercase max-w-4xl">
+          Active Sessions <br />
+          <span className="text-[#facc15]">
+            Coming soon
+          </span>
         </h1>
-        
-        <p className="text-gray-600 mb-8 text-lg font-medium leading-relaxed">
-          We're working on advanced session insights and management tools. Stay tuned for better security features!
+
+        <p className="text-white/60 text-lg sm:text-xl leading-relaxed mb-12 max-w-2xl font-medium">
+          We're building advanced session insights and security management tools. Soon you'll be able to monitor and manage all your active devices from here.
         </p>
 
         <button
           onClick={() => navigate("/")}
-          className="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-white transition-all duration-300 bg-slate-900 border border-transparent rounded-xl hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 shadow-md hover:shadow-indigo-500/30"
+          className="group inline-flex items-center gap-3 px-8 py-4 bg-[#facc15] text-black font-black border-2 border-black shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#facc15] transition-all duration-150 uppercase tracking-wide text-sm"
         >
-          <span className="relative flex items-center gap-2">
-            <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            Back to Dashboard
-          </span>
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          Return to Dashboard
         </button>
-      </div>
+      </main>
 
       {/* --- COMMENTED OUT ORIGINAL JSX ---
       <div className="max-w-4xl mx-auto hidden">
