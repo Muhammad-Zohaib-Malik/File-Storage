@@ -38,9 +38,12 @@ jobs:
             # Prevent git pull conflicts
             git reset --hard
             git pull
+            
+            # Load nvm properly (required for non-interactive SSH)
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
-            # Load Node / npm (required because GitHub SSH is non-interactive)
-            export PATH=$PATH:/home/ubuntu/.nvm/versions/node/v24.12.0/bin
 
             # 3. Navigate into the SERVER folder
             cd server
