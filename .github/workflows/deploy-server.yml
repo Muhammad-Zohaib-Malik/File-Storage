@@ -3,10 +3,10 @@ name: Deploy StorageApp Backend
 on:
   push:
     branches:
-      - main
+      - main        # Trigger workflow on push to main branch
     paths:
-      - 'server/**'
-  workflow_dispatch:
+      - 'server/**' # Only run if changes are in client/ folder
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
 
 jobs:
   deploy:
@@ -24,6 +24,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
+          # Add server host key so SSH does not ask for confirmation
           ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
 
       # 2. Deploy to remote server
@@ -38,26 +39,17 @@ jobs:
             git reset --hard
             git pull
 
-            # ✅ Load NVM (fix for npm not found)
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-            # ✅ Use installed Node version
-            nvm use 24
-
-            # Optional debug (remove later)
-            node -v
-            npm -v
-            which npm
+            # Load Node / npm (required because GitHub SSH is non-interactive)
+            export PATH=$PATH:/home/ubuntu/.nvm/versions/node/v24.12.0/bin
 
             # 3. Navigate into the SERVER folder
             cd server
             
             echo "Installing backend dependencies (npm ci)..."
-            npm ci
+            npm i
 
             echo "Reloading PM2 app..."
-            pm2 restart storageApp --update-env
+            pm2 reload storageApp
 
             echo "Backend Deployed Successfully..."
           EOF
