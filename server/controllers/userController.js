@@ -24,7 +24,7 @@ import { github } from "../utils/github.js";
 import * as arctic from "arctic";
 import { UAParser } from "ua-parser-js";
 import { LoginActivity } from "../models/loginModel.js";
-import { getGeoLocation } from "../utils/getGeoLocation.js";
+// import { getGeoLocation } from "../utils/getGeoLocation.js";
 
 export const register = async (req, res, next) => {
   const { success, error, data } = registerSchema.safeParse(req.body);
@@ -123,19 +123,19 @@ export const login = async (req, res) => {
     return res.status(404).json({ error: "Invalid Credentials" });
   }
 
-  const parser = new UAParser(req.headers["user-agent"]);
-  const uaResult = parser.getResult();
-  const location = await getGeoLocation();
+  // const parser = new UAParser(req.headers["user-agent"]);
+  // const uaResult = parser.getResult();
+  // const location = await getGeoLocation();
 
-  await LoginActivity.create({
-    userId: user._id,
-    ip: location.ip,
-    browser: uaResult.browser.name,
-    os: uaResult.os.name,
-    device: uaResult.device.model,
-    city: location.city,
-    country: location.country,
-  });
+  // await LoginActivity.create({
+  //   userId: user._id,
+  //   ip: location.ip,
+  //   browser: uaResult.browser.name,
+  //   os: uaResult.os.name,
+  //   device: uaResult.device.model,
+  //   city: location.city,
+  //   country: location.country,
+  // });
 
   const allSessions = await redisClient.ft.search(
     "userIdIdx",

@@ -4,15 +4,13 @@ import cookieParser from "cookie-parser";
 import directoryRoutes from "./routes/directoryRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
-import loginActivityRoutes from "./routes/loginActivityRoutes.js";
+// import loginActivityRoutes from "./routes/loginActivityRoutes.js";
 import subscriptionRoutes from "./routes/subcriptionRoutes.js";
 import webbhooksRoutes from "./routes/webhookRoutes.js";
 import { checkAuth } from "./middlewares/authMiddleware.js";
 import { connectDB } from "./config/db.js";
 import logger from "./utils/logger.js";
 import helmet from "helmet";
-import { executeBashScript } from "./helper/executeBashScript.js";
-import { verifyGithubSignature } from "./middlewares/verifyGithubSignature.js";
 
 // import createRateLimiter from "./utils/rateLimiter.js";
 
@@ -54,7 +52,7 @@ app.get("/health", (req, res) => {
 app.use("/directory", checkAuth, directoryRoutes);
 app.use("/file", checkAuth, fileRoutes);
 app.use("/user", userRoutes);
-app.use("/latest-login", checkAuth, loginActivityRoutes);
+// app.use("/latest-login", checkAuth, loginActivityRoutes);
 app.use("/subscriptions", checkAuth, subscriptionRoutes);
 
 app.use((err, req, res, next) => {

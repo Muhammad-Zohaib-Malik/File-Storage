@@ -1,8 +1,8 @@
-import express from 'express'
-import { getLatestLogin } from '../controllers/loginActivityController.js';
+// import express from 'express'
+// import { getLatestLogin } from '../controllers/loginActivityController.js';
 
-const router = express.Router();
+// const router = express.Router();
 
-router.get("/",getLatestLogin)
+// router.get("/",getLatestLogin)
 
-export default router
+// export default router
