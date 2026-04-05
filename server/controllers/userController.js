@@ -407,7 +407,8 @@ export const githubLoginCallback = async (req, res, next) => {
       return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("Failed to fetch user data from GitHub")}`);
     }
 
-    let { name, email, avatar_url } = await githubUserResponse.json();
+    let { name, login, email, avatar_url } = await githubUserResponse.json();
+    name = name || login || (email ? email.split("@")[0] : "GitHub User");
 
     if (!email) {
       const emailResponse = await fetch("https://api.github.com/user/emails", {
