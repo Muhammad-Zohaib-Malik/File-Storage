@@ -9,7 +9,9 @@ export const verifyGoogleToken = async (code) => {
   try {
     const { tokens } = await client.getToken({
       code,
-      redirect_uri: process.env.REDIRECT_URI,
+      // 'postmessage' is strictly required here because the frontend uses @react-oauth/google with useGoogleLogin
+      // It sets redirect_uri to 'postmessage' under the hood. Any other domain here will cause redirect_uri_mismatch!
+      redirect_uri: "postmessage",
     });
 
     const loginTicket = await client.verifyIdToken({
