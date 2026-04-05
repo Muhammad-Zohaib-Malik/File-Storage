@@ -407,7 +407,20 @@ export const githubLoginCallback = async (req, res, next) => {
       return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("Failed to fetch user data from GitHub")}`);
     }
 
-    const { name, email, avatar_url } = await githubUserResponse.json();
+    let { name, email, avatar_url } = await githubUserResponse.json();
+
+    if (!email) {
+      const emailResponse = await fetch("https://api.github.com/user/emails", {
+        headers: { Authorization: `Bearer ${tokens.accessToken()}` },
+      });
+      if (emailResponse.ok) {
+        const emails = await emailResponse.json();
+        const primaryEmail = emails.find((e) => e.primary && e.verified) || emails.find((e) => e.primary);
+        if (primaryEmail) {
+          email = primaryEmail.email;
+        }
+      }
+    }
 
     if (!email) {
       return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("GitHub did not return an email")}`);
