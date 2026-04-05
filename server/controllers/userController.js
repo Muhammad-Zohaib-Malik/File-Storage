@@ -373,7 +373,7 @@ export const loginWithGoogle = async (req, res, next) => {
 
 export const loginWithGithub = async (req, res, next) => {
   const state = arctic.generateState();
-  const scopes = ["user:email"];
+  const scopes = ["read:user", "user:email"];
   const url = github.createAuthorizationURL(state, scopes);
   const cookieConfig = {
     httpOnly: true,
