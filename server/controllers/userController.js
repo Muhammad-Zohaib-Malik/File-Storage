@@ -264,12 +264,12 @@ export const loginWithGoogle = async (req, res, next) => {
   }
 
   const { code } = data;
-  const userData = await verifyGoogleToken(code);
-  const { email, name, picture } = userData;
-
   let mongooseSession;
 
   try {
+    const userData = await verifyGoogleToken(code);
+    const { email, name, picture } = userData;
+
     mongooseSession = await mongoose.startSession();
     mongooseSession.startTransaction();
 

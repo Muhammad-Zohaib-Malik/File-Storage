@@ -22,6 +22,6 @@ export const verifyGoogleToken = async (code) => {
     return userData;
   } catch (error) {
     console.log(error);
-    return error;
+    throw new Error(error.message || "Failed to verify Google token");
   }
 };
