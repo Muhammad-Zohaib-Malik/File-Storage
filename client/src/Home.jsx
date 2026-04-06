@@ -1,5 +1,6 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import { PLAN_CATALOG, PlanCard } from "./Plans";
 
 import {
@@ -14,6 +15,15 @@ import {
 const Home = () => {
   const navigate = useNavigate();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("payment_success") === "true") {
+      toast.success("Payment completed successfully!");
+      searchParams.delete("payment_success");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white overflow-hidden">
