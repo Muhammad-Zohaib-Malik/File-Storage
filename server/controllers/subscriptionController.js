@@ -7,7 +7,7 @@ const BASE_URL = process.env.BASE_URL;
 export const createSubscription = async (req, res, next) => {
   try {
     const checkoutSession = await stripe.checkout.sessions.create({
-      success_url: `${BASE_URL}`,
+      success_url: `${BASE_URL}?payment_success=true`,
       line_items: [
         {
           price: req.body.priceId,
