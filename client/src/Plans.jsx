@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { createSubscription } from "./api/subscriptionApi";
+import { createSubscription, getCurrentSubscription } from "./api/subscriptionApi";
 import { Check, ArrowLeft } from "lucide-react";
+import { useEffect } from "react";
 
 export const PLAN_CATALOG = {
   monthly: [
@@ -99,7 +100,7 @@ export function Price({ value }) {
   );
 }
 
-export function PlanCard({ plan, onSelect }) {
+export function PlanCard({ plan, onSelect, isCurrent }) {
   return (
     <div
       className={classNames(
@@ -112,6 +113,12 @@ export function PlanCard({ plan, onSelect }) {
       {plan.popular && (
         <div className="absolute -top-3 right-4 bg-[#facc15] px-3 py-1 text-xs font-black text-black uppercase tracking-wider border-2 border-black inline-flex shadow-brutal-sm">
           Most Popular
+        </div>
+      )}
+
+      {isCurrent && (
+        <div className="absolute -top-3 left-4 bg-green-500 px-3 py-1 text-xs font-black text-black uppercase tracking-wider border-2 border-black inline-flex shadow-brutal-sm">
+          Current Plan
         </div>
       )}
 
@@ -144,14 +151,17 @@ export function PlanCard({ plan, onSelect }) {
 
       <button
         onClick={() => onSelect?.(plan)}
+        disabled={isCurrent}
         className={classNames(
           "mt-auto cursor-pointer inline-flex w-full items-center justify-center px-6 py-4 text-sm font-black transition-all duration-150 uppercase tracking-widest border-2",
-          plan.popular
+          isCurrent
+            ? "bg-green-500/10 text-green-500 border-green-500/20 cursor-default"
+            : plan.popular
             ? "bg-[#facc15] text-black border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000]"
             : "bg-transparent text-white border-white/40 hover:border-white hover:bg-white/10"
         )}
       >
-        {plan.cta}
+        {isCurrent ? "Active Plan" : plan.cta}
       </button>
     </div>
   );
@@ -159,7 +169,20 @@ export function PlanCard({ plan, onSelect }) {
 
 export default function Plans() {
   const [mode, setMode] = useState("monthly");
+  const [currentSub, setCurrentSub] = useState(null);
   const plans = PLAN_CATALOG[mode];
+
+  useEffect(() => {
+    const fetchCurrent = async () => {
+      try {
+        const sub = await getCurrentSubscription();
+        setCurrentSub(sub);
+      } catch (err) {
+        console.error("Failed to fetch subscription", err);
+      }
+    };
+    fetchCurrent();
+  }, []);
 
   async function handleSelect(plan) {
     const data = await createSubscription(plan.id);
@@ -240,6 +263,7 @@ export default function Plans() {
               key={`${mode}-${plan.name}-${index}`}
               plan={plan}
               onSelect={handleSelect}
+              isCurrent={currentSub?.priceId === plan.id}
             />
           ))}
         </div>

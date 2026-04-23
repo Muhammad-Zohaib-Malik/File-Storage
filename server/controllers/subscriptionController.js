@@ -34,3 +34,17 @@ export const createSubscription = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getCurrentSubscription = async (req, res, next) => {
+  try {
+    const subscription = await Subscription.findOne({
+      userId: req.user._id,
+      status: "active",
+    }).sort({ createdAt: -1 });
+
+    res.json(subscription);
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+};

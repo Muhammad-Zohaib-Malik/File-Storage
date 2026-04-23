@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { fetchUser, logoutUser, logoutAllSessions, updatePassword, updateUsername } from "./api/userApi";
-import { Camera, User, Mail, Shield, LogOut, Key } from "lucide-react";
+import { getCurrentSubscription } from "./api/subscriptionApi";
+import { Camera, User, Mail, Shield, LogOut, Key, CreditCard } from "lucide-react";
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
@@ -10,6 +11,7 @@ const UserProfile = () => {
   const [fullName, setFullName] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [subscription, setSubscription] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,7 +27,18 @@ const UserProfile = () => {
         setLoading(false);
       }
     };
+
+    const loadSubscription = async () => {
+      try {
+        const subData = await getCurrentSubscription();
+        setSubscription(subData);
+      } catch (err) {
+        console.error("Failed to load subscription", err);
+      }
+    };
+
     loadUser();
+    loadSubscription();
   }, [navigate]);
 
   const handleLogout = async () => {
@@ -284,6 +297,60 @@ const UserProfile = () => {
                 </div>
               </div>
             )}
+
+            {/* Current Subscription */}
+            <div className="bg-[#111] border-2 border-[#facc15]/30 shadow-[6px_6px_0px_0px_rgba(250,204,21,0.1)] p-6">
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-white/10">
+                <div className="p-2 bg-[#facc15] border-2 border-black shadow-[2px_2px_0px_0px_#000]">
+                  <CreditCard size={20} className="text-black" strokeWidth={2.5} />
+                </div>
+                <h2 className="text-xl font-black uppercase tracking-wide">Current Subscription</h2>
+              </div>
+
+              {subscription ? (
+                <div className="space-y-4">
+                  <div className="p-5 bg-[#0a0a0a] border-2 border-[#facc15]/50 shadow-[4px_4px_0px_0px_#facc15]/20">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <p className="text-xs font-black text-white/50 uppercase tracking-widest mb-1">Active Plan</p>
+                        <h3 className="text-2xl font-black text-[#facc15] uppercase tracking-tighter">
+                          {subscription.storageLabel}
+                        </h3>
+                      </div>
+                      <span className="px-3 py-1 bg-green-500/10 text-green-400 border border-green-500/20 text-[10px] font-black uppercase tracking-widest">
+                        {subscription.status}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-0.5">Billing Interval</p>
+                        <p className="text-sm font-bold uppercase">{subscription.billingInterval}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-0.5">Member Since</p>
+                        <p className="text-sm font-bold">{new Date(subscription.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => navigate('/plans')}
+                    className="w-full py-3 px-4 bg-[#222] text-white text-sm font-black uppercase tracking-wider border-2 border-white/20 hover:border-[#facc15] hover:text-[#facc15] transition-all"
+                  >
+                    Change Plan
+                  </button>
+                </div>
+              ) : (
+                <div className="p-8 text-center bg-[#0a0a0a] border-2 border-white/5 border-dashed">
+                  <p className="text-white/40 text-sm font-medium mb-6 uppercase tracking-widest">No active subscription found</p>
+                  <button
+                    onClick={() => navigate("/plans")}
+                    className="py-3 px-8 bg-[#facc15] text-black text-sm font-black uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:-translate-y-0.5 transition-all"
+                  >
+                    View Plans
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Session Management */}
             <div className="bg-[#111] border-2 border-red-500/50 shadow-[6px_6px_0px_0px_rgba(239,68,68,0.3)] p-6">
