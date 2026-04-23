@@ -18,6 +18,7 @@ const subscriptionSchema = new Schema(
     stripeSubscriptionId: {
       type: String,
       unique: true,
+      sparse: true,
     },
     stripeCustomerId: {
       type: String,
