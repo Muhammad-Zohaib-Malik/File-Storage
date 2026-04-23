@@ -3,17 +3,17 @@ name: Deploy StorageApp Backend
 on:
   push:
     branches:
-      - main        # Trigger workflow on push to main branch
+      - main # Trigger workflow on push to main branch
     paths:
-      - 'server/**' # Only run if changes are in client/ folder
-  workflow_dispatch:  # Allow manual trigger from GitHub UI
+      - "server/**" # Only run if changes are in client/ folder
+  workflow_dispatch: # Allow manual trigger from GitHub UI
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     env:
-      SSH_HOST: 54.236.246.83
+      SSH_HOST: 54.145.2.142
       SSH_USER: ubuntu
 
     steps:
