@@ -2,22 +2,22 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   fetchAllUsers,
-  fetchUser,
   deleteUserById,
   logoutUserById,
   permanentDeleteUserById,
   recoverUserById,
   changeUserRoleById,
 } from "./api/userApi";
+import { useAuth } from "./context/AuthContext";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModel";
 import toast from "react-hot-toast";
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
-  const [userName, setUserName] = useState("Guest User");
-  const [userEmail, setUserEmail] = useState("");
-  const [userImage, setUserImage] = useState("");
-  const [userRole, setUserRole] = useState("User");
+  const { user } = useAuth();
+  const userName = user?.name || "Guest User";
+  const userEmail = user?.email || "";
+  const userRole = user?.role || "User";
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [permanentMode, setPermanentMode] = useState(false);
@@ -27,7 +27,6 @@ export default function UsersPage() {
 
   useEffect(() => {
     fetchUsers();
-    fetchCurrentUser();
   }, []);
 
   const fetchUsers = async () => {
@@ -41,18 +40,6 @@ export default function UsersPage() {
     }
   };
 
-  const fetchCurrentUser = async () => {
-    try {
-      const data = await fetchUser();
-      setUserName(data.name);
-      setUserEmail(data.email);
-      setUserImage(data.picture);
-      setUserRole(data.role);
-    } catch (err) {
-      console.error("❌ Fetching current user failed:", err);
-      if (err.response?.status === 401) navigate("/login");
-    }
-  };
 
   const logoutUser = async (user) => {
     const confirmed = confirm(`You are about to logout ${user.email}`);

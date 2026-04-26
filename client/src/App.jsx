@@ -8,45 +8,51 @@ import UserProfile from "./UserProfile";
 import SessionManagement from "./SessionManagement";
 import Plans from "./Plans";
 import Home from "./Home";
+import AppLayout from "./AppLayout";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />,
-  },
-  {
-    path: "/directory",
-    element: <DirectoryView />,
-  },
-
-  {
-    path: "/register",
-    element: <Register />,
-  },
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/users",
-    element: <UsersPage />,
-  },
-  {
-    path: "/plans",
-    element: <Plans />,
-  },
-  {
-    path: "/directory/:dirId",
-    element: <DirectoryView />,
-  },
-  {
-    path: "/profile",
-    element: <UserProfile />,
-  },
-  {
-    path: "/sessions",
-    element: <SessionManagement />,
-  },
+    element: <AppLayout />,
+    children: [
+      {
+        path: "/",
+        element: <Home />,
+      },
+      {
+        path: "/directory",
+        element: <DirectoryView />,
+      },
+      {
+        path: "/directory/:dirId",
+        element: <DirectoryView />,
+      },
+      {
+        path: "/register",
+        element: <Register />,
+      },
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        path: "/users",
+        element: <UsersPage />,
+      },
+      {
+        path: "/plans",
+        element: <Plans />,
+      },
+      {
+        path: "/profile",
+        element: <UserProfile />,
+      },
+      {
+        path: "/sessions",
+        element: <SessionManagement />,
+      },
+    ]
+  }
 ]);
 
 function App() {

@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { fetchUser, logoutUser, logoutAllSessions, updatePassword, updateUsername } from "./api/userApi";
+import { useAuth } from "./context/AuthContext";
+import { updatePassword, updateUsername } from "./api/userApi";
 import { getCurrentSubscription } from "./api/subscriptionApi";
 import { Camera, User, Mail, Shield, LogOut, Key, CreditCard } from "lucide-react";
 
 const UserProfile = () => {
-  const [user, setUser] = useState(null);
+  const { user, loading: userLoading, logout, logoutAll } = useAuth();
   const [loading, setLoading] = useState(true);
   const [fullName, setFullName] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -15,50 +16,36 @@ const UserProfile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const userData = await fetchUser();
-        setUser(userData);
-        setFullName(userData.name || "");
-      } catch (err) {
-        console.error("Failed to load user", err);
-        navigate("/login");
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (user) {
+      setFullName(user.name || "");
+    }
+  }, [user]);
 
+  useEffect(() => {
     const loadSubscription = async () => {
       try {
         const subData = await getCurrentSubscription();
         setSubscription(subData);
       } catch (err) {
         console.error("Failed to load subscription", err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    loadUser();
-    loadSubscription();
-  }, [navigate]);
+    if (!userLoading && user) {
+      loadSubscription();
+    } else if (!userLoading && !user) {
+      navigate("/login");
+    }
+  }, [userLoading, user, navigate]);
 
   const handleLogout = async () => {
-    try {
-      await logoutUser();
-      toast.success("Logged out successfully!");
-      navigate("/login");
-    } catch (err) {
-      console.error("Logout failed", err);
-    }
+    await logout();
   };
 
   const handleLogoutAll = async () => {
-    try {
-      await logoutAllSessions();
-      toast.success("Logged out from all sessions successfully!");
-      navigate("/login");
-    } catch (err) {
-      console.error("Logout All failed", err);
-    }
+    await logoutAll();
   };
 
   const handleUpdateUsername = async () => {
@@ -93,7 +80,7 @@ const UserProfile = () => {
 
   // const handleImageChange = () => { };
 
-  if (loading) {
+  if (loading || userLoading) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-[#facc15] border-t-black animate-spin shadow-[4px_4px_0px_0px_#facc15]"></div>

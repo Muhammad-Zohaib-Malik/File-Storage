@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { fetchUser, logoutUser, logoutAllSessions } from "../api/userApi";
+import { useAuth } from "../context/AuthContext";
 import { FaFolderPlus, FaUpload, FaSignOutAlt, FaSignInAlt } from "react-icons/fa";
 import {
   HardDrive,
@@ -75,14 +75,14 @@ function DirectoryHeader({
   handleFileSelect,
   disabled = false,
 }) {
+  const { user, loading: isUserLoading, logout, logoutAll } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [isUserLoading, setIsUserLoading] = useState(true);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [userName, setUserName] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-  const [userPicture, setUserPicture] = useState("");
-  const [maxStorageInBytes, setMaxStorageInBytes] = useState(0);
-  const [usedStorageInBytes, setUsedStorageInBytes] = useState(0);
+  const loggedIn = !!user;
+  const userName = user?.name || "";
+  const userEmail = user?.email || "";
+  const userPicture = user?.picture || "";
+  const maxStorageInBytes = Number(user?.maxStorageInBytes) || 0;
+  const usedStorageInBytes = Number(user?.usedStorageInBytes) || 0;
 
   const userMenuRef = useRef(null);
   const navigate = useNavigate();
@@ -107,32 +107,9 @@ function DirectoryHeader({
         ? "#f97316"
         : "#facc15";
 
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const user = await fetchUser();
-        setUserName(user.name || "");
-        setUserEmail(user.email || "");
-        setUserPicture(user.picture || "");
-        setMaxStorageInBytes(Number(user.maxStorageInBytes) || 0);
-        setUsedStorageInBytes(Number(user.usedStorageInBytes) || 0);
-        setLoggedIn(true);
-      } catch {
-        setLoggedIn(false);
-      } finally {
-        setIsUserLoading(false);
-      }
-    }
-    loadUser();
-  }, []);
-
   const handleLogout = async () => {
     try {
-      await logoutUser();
-      setLoggedIn(false);
-      navigate("/login");
-    } catch (err) {
-      console.error("Logout error:", err);
+      await logout();
     } finally {
       setShowUserMenu(false);
     }
@@ -140,11 +117,7 @@ function DirectoryHeader({
 
   const handleLogoutAll = async () => {
     try {
-      await logoutAllSessions();
-      setLoggedIn(false);
-      navigate("/login");
-    } catch (err) {
-      console.error("Logout all error:", err);
+      await logoutAll();
     } finally {
       setShowUserMenu(false);
     }

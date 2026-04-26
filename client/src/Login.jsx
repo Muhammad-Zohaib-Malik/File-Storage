@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { loginWithGoogle } from "./api/authApi";
 import { useGoogleLogin } from "@react-oauth/google";
-import { loginUser, fetchUser } from "./api/userApi";
+import { loginUser } from "./api/userApi";
+import { useAuth } from "./context/AuthContext";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { HardDrive } from "lucide-react";
@@ -27,18 +28,25 @@ const Login = () => {
     }
   }, [searchParams, setSearchParams]);
 
+  const { user, loading, loadUser } = useAuth();
+
   // Redirect already-logged-in users
   useEffect(() => {
-    fetchUser()
-      .then(() => navigate("/directory", { replace: true }))
-      .catch(() => setIsCheckingAuth(false));
-  }, []);
+    if (!loading) {
+      if (user) {
+        navigate("/directory", { replace: true });
+      } else {
+        setIsCheckingAuth(false);
+      }
+    }
+  }, [loading, user, navigate]);
 
   // useGoogleLogin is a hook — must be above any early return
   const googleLogin = useGoogleLogin({
     onSuccess: async (res) => {
       try {
         await loginWithGoogle(res.code);
+        await loadUser();
         navigate("/directory");
       } catch (err) {
         toast.error(err.response?.data?.error || "Google login failed");
@@ -72,6 +80,7 @@ const Login = () => {
             : data.error;
         setServerError(errorMessages);
       } else {
+        await loadUser(); // Reload user state
         navigate("/directory");
       }
     } catch (err) {

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { loginWithGoogle, sendOtp, verifyOtp } from "./api/authApi";
-import { registerUser, fetchUser } from "./api/userApi";
+import { registerUser } from "./api/userApi";
+import { useAuth } from "./context/AuthContext";
 import { useGoogleLogin } from "@react-oauth/google";
 import { FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
@@ -37,12 +38,18 @@ const Register = () => {
     }
   }, [searchParams, setSearchParams]);
 
+  const { user, loading, loadUser } = useAuth();
+
   // Redirect already-logged-in users
   useEffect(() => {
-    fetchUser()
-      .then(() => navigate("/directory", { replace: true }))
-      .catch(() => setIsCheckingAuth(false));
-  }, []);
+    if (!loading) {
+      if (user) {
+        navigate("/directory", { replace: true });
+      } else {
+        setIsCheckingAuth(false);
+      }
+    }
+  }, [loading, user, navigate]);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -56,6 +63,7 @@ const Register = () => {
     onSuccess: async (res) => {
       try {
         await loginWithGoogle(res.code);
+        await loadUser();
         navigate("/directory");
       } catch (err) {
         toast.error(err.response?.data?.error || "Google login failed");
@@ -128,6 +136,7 @@ const Register = () => {
             : response.error;
         setServerError(errorMessages);
       } else {
+        await loadUser(); // Reload user state
         setIsSuccess(true);
         setTimeout(() => navigate("/directory"), 2000);
       }

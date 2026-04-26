@@ -2,6 +2,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { PLAN_CATALOG, PlanCard } from "./Plans";
+import { useAuth } from "./context/AuthContext";
 
 import {
   Shield,
@@ -14,7 +15,7 @@ import {
 
 const Home = () => {
   const navigate = useNavigate();
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -48,18 +49,29 @@ const Home = () => {
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <Link
-            to="/login"
-            className="text-sm font-bold text-white hover:text-[#facc15] transition-colors px-4 py-2 border-2 border-white/20 hover:border-[#facc15] uppercase tracking-wide"
-          >
-            Sign in
-          </Link>
-          <Link
-            to="/register"
-            className="text-sm font-black bg-[#facc15] text-black px-5 py-2.5 border-2 border-black shadow-brutal-sm hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-150 uppercase tracking-wide"
-          >
-            Get started
-          </Link>
+          {!user ? (
+            <>
+              <Link
+                to="/login"
+                className="text-sm font-bold text-white hover:text-[#facc15] transition-colors px-4 py-2 border-2 border-white/20 hover:border-[#facc15] uppercase tracking-wide"
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/register"
+                className="text-sm font-black bg-[#facc15] text-black px-5 py-2.5 border-2 border-black shadow-brutal-sm hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-150 uppercase tracking-wide"
+              >
+                Get started
+              </Link>
+            </>
+          ) : (
+            <Link
+              to="/directory"
+              className="text-sm font-black bg-[#facc15] text-black px-5 py-2.5 border-2 border-black shadow-brutal-sm hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-150 uppercase tracking-wide"
+            >
+              Go to Vault
+            </Link>
+          )}
         </div>
       </nav>
 
@@ -88,12 +100,14 @@ const Home = () => {
               Open my files
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link
-              to="/register"
-              className="inline-flex items-center gap-3 px-7 py-4 bg-transparent text-white font-black border-2 border-white/40 hover:border-white hover:bg-white/5 transition-all duration-150 uppercase tracking-wide text-sm"
-            >
-              Create free account
-            </Link>
+            {!user && (
+              <Link
+                to="/register"
+                className="inline-flex items-center gap-3 px-7 py-4 bg-transparent text-white font-black border-2 border-white/40 hover:border-white hover:bg-white/5 transition-all duration-150 uppercase tracking-wide text-sm"
+              >
+                Create free account
+              </Link>
+            )}
           </div>
         </div>
 
@@ -181,13 +195,24 @@ const Home = () => {
           © 2026 Storemyfiles
         </span>
         <p className="text-xs text-white/30">
-          Already have an account?{" "}
-          <Link
-            to="/login"
-            className="text-[#facc15] font-black hover:underline"
-          >
-            Sign in →
-          </Link>
+          {!user ? (
+            <>
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="text-[#facc15] font-black hover:underline"
+              >
+                Sign in →
+              </Link>
+            </>
+          ) : (
+            <Link
+              to="/directory"
+              className="text-[#facc15] font-black hover:underline"
+            >
+              Open Vault →
+            </Link>
+          )}
         </p>
       </footer>
     </div>
