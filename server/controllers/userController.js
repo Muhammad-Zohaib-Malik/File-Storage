@@ -8,6 +8,7 @@ import mongoose, { Types } from "mongoose";
 import redisClient from "../config/redis.js";
 import { rm } from "fs/promises";
 import path from "path";
+import { deleteS3FilesFromAws } from "../services/s3.js";
 import {
   loginSchema,
   loginWithGoogleSchema,
@@ -615,15 +616,21 @@ export const deleteUsingRoleByHardDelete = async (req, res, next) => {
 
     session.startTransaction();
 
-    // Step 1: Delete files from disk
+    // Step 1: Delete files from AWS S3
     const userFiles = await File.find({ userId }).session(session);
 
-    for (const file of userFiles) {
-      const filePath = path.resolve("storage", `${file._id}${file.extension}`);
-      try {
-        await rm(filePath);
-      } catch (err) {
-        console.warn(`Could not delete file: ${filePath}`, err.message);
+    if (userFiles.length > 0) {
+      const keys = userFiles.map((file) => ({ Key: `${file._id}${file.extension}` }));
+      
+      // AWS S3 DeleteObjectsCommand allows a maximum of 1000 objects per request
+      const chunkSize = 1000;
+      for (let i = 0; i < keys.length; i += chunkSize) {
+        const chunk = keys.slice(i, i + chunkSize);
+        try {
+          await deleteS3FilesFromAws({ keys: chunk });
+        } catch (err) {
+          console.warn(`Could not delete files chunk from S3 for user: ${userId}`, err.message);
+        }
       }
     }
 
