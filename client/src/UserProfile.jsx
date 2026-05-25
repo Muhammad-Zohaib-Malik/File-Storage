@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useAuth } from "./context/AuthContext";
 import { updatePassword, updateUsername } from "./api/userApi";
-import { getCurrentSubscription } from "./api/subscriptionApi";
+import { getCurrentSubscription, getAllSubscriptions, pauseSubscription, resumeSubscription, cancelSubscription } from "./api/subscriptionApi";
 import { Camera, User, Mail, Shield, LogOut, Key, CreditCard } from "lucide-react";
 
 const UserProfile = () => {
@@ -13,6 +13,7 @@ const UserProfile = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [subscription, setSubscription] = useState(null);
+  const [allSubscriptions, setAllSubscriptions] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,10 +25,14 @@ const UserProfile = () => {
   useEffect(() => {
     const loadSubscription = async () => {
       try {
-        const subData = await getCurrentSubscription();
+        const [subData, allSubData] = await Promise.all([
+          getCurrentSubscription(),
+          getAllSubscriptions()
+        ]);
         setSubscription(subData);
+        setAllSubscriptions(allSubData || []);
       } catch (err) {
-        console.error("Failed to load subscription", err);
+        console.error("Failed to load subscription data", err);
       } finally {
         setLoading(false);
       }
@@ -77,6 +82,49 @@ const UserProfile = () => {
       console.error("Password update failed", error);
     }
   }
+
+  const handlePause = async () => {
+    try {
+      setLoading(true);
+      const updatedSub = await pauseSubscription();
+      setSubscription(updatedSub);
+      toast.success("Subscription paused successfully");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to pause subscription");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResume = async () => {
+    try {
+      setLoading(true);
+      const updatedSub = await resumeSubscription();
+      setSubscription(updatedSub);
+      toast.success("Subscription resumed successfully");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to resume subscription");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    if (!window.confirm("Are you sure you want to cancel your subscription? Your storage will be reduced to 500 MB immediately.")) return;
+    try {
+      setLoading(true);
+      await cancelSubscription();
+      setSubscription(null);
+      toast.success("Subscription canceled successfully");
+      
+      // Reload user data to get updated storage limit if needed
+      // window.location.reload(); 
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to cancel subscription");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // const handleImageChange = () => { };
 
@@ -319,12 +367,35 @@ const UserProfile = () => {
                       </div>
                     </div>
                   </div>
-                  <button 
-                    onClick={() => navigate('/plans')}
-                    className="w-full py-3 px-4 bg-[#222] text-white text-sm font-black uppercase tracking-wider border-2 border-white/20 hover:border-[#facc15] hover:text-[#facc15] transition-all"
-                  >
-                    Change Plan
-                  </button>
+                  <div className="flex flex-col gap-3 mt-4">
+                    <button 
+                      onClick={() => navigate('/plans')}
+                      className="w-full py-3 px-4 bg-[#222] text-white text-sm font-black uppercase tracking-wider border-2 border-white/20 hover:border-[#facc15] hover:text-[#facc15] transition-all"
+                    >
+                      Change Plan
+                    </button>
+                    {subscription.isPaused ? (
+                      <button 
+                        onClick={handleResume}
+                        className="w-full py-3 px-4 bg-green-500 text-black text-sm font-black uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all"
+                      >
+                        Resume Subscription
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={handlePause}
+                        className="w-full py-3 px-4 bg-[#222] text-white text-sm font-black uppercase tracking-wider border-2 border-white/20 hover:border-orange-500 hover:text-orange-500 transition-all"
+                      >
+                        Pause Subscription
+                      </button>
+                    )}
+                    <button 
+                      onClick={handleCancel}
+                      className="w-full py-3 px-4 bg-red-500 text-black text-sm font-black uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000] transition-all"
+                    >
+                      Cancel Subscription
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="p-8 text-center bg-[#0a0a0a] border-2 border-white/5 border-dashed">
@@ -337,6 +408,41 @@ const UserProfile = () => {
                   </button>
                 </div>
               )}
+            </div>
+
+            {/* Subscription History */}
+            <div className="bg-[#111] border-2 border-white/20 shadow-[6px_6px_0px_0px_rgba(255,255,255,0.05)] p-6">
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-white/10">
+                <div className="p-2 bg-blue-500 border-2 border-black shadow-[2px_2px_0px_0px_#000]">
+                  <CreditCard size={20} className="text-black" strokeWidth={2.5} />
+                </div>
+                <h2 className="text-xl font-black uppercase tracking-wide">Subscription History</h2>
+              </div>
+              
+              <div className="space-y-4">
+                {allSubscriptions.length > 0 ? (
+                  allSubscriptions.map((sub) => (
+                    <div key={sub._id} className="p-4 bg-[#0a0a0a] border-2 border-white/10 flex justify-between items-center">
+                      <div>
+                        <p className="text-xs font-black text-white/50 uppercase tracking-widest mb-1">{sub.billingInterval} Plan</p>
+                        <h4 className="text-lg font-bold text-white uppercase">{sub.storageLabel || "N/A"}</h4>
+                        <p className="text-[10px] text-white/40 mt-1">{new Date(sub.createdAt).toLocaleDateString()}</p>
+                      </div>
+                      <div>
+                        <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest border ${
+                          sub.status === 'active' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 
+                          sub.status === 'canceled' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 
+                          'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                        }`}>
+                          {sub.isPaused ? "Paused" : sub.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-white/40 text-sm font-medium uppercase tracking-widest text-center py-4">No history found</p>
+                )}
+              </div>
             </div>
 
             {/* Session Management */}

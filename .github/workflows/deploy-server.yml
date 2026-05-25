@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      SSH_HOST: 54.145.2.142
+      SSH_HOST: 54.165.188.155
       SSH_USER: ubuntu
 
     steps:
@@ -49,7 +49,7 @@ jobs:
             cd server
             
             echo "Installing backend dependencies (npm ci)..."
-            npm i
+            npm ci
 
             echo "Reloading PM2 app..."
             pm2 reload storageApp
