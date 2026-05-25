@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createSubscription, getCurrentSubscription } from "./api/subscriptionApi";
 import { Check, ArrowLeft } from "lucide-react";
-import { useEffect } from "react";
+import { toast } from "react-hot-toast";
 
 export const PLAN_CATALOG = {
   monthly: [
@@ -22,7 +22,7 @@ export const PLAN_CATALOG = {
       popular: false,
     },
     {
-      id: "price_1SdlVw3cVYZiLez66kQLuZR4",
+      id: "price_1SdlXM3cVYZiLez6rmv4CnrA",
       name: "Pro",
       tagline: "For creators & devs",
       storage: "5 TB",
@@ -150,12 +150,19 @@ export function PlanCard({ plan, onSelect, isCurrent }) {
       </ul>
 
       <button
-        onClick={() => onSelect?.(plan)}
-        disabled={isCurrent}
+        onClick={() => {
+          if (isCurrent) {
+            toast("You are already subscribed to this plan", {
+              icon: 'ℹ️',
+            });
+            return;
+          }
+          onSelect?.(plan);
+        }}
         className={classNames(
           "mt-auto cursor-pointer inline-flex w-full items-center justify-center px-6 py-4 text-sm font-black transition-all duration-150 uppercase tracking-widest border-2",
           isCurrent
-            ? "bg-green-500/10 text-green-500 border-green-500/20 cursor-default"
+            ? "bg-green-500/10 text-green-500 border-green-500/20"
             : plan.popular
             ? "bg-[#facc15] text-black border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000]"
             : "bg-transparent text-white border-white/40 hover:border-white hover:bg-white/10"
