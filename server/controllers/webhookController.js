@@ -95,6 +95,17 @@ export const handleStripeWebhook = async (req, res) => {
         subscription.isPaused = !!stripeSubscription.pause_collection;
         subscription.status = stripeSubscription.status; // might be active, canceled, etc.
         await subscription.save();
+
+        const user = await User.findById(subscription.userId);
+        if (user) {
+          if (subscription.isPaused) {
+            user.maxStorageInBytes = 500 * 1024 * 1024; // Free tier
+          } else if (subscription.status === "active" && subscription.storageBytes) {
+            user.maxStorageInBytes = subscription.storageBytes;
+          }
+          await user.save();
+        }
+
         console.log(`Subscription ${subscription._id} updated from webhook`);
       }
     } catch (err) {

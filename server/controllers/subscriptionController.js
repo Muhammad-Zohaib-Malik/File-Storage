@@ -68,6 +68,12 @@ export const pauseSubscription = async (req, res, next) => {
     subscription.isPaused = true;
     await subscription.save();
 
+    const user = await User.findById(req.user._id);
+    if (user) {
+      user.maxStorageInBytes = 500 * 1024 * 1024; // Free tier
+      await user.save();
+    }
+
     res.json(subscription);
   } catch (err) {
     console.log(err);
@@ -92,6 +98,12 @@ export const resumeSubscription = async (req, res, next) => {
 
     subscription.isPaused = false;
     await subscription.save();
+
+    const user = await User.findById(req.user._id);
+    if (user && subscription.storageBytes) {
+      user.maxStorageInBytes = subscription.storageBytes;
+      await user.save();
+    }
 
     res.json(subscription);
   } catch (err) {
