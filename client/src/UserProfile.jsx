@@ -7,7 +7,7 @@ import { getCurrentSubscription, getAllSubscriptions, pauseSubscription, resumeS
 import { Camera, User, Mail, Shield, LogOut, Key, CreditCard } from "lucide-react";
 
 const UserProfile = () => {
-  const { user, loading: userLoading, logout, logoutAll } = useAuth();
+  const { user, loading: userLoading, logout, logoutAll, loadUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [fullName, setFullName] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -22,24 +22,24 @@ const UserProfile = () => {
     }
   }, [user]);
 
-  useEffect(() => {
-    const loadSubscription = async () => {
-      try {
-        const [subData, allSubData] = await Promise.all([
-          getCurrentSubscription(),
-          getAllSubscriptions()
-        ]);
-        setSubscription(subData);
-        setAllSubscriptions(allSubData || []);
-      } catch (err) {
-        console.error("Failed to load subscription data", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchSubscriptions = async () => {
+    try {
+      const [subData, allSubData] = await Promise.all([
+        getCurrentSubscription(),
+        getAllSubscriptions()
+      ]);
+      setSubscription(subData);
+      setAllSubscriptions(allSubData || []);
+    } catch (err) {
+      console.error("Failed to load subscription data", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     if (!userLoading && user) {
-      loadSubscription();
+      fetchSubscriptions();
     } else if (!userLoading && !user) {
       navigate("/login");
     }
@@ -86,12 +86,12 @@ const UserProfile = () => {
   const handlePause = async () => {
     try {
       setLoading(true);
-      const updatedSub = await pauseSubscription();
-      setSubscription(updatedSub);
+      await pauseSubscription();
+      await fetchSubscriptions();
+      await loadUser();
       toast.success("Subscription paused successfully");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to pause subscription");
-    } finally {
       setLoading(false);
     }
   };
@@ -99,12 +99,12 @@ const UserProfile = () => {
   const handleResume = async () => {
     try {
       setLoading(true);
-      const updatedSub = await resumeSubscription();
-      setSubscription(updatedSub);
+      await resumeSubscription();
+      await fetchSubscriptions();
+      await loadUser();
       toast.success("Subscription resumed successfully");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to resume subscription");
-    } finally {
       setLoading(false);
     }
   };
@@ -114,14 +114,11 @@ const UserProfile = () => {
     try {
       setLoading(true);
       await cancelSubscription();
-      setSubscription(null);
+      await fetchSubscriptions();
+      await loadUser();
       toast.success("Subscription canceled successfully");
-      
-      // Reload user data to get updated storage limit if needed
-      // window.location.reload(); 
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to cancel subscription");
-    } finally {
       setLoading(false);
     }
   };
