@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      SSH_HOST: 54.165.188.155
+      SSH_HOST: 52.91.197.174
       SSH_USER: ubuntu
 
     steps:
