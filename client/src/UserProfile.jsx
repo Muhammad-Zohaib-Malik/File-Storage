@@ -5,6 +5,7 @@ import { useAuth } from "./context/AuthContext";
 import { updatePassword, updateUsername } from "./api/userApi";
 import { getCurrentSubscription, getAllSubscriptions, pauseSubscription, resumeSubscription, cancelSubscription } from "./api/subscriptionApi";
 import { Camera, User, Mail, Shield, LogOut, Key, CreditCard } from "lucide-react";
+import TwoFactorAuth from "./components/TwoFactorAuth";
 
 const UserProfile = () => {
   const { user, loading: userLoading, logout, logoutAll, loadUser } = useAuth();
@@ -329,6 +330,9 @@ const UserProfile = () => {
                 </div>
               </div>
             )}
+
+            {/* Two-Factor Authentication */}
+            <TwoFactorAuth user={user} onUpdate={loadUser} />
 
             {/* Current Subscription */}
             <div className="bg-[#111] border-2 border-[#facc15]/30 shadow-[6px_6px_0px_0px_rgba(250,204,21,0.1)] p-6">
